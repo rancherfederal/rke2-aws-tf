@@ -81,6 +81,6 @@ variable "ssh_authorized_keys" {
 //}
 
 variable "rke2_config" {
-  default = ""
+  default     = ""
   description = "User defined extra input to rke2.yaml"
 }

@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 locals {
-  name    = "cloud-enabled"
+  name = "cloud-enabled"
 
   tags = {
     "terraform" = "true",
@@ -29,6 +29,17 @@ data "aws_ami" "rhel7" {
     name   = "name"
     values = ["RHEL-7*"]
   }
+}
+
+# Key Pair
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "ssh_pem" {
+  filename = "${local.name}.pem"
+  content  = tls_private_key.ssh.private_key_pem
 }
 
 # IAM Policies
@@ -64,7 +75,7 @@ module "rke2" {
   vpc_id  = data.aws_vpc.default.id
   subnets = [data.aws_subnet.default.id]
 
-  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
+  ssh_authorized_keys  = [tls_private_key.ssh.public_key_openssh]
   ami                  = data.aws_ami.rhel7.image_id
   server_count         = 1
   iam_instance_profile = module.server_role.this_iam_instance_profile_name
@@ -101,7 +112,7 @@ module "agents" {
   subnets = [data.aws_subnet.default.id]
 
   ami                  = data.aws_ami.rhel7.image_id
-  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
+  ssh_authorized_keys  = [tls_private_key.ssh.public_key_openssh]
   spot                 = true
   iam_instance_profile = module.agent_role.this_iam_instance_profile_name
 

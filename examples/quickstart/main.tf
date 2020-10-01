@@ -31,6 +31,17 @@ data "aws_ami" "rhel7" {
   }
 }
 
+# Private Key
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "pem" {
+  filename = "${local.name}.pem"
+  content  = tls_private_key.ssh.private_key_pem
+}
+
 #
 # Server
 #
@@ -42,7 +53,7 @@ module "rke2" {
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel7.image_id
   server_count        = 3
-  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
+  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
 
   tags = local.tags
 }
@@ -57,7 +68,7 @@ module "agents" {
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel7.image_id
-  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
+  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
 
   cluster_data = module.rke2.cluster_data
 }
