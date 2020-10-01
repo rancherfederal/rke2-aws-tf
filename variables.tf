@@ -70,32 +70,36 @@ variable "ssh_authorized_keys" {
 }
 
 # rkegov variables
-variable "node_labels" {
-  type    = list(string)
-  default = []
+variable "rke2_config" {
+  default = ""
 }
 
-variable "node_taints" {
-  type    = list(string)
-  default = []
-}
-
-variable "write_kubeconfig_mode" {
-  default     = "0644"
-  description = "Write kubeconfig with this mode"
-}
-
-variable "kube_apiserver_args" {
-  type    = list(string)
-  default = []
-}
-
-variable "kube_scheduler_args" {
-  type    = list(string)
-  default = []
-}
-
-variable "kube_controller_manager_args" {
-  type    = list(string)
-  default = []
-}
+//variable "node_labels" {
+//  type    = list(string)
+//  default = []
+//}
+//
+//variable "node_taints" {
+//  type    = list(string)
+//  default = []
+//}
+//
+//variable "write_kubeconfig_mode" {
+//  default     = "0644"
+//  description = "Write kubeconfig with this mode"
+//}
+//
+//variable "kube_apiserver_args" {
+//  type    = list(string)
+//  default = []
+//}
+//
+//variable "kube_scheduler_args" {
+//  type    = list(string)
+//  default = []
+//}
+//
+//variable "kube_controller_manager_args" {
+//  type    = list(string)
+//  default = []
+//}

@@ -15,16 +15,10 @@ data "template_cloudinit_config" "this" {
     filename     = "00_cfg.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/agent.sh", {
-      args = {
-        "token"               = var.cluster_data.token
-        "server"              = var.cluster_data.server_url
-        "cloud-provider-name" = "aws"
-      }
+      token  = var.cluster_data.token
+      server = var.cluster_data.server_url
 
-      list_args = {
-        "node-label" = concat(["name=${var.name}"], var.node_labels)
-        "node-taint" = var.node_taints
-      }
+      config = var.rke2_config
     })
   }
 

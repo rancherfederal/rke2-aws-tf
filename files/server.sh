@@ -1,5 +1,16 @@
 #!/bin/bash
-set -e
+
+cp_wait() {
+  while true; do
+    timeout 1 bash -c "cat < /dev/null > /dev/tcp/${server_lb}/6443"
+    if [ "$?" == 0 ]; then
+      echo "leader is ready"
+      break
+    fi
+    echo "waiting for leader to be ready..."
+    sleep 10
+  done
+}
 
 build_config() {
   mkdir -p "/etc/rancher/rke2"
@@ -7,7 +18,7 @@ build_config() {
 %{~ if server_index == 0 }
 cluster-init: true
 %{~ else }
-server: "${server}"
+server: "https://${server_lb}:9345"
 %{~ endif }
 
 # args
@@ -24,9 +35,15 @@ ${k}:
   %{~ endfor }
 %{~ endif }
 %{~ endfor }
+
+${config}
 EOF
 }
 
 {
+  %{~ if server_index != 0 }
+  cp_wait
+  %{~ endif }
+
   build_config
 }

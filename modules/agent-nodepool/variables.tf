@@ -91,12 +91,6 @@ variable "extra_security_groups" {
 #
 # RKE2 Variables
 #
-variable "node_labels" {
-  type    = list(string)
-  default = []
-}
-
-variable "node_taints" {
-  type    = list(string)
-  default = []
+variable "rke2_config" {
+  default = ""
 }

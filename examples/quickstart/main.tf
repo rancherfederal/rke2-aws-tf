@@ -3,11 +3,7 @@ provider "aws" {
 }
 
 locals {
-  name    = "quickstart"
-  vpc_id  = "vpc-087496fba26c6d6df"
-  subnets = ["subnet-084b8f063e166cd01", "subnet-0fc3993950d081bfb", "subnet-0b998c99f39ccf748"]
-
-  ami = "ami-24206045"
+  name = "quickstart"
 
   tags = {
     "terraform" = "true",
@@ -15,75 +11,53 @@ locals {
   }
 }
 
-# IAM Policies
-module "policies" {
-  source = "../../modules/policies"
-  name   = local.name
+# Defaults
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnet" "default" {
+  availability_zone = "us-gov-west-1a"
+  default_for_az    = true
+}
+
+data "aws_ami" "rhel7" {
+  most_recent = true
+  owners      = ["219670896067"]
+
+  filter {
+    name   = "name"
+    values = ["RHEL-7*"]
+  }
 }
 
 #
 # Server
 #
-module "server_role" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
-  version = "~> 2.0"
-
-  create_role             = true
-  role_name               = "${local.name}-server-role"
-  trusted_role_services   = ["ec2.amazonaws.com"]
-  role_requires_mfa       = false
-  create_instance_profile = true
-
-
-  custom_role_policy_arns = [
-    module.policies.server_aws_policy_arn,
-    module.policies.server_state_policy_arn,
-  ]
-}
-
 module "rke2" {
   source = "../.."
 
-  name    = local.name
-  vpc_id  = local.vpc_id
-  subnets = local.subnets
-
-  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
-  ami                  = local.ami
-  server_count         = 1
-  iam_instance_profile = module.server_role.this_iam_instance_profile_name
+  name                = local.name
+  vpc_id              = data.aws_vpc.default.id
+  subnets             = [data.aws_subnet.default.id]
+  ami                 = data.aws_ami.rhel7.image_id
+  server_count        = 3
+  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
 
   tags = local.tags
 }
 
 #
-# Generic agent pool
+# Generic Agent Pool
 #
-module "agent_role" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
-  version = "~> 2.0"
-
-  create_role             = true
-  role_name               = "${local.name}-generic-agent-role"
-  trusted_role_services   = ["ec2.amazonaws.com"]
-  role_requires_mfa       = false
-  create_instance_profile = true
-
-  custom_role_policy_arns = [
-    module.policies.agent_aws_policy_arn,
-  ]
-}
-
 module "agents" {
-  source  = "../../modules/agent-nodepool"
-  name    = "generic-agent"
-  vpc_id  = local.vpc_id
-  subnets = local.subnets
+  source = "../../modules/agent-nodepool"
 
-  ami                  = local.ami
-  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
-  spot                 = true
-  iam_instance_profile = module.agent_role.this_iam_instance_profile_name
+  name                = "generic-agent"
+  vpc_id              = data.aws_vpc.default.id
+  subnets             = [data.aws_subnet.default.id]
+  ami                 = data.aws_ami.rhel7.image_id
+  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
 
   cluster_data = module.rke2.cluster_data
 }
