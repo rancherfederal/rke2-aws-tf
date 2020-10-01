@@ -25,3 +25,12 @@ output "server_url" {
 output "token" {
   value = random_password.token.result
 }
+
+output "cluster_data" {
+  value = {
+    name                   = var.name
+    server_url             = "https://${module.cp_lb.dns}:9345"
+    cluster_security_group = aws_security_group.cluster.id
+    token                  = random_password.token.result
+  }
+}

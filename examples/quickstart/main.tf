@@ -15,9 +15,32 @@ locals {
   }
 }
 
+# IAM Policies
+module "policies" {
+  source = "../../modules/policies"
+  name   = local.name
+}
+
 #
 # Server
 #
+module "server_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "~> 2.0"
+
+  create_role             = true
+  role_name               = "${local.name}-server-role"
+  trusted_role_services   = ["ec2.amazonaws.com"]
+  role_requires_mfa       = false
+  create_instance_profile = true
+
+
+  custom_role_policy_arns = [
+    module.policies.server_aws_policy_arn,
+    module.policies.server_state_policy_arn,
+  ]
+}
+
 module "rke2" {
   source = "../.."
 
@@ -25,9 +48,10 @@ module "rke2" {
   vpc_id  = local.vpc_id
   subnets = local.subnets
 
-  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
-  ami                 = local.ami
-  server_count        = 3
+  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
+  ami                  = local.ami
+  server_count         = 1
+  iam_instance_profile = module.server_role.this_iam_instance_profile_name
 
   tags = local.tags
 }
@@ -35,19 +59,33 @@ module "rke2" {
 #
 # Generic agent pool
 #
+module "agent_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "~> 2.0"
+
+  create_role             = true
+  role_name               = "${local.name}-generic-agent-role"
+  trusted_role_services   = ["ec2.amazonaws.com"]
+  role_requires_mfa       = false
+  create_instance_profile = true
+
+  custom_role_policy_arns = [
+    module.policies.agent_aws_policy_arn,
+  ]
+}
+
 module "agents" {
   source  = "../../modules/agent-nodepool"
-  cluster = module.rke2.cluster_name
   name    = "generic-agent"
   vpc_id  = local.vpc_id
   subnets = local.subnets
 
-  ami                 = local.ami
-  ssh_authorized_keys = [file("~/.ssh/id_rsa.pub")]
+  ami                  = local.ami
+  ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
+  spot                 = true
+  iam_instance_profile = module.agent_role.this_iam_instance_profile_name
 
-  server_url             = module.rke2.server_url
-  token                  = module.rke2.token
-  cluster_security_group = module.rke2.shared_cluster_sg
+  cluster_data = module.rke2.cluster_data
 }
 
 // For demonstration only, lock down ssh access in production

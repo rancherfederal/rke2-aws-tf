@@ -23,6 +23,7 @@ data "template_cloudinit_config" "this" {
       args = {
         "write-kubeconfig-mode" = var.write_kubeconfig_mode
         "token"                 = random_password.token.result
+        "cloud-provider-name"   = "aws"
       }
 
       list_args = {

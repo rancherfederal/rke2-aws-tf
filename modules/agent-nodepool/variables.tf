@@ -1,9 +1,6 @@
 variable "name" {
-  type = string
-}
-
-variable "cluster" {
-  type = string
+  description = "RKE2 cluster name"
+  type        = string
 }
 
 variable "vpc_id" {
@@ -14,11 +11,24 @@ variable "subnets" {
   type = list(string)
 }
 
+variable "cluster_data" {
+  description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
+
+  type = object({
+    name                   = string
+    server_url             = string
+    cluster_security_group = string
+    token                  = string
+  })
+}
+
 variable "tags" {
   type    = map(string)
   default = {}
 }
 
+#
+# Server Instance Variables
 #
 variable "ami" {
   type = string
@@ -71,26 +81,16 @@ variable "ssh_authorized_keys" {
 }
 
 #
-variable "cluster_security_group" {
-  type = string
-}
-
+#
+#
 variable "extra_security_groups" {
   type    = list(string)
   default = []
 }
 
 #
+# RKE2 Variables
 #
-#
-variable "server_url" {
-  type = string
-}
-
-variable "token" {
-  type = string
-}
-
 variable "node_labels" {
   type    = list(string)
   default = []

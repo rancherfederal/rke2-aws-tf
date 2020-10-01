@@ -1,3 +1,9 @@
+locals {
+  ccm_tags = {
+    "kubernetes.io/cluster/${var.name}" = "owned"
+  }
+}
+
 resource "random_password" "token" {
   length  = 32
   special = false
@@ -11,7 +17,9 @@ module "cp_lb" {
   name    = var.name
   vpc_id  = var.vpc_id
   subnets = var.subnets
-  tags    = var.tags
+  tags = merge({
+
+  }, local.ccm_tags, var.tags)
 }
 
 #
@@ -20,10 +28,11 @@ module "cp_lb" {
 resource "aws_instance" "servers" {
   count = var.server_count
 
-  ami              = var.ami
-  instance_type    = var.instance_type
-  subnet_id        = var.subnets[0]
-  user_data_base64 = data.template_cloudinit_config.this[count.index].rendered
+  ami                  = var.ami
+  instance_type        = var.instance_type
+  subnet_id            = var.subnets[0]
+  user_data_base64     = data.template_cloudinit_config.this[count.index].rendered
+  iam_instance_profile = var.iam_instance_profile
 
   vpc_security_group_ids = [aws_security_group.cluster.id, aws_security_group.server.id]
 
@@ -36,15 +45,8 @@ resource "aws_instance" "servers" {
   tags = merge({
     "Name" = "${var.name}-server-${count.index}"
     "Role" = "server"
-  }, var.tags)
+  }, local.ccm_tags, var.tags)
 }
-
-//resource "aws_elb_attachment" "server_lb_attachments" {
-//  count = length(aws_instance.servers)
-//
-//  elb = module.cp_lb.id
-//  instance = aws_instance.servers[count.index].id
-//}
 
 resource "aws_lb_target_group_attachment" "server_tg_attachments" {
   count = length(aws_instance.servers)
@@ -69,7 +71,7 @@ resource "aws_security_group" "cluster" {
   vpc_id      = var.vpc_id
 
   tags = merge({
-
+    "shared" = "true",
   }, var.tags)
 }
 
@@ -103,8 +105,8 @@ resource "aws_security_group" "server" {
   vpc_id      = var.vpc_id
 
   tags = merge({
-
-  }, var.tags)
+    "kubernetes.io/cluster/${var.name}" = "owned",
+  }, local.ccm_tags, var.tags)
 }
 
 resource "aws_security_group_rule" "server_cp" {
@@ -113,8 +115,7 @@ resource "aws_security_group_rule" "server_cp" {
   protocol          = "tcp"
   security_group_id = aws_security_group.server.id
   type              = "ingress"
-  //  source_security_group_id = module.cp_lb.sg
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 resource "aws_security_group_rule" "server_cp_supervisor" {
@@ -123,6 +124,5 @@ resource "aws_security_group_rule" "server_cp_supervisor" {
   protocol          = "tcp"
   security_group_id = aws_security_group.server.id
   type              = "ingress"
-  //  source_security_group_id = module.cp_lb.sg
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks       = ["0.0.0.0/0"]
 }

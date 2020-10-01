@@ -1,7 +1,7 @@
 locals {
   tags = merge({
-    "Name"                                 = "${var.cluster}-${var.name}-nodepool",
-    "kubernetes.io/cluster/${var.cluster}" = "owned"
+    "Name"                                           = "${var.cluster_data.name}-${var.name}-nodepool",
+    "kubernetes.io/cluster/${var.cluster_data.name}" = "owned"
   }, var.tags)
 }
 
@@ -22,7 +22,7 @@ resource "aws_launch_template" "this" {
   image_id               = var.ami
   instance_type          = var.instance_type
   user_data              = data.template_cloudinit_config.this.rendered
-  vpc_security_group_ids = concat([aws_security_group.this.id], [var.cluster_security_group], var.extra_security_groups)
+  vpc_security_group_ids = concat([aws_security_group.this.id], [var.cluster_data.cluster_security_group], var.extra_security_groups)
 
   block_device_mappings {
     device_name = "/dev/sda1"

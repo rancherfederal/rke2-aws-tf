@@ -16,12 +16,13 @@ data "template_cloudinit_config" "this" {
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/agent.sh", {
       args = {
-        "token"  = var.token
-        "server" = var.server_url
+        "token"               = var.cluster_data.token
+        "server"              = var.cluster_data.server_url
+        "cloud-provider-name" = "aws"
       }
 
       list_args = {
-        "node-label" = var.node_labels
+        "node-label" = concat(["name=${var.name}"], var.node_labels)
         "node-taint" = var.node_taints
       }
     })
