@@ -1,0 +1,11 @@
+#cloud-config
+ssh_authorized_keys:
+%{ for _ in ssh_authorized_keys }
+  - ${_}
+%{ endfor }
+
+users:
+  - default
+  - name: rke2
+    homedir: /var/lib/rancher/rke2
+    system: true
