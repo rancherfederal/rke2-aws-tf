@@ -4,14 +4,30 @@ provider "aws" {
 
 locals {
   name    = "cloud-enabled"
-  vpc_id  = "vpc-087496fba26c6d6df"
-  subnets = ["subnet-084b8f063e166cd01", "subnet-0fc3993950d081bfb", "subnet-0b998c99f39ccf748"]
-
-  ami = "ami-24206045"
 
   tags = {
     "terraform" = "true",
     "env"       = "cloud-enabled",
+  }
+}
+
+# Query for defaults
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnet" "default" {
+  availability_zone = "us-gov-west-1a"
+  default_for_az    = true
+}
+
+data "aws_ami" "rhel7" {
+  most_recent = true
+  owners      = ["219670896067"]
+
+  filter {
+    name   = "name"
+    values = ["RHEL-7*"]
   }
 }
 
@@ -45,11 +61,11 @@ module "rke2" {
   source = "../.."
 
   name    = local.name
-  vpc_id  = local.vpc_id
-  subnets = local.subnets
+  vpc_id  = data.aws_vpc.default.id
+  subnets = [data.aws_subnet.default.id]
 
   ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
-  ami                  = local.ami
+  ami                  = data.aws_ami.rhel7.image_id
   server_count         = 1
   iam_instance_profile = module.server_role.this_iam_instance_profile_name
 
@@ -81,10 +97,10 @@ module "agent_role" {
 module "agents" {
   source  = "../../modules/agent-nodepool"
   name    = "generic-agent"
-  vpc_id  = local.vpc_id
-  subnets = local.subnets
+  vpc_id  = data.aws_vpc.default.id
+  subnets = [data.aws_subnet.default.id]
 
-  ami                  = local.ami
+  ami                  = data.aws_ami.rhel7.image_id
   ssh_authorized_keys  = [file("~/.ssh/id_rsa.pub")]
   spot                 = true
   iam_instance_profile = module.agent_role.this_iam_instance_profile_name

@@ -70,36 +70,17 @@ variable "ssh_authorized_keys" {
 }
 
 # rkegov variables
+//variable "rke2_version" {
+//  default = "v1.18.9-beta23+rke2"
+//  description = "RKE2 version to install"
+//}
+//
+//variable "rke2_method" {
+//  default = "tar"
+//  description = "RKE2 installation method, defaults to tar regardless of system"
+//}
+
 variable "rke2_config" {
   default = ""
+  description = "User defined extra input to rke2.yaml"
 }
-
-//variable "node_labels" {
-//  type    = list(string)
-//  default = []
-//}
-//
-//variable "node_taints" {
-//  type    = list(string)
-//  default = []
-//}
-//
-//variable "write_kubeconfig_mode" {
-//  default     = "0644"
-//  description = "Write kubeconfig with this mode"
-//}
-//
-//variable "kube_apiserver_args" {
-//  type    = list(string)
-//  default = []
-//}
-//
-//variable "kube_scheduler_args" {
-//  type    = list(string)
-//  default = []
-//}
-//
-//variable "kube_controller_manager_args" {
-//  type    = list(string)
-//  default = []
-//}

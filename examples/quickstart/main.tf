@@ -11,7 +11,7 @@ locals {
   }
 }
 
-# Defaults
+# Query for defaults
 data "aws_vpc" "default" {
   default = true
 }
