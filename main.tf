@@ -23,43 +23,29 @@ module "cp_lb" {
 }
 
 #
-# Server Nodes
+# Server Nodepool
 #
-resource "aws_instance" "servers" {
-  count = var.server_count
+module "servers" {
+  source              = "./modules/server-nodepool"
+  name                = "server"
+  vpc_id              = var.vpc_id
+  subnets             = var.subnets
+  ami                 = var.ami
+  ssh_authorized_keys = var.ssh_authorized_keys
 
-  ami                  = var.ami
-  instance_type        = var.instance_type
-  subnet_id            = var.subnets[0]
-  user_data_base64     = data.template_cloudinit_config.this[count.index].rendered
-  iam_instance_profile = var.iam_instance_profile
-
-  vpc_security_group_ids = [aws_security_group.cluster.id, aws_security_group.server.id]
-
-  root_block_device {
-    volume_size = var.block_device_mappings.size
-    volume_type = "gp2"
-    encrypted   = var.block_device_mappings.encrypted
+  cluster_data = {
+    name                   = var.name
+    server_dns             = module.cp_lb.dns
+    cluster_security_group = aws_security_group.cluster.id
+    token                  = random_password.token.result
   }
 
+  server_tg_arn            = module.cp_lb.server_tg_arn
+  server_supervisor_tg_arn = module.cp_lb.server_supervisor_tg_arn
+
   tags = merge({
-    "Name" = "${var.name}-server-${count.index}"
-    "Role" = "server"
-  }, local.ccm_tags, var.tags)
-}
-
-resource "aws_lb_target_group_attachment" "server_tg_attachments" {
-  count = length(aws_instance.servers)
-
-  target_group_arn = module.cp_lb.server_tg_arn
-  target_id        = aws_instance.servers[count.index].id
-}
-
-resource "aws_lb_target_group_attachment" "server_supervisor_tg_attachments" {
-  count = length(aws_instance.servers)
-
-  target_group_arn = module.cp_lb.server_supervisor_tg_arn
-  target_id        = aws_instance.servers[count.index].id
+    "Role" = "Server",
+  }, var.tags)
 }
 
 #
@@ -93,36 +79,5 @@ resource "aws_security_group_rule" "cluster_egress" {
   protocol          = "-1"
   security_group_id = aws_security_group.cluster.id
   type              = "egress"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-#
-# Shared Server Security Group
-#
-resource "aws_security_group" "server" {
-  name        = "${var.name}-server"
-  description = "Shared ${var.name} server security group"
-  vpc_id      = var.vpc_id
-
-  tags = merge({
-    "kubernetes.io/cluster/${var.name}" = "owned",
-  }, local.ccm_tags, var.tags)
-}
-
-resource "aws_security_group_rule" "server_cp" {
-  from_port         = 6443
-  to_port           = 6443
-  protocol          = "tcp"
-  security_group_id = aws_security_group.server.id
-  type              = "ingress"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "server_cp_supervisor" {
-  from_port         = 9345
-  to_port           = 9345
-  protocol          = "tcp"
-  security_group_id = aws_security_group.server.id
-  type              = "ingress"
   cidr_blocks       = ["0.0.0.0/0"]
 }

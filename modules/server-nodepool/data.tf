@@ -15,16 +15,16 @@ data "template_cloudinit_config" "this" {
     filename     = "00_download.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/../common/download.sh", {
-      type = "agent"
+      type = "server"
     })
   }
 
   part {
     filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/agent.sh", {
-      server = var.cluster_data.server_url
-      token  = var.cluster_data.token
+    content = templatefile("${path.module}/files/server.sh", {
+      server_dns = var.cluster_data.server_dns
+      token      = var.cluster_data.token
 
       config = var.rke2_config
     })

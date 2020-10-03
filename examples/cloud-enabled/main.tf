@@ -38,8 +38,9 @@ resource "tls_private_key" "ssh" {
 }
 
 resource "local_file" "ssh_pem" {
-  filename = "${local.name}.pem"
-  content  = tls_private_key.ssh.private_key_pem
+  filename        = "${local.name}.pem"
+  content         = tls_private_key.ssh.private_key_pem
+  file_permission = "0600"
 }
 
 # IAM Policies
