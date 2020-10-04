@@ -15,10 +15,13 @@ variable "cluster_data" {
   description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
 
   type = object({
-    name                   = string
-    server_url             = string
-    cluster_security_group = string
-    token                  = string
+    name       = string
+    server_dns = string
+    cluster_sg = string
+    token = object({
+      address         = string
+      policy_document = string
+    })
   })
 }
 

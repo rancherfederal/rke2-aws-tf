@@ -13,6 +13,11 @@ variable "subnets" {
   description = "List of subnet IDs to create resources in"
 }
 
+variable "token_store" {
+  type    = string
+  default = "secretsmanager"
+}
+
 variable "tags" {
   default = {}
   type    = map(string)
@@ -54,14 +59,14 @@ variable "asg" {
 
   default = {
     min     = 1
-    max     = 3
-    desired = 2
+    max     = 9
+    desired = 3
   }
 }
 
-variable "server_count" {
-  type    = number
-  default = 3
+variable "controlplane_allowed_cidrs" {
+  type    = list(string)
+  default = ["0.0.0.0/0"]
 }
 
 variable "ssh_authorized_keys" {
@@ -70,16 +75,6 @@ variable "ssh_authorized_keys" {
 }
 
 # rkegov variables
-//variable "rke2_version" {
-//  default = "v1.18.9-beta23+rke2"
-//  description = "RKE2 version to install"
-//}
-//
-//variable "rke2_method" {
-//  default = "tar"
-//  description = "RKE2 installation method, defaults to tar regardless of system"
-//}
-
 variable "rke2_config" {
   default     = ""
   description = "User defined extra input to rke2.yaml"

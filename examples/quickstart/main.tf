@@ -1,9 +1,10 @@
 provider "aws" {
-  region = "us-gov-west-1"
+  region = local.aws_region
 }
 
 locals {
-  name = "quickstart"
+  name       = "quickstart"
+  aws_region = "us-gov-west-1"
 
   tags = {
     "terraform" = "true",
@@ -17,7 +18,7 @@ data "aws_vpc" "default" {
 }
 
 data "aws_subnet" "default" {
-  availability_zone = "us-gov-west-1a"
+  availability_zone = "${local.aws_region}a"
   default_for_az    = true
 }
 
@@ -53,7 +54,6 @@ module "rke2" {
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel7.image_id
-  server_count        = 3
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
 
   tags = local.tags
@@ -65,7 +65,7 @@ module "rke2" {
 module "agents" {
   source = "../../modules/agent-nodepool"
 
-  name                = "generic-agent"
+  name                = "agent"
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel7.image_id
@@ -79,7 +79,7 @@ resource "aws_security_group_rule" "quickstart_ssh" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  security_group_id = module.rke2.shared_cluster_sg
+  security_group_id = module.rke2.cluster_data.cluster_sg
   type              = "ingress"
   cidr_blocks       = ["0.0.0.0/0"]
 }

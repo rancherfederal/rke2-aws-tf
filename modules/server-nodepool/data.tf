@@ -23,8 +23,8 @@ data "template_cloudinit_config" "this" {
     filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/files/server.sh", {
-      server_dns = var.cluster_data.server_dns
-      token      = var.cluster_data.token
+      server_dns    = var.cluster_data.server_dns
+      token_address = var.cluster_data.token.address
 
       config = var.rke2_config
     })

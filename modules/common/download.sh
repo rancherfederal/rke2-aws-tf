@@ -23,20 +23,25 @@ fatal() {
     exit 1
 }
 
-download() {
+download_rke2() {
   # TODO: Install from repo
   yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
 
   curl -fsSL https://raw.githubusercontent.com/rancher/rke2/master/install.sh | sh -s -
 }
 
-start() {
-  systemctl enable "rke2-$${INSTALL_RKE2_TYPE}"
-  systemctl daemon-reload
-  systemctl start "rke2-$${INSTALL_RKE2_TYPE}"
+download_dependencies() {
+  yum install -y unzip
+
+  # Install awscli (used for secrets fetching)
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip -q awscliv2.zip
+  ./aws/install --bin-dir /usr/bin
+
+  aws configure set default.region $(curl -s http://169.254.169.254/latest/meta-data/placement/region)
 }
 
 {
-  download
-  start
+  download_dependencies
+  download_rke2
 }

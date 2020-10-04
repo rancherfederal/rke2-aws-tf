@@ -21,9 +21,6 @@ fatal() {
     exit 1
 }
 
-# If launch_index == 0 and apiserver is not ready, initialize a new leader
-#   else, join a new server to an existing cluster
-
 identify() {
   NODE_TYPE="server"
 
@@ -56,10 +53,30 @@ cp_wait() {
   done
 }
 
+fetch_token() {
+  # Validate aws caller identity, fatal if not valid
+  if ! aws sts get-caller-identity 2>/dev/null; then
+    fatal "No valid aws caller identity"
+  fi
+
+  # Either
+  #   a) fetch secret from secrets manager
+  #   b) if secrets manager not found, try and fetch from s3 bucket
+  #   c) fail
+  if token=$(aws secretsmanager get-secret-value --secret-id ${token_address} --query 'SecretString' --output text 2>/dev/null); then
+    info "Found token from secretsmanager"
+  elif token=$(aws s3 cp ${token_address} - 2>/dev/null);then
+    info "Found token from s3 object"
+  else
+    fatal "Could not find cluster token from secretsmanager or s3"
+  fi
+
+  echo "token: $${token}" >> "/etc/rancher/rke2/config.yaml"
+}
+
 base_config() {
   mkdir -p "/etc/rancher/rke2"
   cat <<-EOF > "/etc/rancher/rke2/config.yaml"
-token: ${token}
 tls-san:
   - ${server_dns}
 
@@ -75,12 +92,12 @@ EOF
 
 leader_config() {
   cat <<-EOF >> "/etc/rancher/rke2/config.yaml"
-cluster-init: true
 EOF
 }
 
 start() {
   base_config
+  fetch_token
 
   case $NODE_TYPE in
   leader)
@@ -92,9 +109,9 @@ start() {
     ;;
   esac
 
-  systemctl enable "rke2-server"
+  systemctl enable rke2-server
   systemctl daemon-reload
-  systemctl start "rke2-server"
+  systemctl start rke2-server
 }
 
 {

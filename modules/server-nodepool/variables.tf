@@ -23,10 +23,13 @@ variable "cluster_data" {
   description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
 
   type = object({
-    name                   = string
-    server_dns             = string
-    cluster_security_group = string
-    token                  = string
+    name       = string
+    server_dns = string
+    cluster_sg = string
+    token = object({
+      address         = string
+      policy_document = string
+    })
   })
 }
 
@@ -70,12 +73,6 @@ variable "asg" {
     max     = number
     desired = number
   })
-
-  default = {
-    min     = 1
-    max     = 3
-    desired = 2
-  }
 }
 
 variable "spot" {
@@ -91,6 +88,10 @@ variable "ssh_authorized_keys" {
 #
 #
 #
+variable "controlplane_allowed_cirds" {
+  type = list(string)
+}
+
 variable "extra_security_groups" {
   type    = list(string)
   default = []
