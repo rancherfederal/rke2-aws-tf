@@ -11,6 +11,14 @@ variable "subnets" {
   type = list(string)
 }
 
+variable "server_tg_arn" {
+  type = string
+}
+
+variable "server_supervisor_tg_arn" {
+  type = string
+}
+
 variable "cluster_data" {
   description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
 
@@ -65,12 +73,6 @@ variable "asg" {
     max     = number
     desired = number
   })
-
-  default = {
-    min     = 1
-    max     = 3
-    desired = 2
-  }
 }
 
 variable "spot" {
@@ -86,6 +88,10 @@ variable "ssh_authorized_keys" {
 #
 #
 #
+variable "controlplane_allowed_cirds" {
+  type = list(string)
+}
+
 variable "extra_security_groups" {
   type    = list(string)
   default = []

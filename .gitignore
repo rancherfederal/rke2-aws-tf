@@ -30,3 +30,6 @@ override.tf.json
 
 # ides
 .idea
+
+# Generated
+*.pem
