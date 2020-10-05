@@ -60,7 +60,7 @@ variable "asg" {
   default = {
     min     = 1
     max     = 9
-    desired = 3
+    desired = 1
   }
 }
 

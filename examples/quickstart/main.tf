@@ -70,6 +70,7 @@ module "agents" {
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel7.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
+  asg                 = { min : 1, max : 5, desired : 2 }
 
   cluster_data = module.rke2.cluster_data
 }
