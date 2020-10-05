@@ -12,16 +12,6 @@ locals {
   }
 }
 
-# Query for defaults
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnet" "default" {
-  availability_zone = "${local.aws_region}a"
-  default_for_az    = true
-}
-
 data "aws_ami" "rhel7" {
   most_recent = true
   owners      = ["219670896067"]
@@ -80,25 +70,10 @@ data "aws_ami" "ubuntu" {
     name   = "architecture"
     values = ["x86_64"]
   }
-}
-
-data "aws_ami" "centos7" {
-  owners      = ["679593333241"]
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["CentOS Linux 7 x86_64 HVM EBS *"]
-  }
 
   filter {
     name   = "architecture"
     values = ["x86_64"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
   }
 }
 
@@ -115,23 +90,56 @@ resource "local_file" "ssh_pem" {
 }
 
 #
+# Network
+#
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "rke2-${local.name}"
+  cidr = "10.88.0.0/16"
+
+  azs             = ["${local.aws_region}a", "${local.aws_region}b", "${local.aws_region}c"]
+  public_subnets  = ["10.88.1.0/24", "10.88.2.0/24", "10.88.3.0/24"]
+  private_subnets = ["10.88.101.0/24", "10.88.102.0/24", "10.88.103.0/24"]
+
+  enable_nat_gateway = true
+  single_nat_gateway = true
+  enable_vpn_gateway = true
+
+  public_subnet_tags = merge({
+    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/role/elb"              = "1"
+  }, local.tags)
+
+  private_subnet_tags = merge({
+    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/role/internal-elb"     = "1"
+  }, local.tags)
+
+  tags = merge({
+    "kubernetes.io/cluster/${local.name}" = "shared"
+  }, local.tags)
+}
+
+#
 # Server
 #
 module "rke2" {
   source = "../.."
 
-  name                = local.name
-  vpc_id              = data.aws_vpc.default.id
-  subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.centos7.image_id # Note: Multi OS is primarily for example purposes
+  name    = local.name
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
+
+  ami                 = data.aws_ami.ubuntu.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
-  asg                 = { min : 1, max : 5, desired : 3 }
+  asg                 = { min : 1, max : 5, desired : 1 }
 
   rke2_config = <<-EOT
 cloud-provider-name: "aws"
 node-label:
   - "name=server"
-  - "os=ubuntu"
+  - "os=centos7"
 EOT
 
   tags = local.tags
@@ -143,13 +151,14 @@ EOT
 module "agents" {
   source = "../../modules/agent-nodepool"
 
-  name                = "agent"
-  vpc_id              = data.aws_vpc.default.id
-  subnets             = [data.aws_subnet.default.id]
+  name    = "agent"
+  vpc_id  = module.vpc.vpc_id
+  subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
+
   ami                 = data.aws_ami.ubuntu.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   spot                = true
-  asg                 = { min : 1, max : 1, desired : 1 }
+  asg                 = { min : 1, max : 10, desired : 2 }
 
   rke2_config = <<-EOT
 cloud-provider-name: "aws"

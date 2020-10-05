@@ -33,3 +33,5 @@ override.tf.json
 
 # Generated
 *.pem
+rke2.yaml
+admin.conf
