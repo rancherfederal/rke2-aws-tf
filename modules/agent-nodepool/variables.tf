@@ -1,18 +1,20 @@
 variable "name" {
-  description = "RKE2 cluster name"
+  description = "Nodepool name"
   type        = string
 }
 
 variable "vpc_id" {
-  type = string
+  description = "VPC ID to create nodepool in"
+  type        = string
 }
 
 variable "subnets" {
-  type = list(string)
+  description = "List of subnet IDs to create nodepool in"
+  type        = list(string)
 }
 
 variable "cluster_data" {
-  description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
+  description = "Required data for joining to an existing rke2 cluster, sourced from main rke2 module"
 
   type = object({
     name       = string
@@ -26,28 +28,33 @@ variable "cluster_data" {
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  description = "Map of tags to add to all resources created"
+  type        = map(string)
+  default     = {}
 }
 
 #
 # Server Instance Variables
 #
 variable "ami" {
-  type = string
+  description = "Nodepool ami"
+  type        = string
 }
 
 variable "instance_type" {
-  type    = string
-  default = "t3.medium"
+  description = "Nodepool instance type"
+  type        = string
+  default     = "t3.medium"
 }
 
 variable "iam_instance_profile" {
-  type    = string
-  default = ""
+  description = "Nodepool IAM Instance Profile, created if left empty"
+  type        = string
+  default     = ""
 }
 
 variable "block_device_mappings" {
+  description = "Nodepool block device mapping configuration"
   type = object({
     size      = number
     encrypted = bool
@@ -60,6 +67,7 @@ variable "block_device_mappings" {
 }
 
 variable "asg" {
+  description = "Nodepool Auto Scaling Group capacities"
   type = object({
     min     = number
     max     = number
@@ -79,28 +87,27 @@ variable "spot" {
 }
 
 variable "ssh_authorized_keys" {
-  type    = list(string)
-  default = []
+  description = "Nodepool list of public keys to add as authorized ssh keys"
+  type        = list(string)
+  default     = []
 }
 
-#
-#
-#
 variable "extra_security_groups" {
-  type    = list(string)
-  default = []
+  description = "Nodepool list of extra security groups to add"
+  type        = list(string)
+  default     = []
 }
 
 #
 # Custom Userdata
 #
 variable "pre_userdata" {
-  description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
+  description = "Custom userdata to run immediately before rke2 agent attempts to join cluster, after required rke2, dependencies are installed"
   default     = ""
 }
 
 variable "post_userdata" {
-  description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
+  description = "Custom userdata to run immediately after rke2 agent attempts to join cluster"
   default     = ""
 }
 
@@ -108,5 +115,6 @@ variable "post_userdata" {
 # RKE2 Variables
 #
 variable "rke2_config" {
-  default = ""
+  description = "Nodepool additional agent configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for a full list of options"
+  default     = ""
 }

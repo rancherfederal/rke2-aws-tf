@@ -1,11 +1,9 @@
 output "cluster_name" {
-  value = var.name
-}
-
-output "server_url" {
-  value = "https://${module.cp_lb.dns}:9345"
+  description = "Name of the rke2 cluster"
+  value       = var.name
 }
 
 output "cluster_data" {
-  value = local.cluster_data
+  description = "Map of cluster data required by agent pools for joining cluster, do not modify this"
+  value       = local.cluster_data
 }

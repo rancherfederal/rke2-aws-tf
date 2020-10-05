@@ -151,17 +151,14 @@ module "rke2" {
   ami                 = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   asg                 = { min : 1, max : 5, desired : 1 }
+  instance_type       = "t3a.medium"
 
-    rke2_config = <<-EOT
-  cloud-provider-name: "aws"
-  node-label:
-    - "name=server"
-    - "os=centos7"
-  EOT
-
-  pre_userdata = <<EOF
-setenforce 0
-EOF
+  rke2_config = <<-EOT
+cloud-provider-name: "aws"
+node-label:
+  - "name=server"
+  - "os=rhel8"
+EOT
 
   tags = local.tags
 }
@@ -180,19 +177,21 @@ module "agents" {
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   spot                = true
   asg                 = { min : 1, max : 10, desired : 2 }
+  instance_type       = "t3a.large"
 
-    rke2_config = <<-EOT
-  cloud-provider-name: "aws"
-  node-label:
-    - "name=generic-agent"
-    - "os=centos7"
-  EOT
-
-  pre_userdata = <<EOF
-setenforce 0
-EOF
+  rke2_config = <<-EOT
+cloud-provider-name: "aws"
+node-label:
+  - "name=generic-agent"
+  - "os=rhel8"
+EOT
 
   cluster_data = module.rke2.cluster_data
+
+  tags = merge({
+    "k8s.io/cluster-autoscaler/enabled"       = "true"
+    "k8s.io/cluster-autoscaler/${local.name}" = "true"
+  }, local.tags)
 }
 
 // For demonstration only, lock down ssh access in production

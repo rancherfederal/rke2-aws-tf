@@ -48,7 +48,11 @@ data "aws_iam_policy_document" "aws_ccm" {
       "ecr:GetRepositoryPolicy",
       "ecr:DescribeRepositories",
       "ecr:ListImages",
-      "ecr:BatchGetImage"
+      "ecr:BatchGetImage",
+      "autoscaling:DescribeTags",
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
     ]
   }
 }

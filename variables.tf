@@ -1,44 +1,52 @@
 variable "name" {
-  type        = string
   description = "Name of the rkegov cluster to create"
+  type        = string
 }
 
 variable "vpc_id" {
-  type        = string
   description = "VPC ID to create resources in"
+  type        = string
 }
 
 variable "subnets" {
-  type        = list(string)
   description = "List of subnet IDs to create resources in"
+  type        = list(string)
 }
 
 variable "token_store" {
-  type    = string
-  default = "secretsmanager"
+  description = "Token store to use, can be either `secretmanager` or `s3`"
+  type        = string
+  default     = "secretsmanager"
 }
 
 variable "tags" {
-  default = {}
-  type    = map(string)
+  description = "Map of tags to add to all resources created"
+  default     = {}
+  type        = map(string)
 }
 
-# instance variables
+#
+# Server pool variables
+#
 variable "instance_type" {
-  type    = string
-  default = "t3a.medium"
+  type        = string
+  default     = "t3a.medium"
+  description = "Server pool instance type"
 }
 
 variable "ami" {
-  type = string
+  description = "Server pool ami"
+  type        = string
 }
 
 variable "iam_instance_profile" {
-  type    = string
-  default = ""
+  description = "Server pool IAM Instance Profile, created if left blank"
+  type        = string
+  default     = ""
 }
 
 variable "block_device_mappings" {
+  description = "Server pool block device mapping configuration"
   type = object({
     size      = number
     encrypted = bool
@@ -51,6 +59,7 @@ variable "block_device_mappings" {
 }
 
 variable "asg" {
+  description = "Server pool Auto Scaling Group capacities"
   type = object({
     min     = number
     max     = number
@@ -64,19 +73,30 @@ variable "asg" {
   }
 }
 
-variable "controlplane_allowed_cidrs" {
-  type    = list(string)
-  default = ["0.0.0.0/0"]
-}
-
 variable "ssh_authorized_keys" {
-  type    = list(string)
-  default = []
+  description = "Server pool list of public keys to add as authorized ssh keys"
+  type        = list(string)
+  default     = []
 }
 
 #
-# Custom Userdata
+# Cluster Variables
 #
+variable "controlplane_allowed_cidrs" {
+  description = "Server pool security group allowed cidr ranges"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+
+#
+# RKE2 Variables
+#
+variable "rke2_config" {
+  description = "Server pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/server_config for full list of options"
+  default     = ""
+}
+
 variable "pre_userdata" {
   description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
   default     = ""
@@ -87,8 +107,3 @@ variable "post_userdata" {
   default     = ""
 }
 
-# rkegov variables
-variable "rke2_config" {
-  default     = ""
-  description = "User defined extra input to rke2.yaml"
-}
