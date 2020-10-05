@@ -57,6 +57,21 @@ data "aws_ami" "centos7" {
   }
 }
 
+data "aws_ami" "centos8" {
+  most_recent = true
+  owners      = ["345084742485"]
+
+  filter {
+    name   = "name"
+    values = ["CentOS Linux 8 x86_64 HVM EBS*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
 data "aws_ami" "ubuntu" {
   owners      = ["513442679011"]
   most_recent = true
@@ -102,9 +117,11 @@ module "vpc" {
   public_subnets  = ["10.88.1.0/24", "10.88.2.0/24", "10.88.3.0/24"]
   private_subnets = ["10.88.101.0/24", "10.88.102.0/24", "10.88.103.0/24"]
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
-  enable_vpn_gateway = true
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_vpn_gateway   = true
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   public_subnet_tags = merge({
     "kubernetes.io/cluster/${local.name}" = "shared"
@@ -131,16 +148,20 @@ module "rke2" {
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                 = data.aws_ami.ubuntu.image_id # Note: Multi OS is primarily for example purposes
+  ami                 = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   asg                 = { min : 1, max : 5, desired : 1 }
 
-  rke2_config = <<-EOT
-cloud-provider-name: "aws"
-node-label:
-  - "name=server"
-  - "os=centos7"
-EOT
+    rke2_config = <<-EOT
+  cloud-provider-name: "aws"
+  node-label:
+    - "name=server"
+    - "os=centos7"
+  EOT
+
+  pre_userdata = <<EOF
+setenforce 0
+EOF
 
   tags = local.tags
 }
@@ -155,17 +176,21 @@ module "agents" {
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                 = data.aws_ami.ubuntu.image_id # Note: Multi OS is primarily for example purposes
+  ami                 = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   spot                = true
   asg                 = { min : 1, max : 10, desired : 2 }
 
-  rke2_config = <<-EOT
-cloud-provider-name: "aws"
-node-label:
-  - "name=generic-agent"
-  - "os=ubuntu"
-EOT
+    rke2_config = <<-EOT
+  cloud-provider-name: "aws"
+  node-label:
+    - "name=generic-agent"
+    - "os=centos7"
+  EOT
+
+  pre_userdata = <<EOF
+setenforce 0
+EOF
 
   cluster_data = module.rke2.cluster_data
 }
