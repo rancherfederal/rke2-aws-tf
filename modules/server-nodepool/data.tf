@@ -27,6 +27,9 @@ data "template_cloudinit_config" "this" {
       token_address = var.cluster_data.token.address
 
       config = var.rke2_config
+
+      pre_userdata  = var.pre_userdata
+      post_userdata = var.post_userdata
     })
   }
 }

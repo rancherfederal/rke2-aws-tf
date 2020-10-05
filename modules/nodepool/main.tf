@@ -38,7 +38,7 @@ resource "aws_autoscaling_group" "this" {
   max_size         = var.asg.max
   desired_capacity = var.asg.desired
 
-  # Health check and target groups dependent on whether we're a server or not (identified via k3s_url)
+  # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
   health_check_type = var.health_check_type
   target_group_arns = var.target_group_arns
 

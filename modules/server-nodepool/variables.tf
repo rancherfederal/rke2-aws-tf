@@ -98,6 +98,19 @@ variable "extra_security_groups" {
 }
 
 #
+# Custom Userdata
+#
+variable "pre_userdata" {
+  description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
+  default     = ""
+}
+
+variable "post_userdata" {
+  description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
+  default     = ""
+}
+
+#
 # RKE2 Variables
 #
 variable "rke2_config" {

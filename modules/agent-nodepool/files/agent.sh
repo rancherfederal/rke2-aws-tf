@@ -51,6 +51,19 @@ ${config}
 EOF
 }
 
+pre_userdata() {
+  info "Beginning user defined pre userdata"
+  ${pre_userdata}
+  info "Beginning user defined pre userdata"
+}
+
+post_userdata() {
+  info "Beginning user defined post userdata"
+  ${post_userdata}
+  info "Ending user defined post userdata"
+}
+
+
 start() {
   config
   fetch_token
@@ -61,5 +74,9 @@ start() {
 }
 
 {
+  pre_userdata
+
   start
+
+  post_userdata
 }

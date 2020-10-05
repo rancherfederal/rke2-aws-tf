@@ -74,6 +74,19 @@ variable "ssh_authorized_keys" {
   default = []
 }
 
+#
+# Custom Userdata
+#
+variable "pre_userdata" {
+  description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
+  default     = ""
+}
+
+variable "post_userdata" {
+  description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
+  default     = ""
+}
+
 # rkegov variables
 variable "rke2_config" {
   default     = ""

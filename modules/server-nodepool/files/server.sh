@@ -46,6 +46,9 @@ cp_wait() {
   while true; do
     if timeout 1 bash -c "true <>/dev/tcp/${server_dns}/6443" 2>/dev/null; then
       info "Cluster is ready"
+
+      # TODO: Fix this
+      sleep 30
       break
     fi
     info "Waiting for cluster to be ready..."
@@ -112,9 +115,28 @@ start() {
   systemctl enable rke2-server
   systemctl daemon-reload
   systemctl start rke2-server
+
+  export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+  export PATH=$PATH:/var/lib/rancher/rke2/bin
+}
+
+pre_userdata() {
+  info "Beginning user defined pre userdata"
+  ${pre_userdata}
+  info "Ending user defined pre userdata"
+}
+
+post_userdata() {
+  info "Beginning user defined post userdata"
+  ${post_userdata}
+  info "Ending user defined post userdata"
 }
 
 {
+  pre_userdata
+
   identify
   start
+
+  post_userdata
 }

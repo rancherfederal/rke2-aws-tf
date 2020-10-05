@@ -62,11 +62,14 @@ module "servers" {
   iam_instance_profile = var.iam_instance_profile
   asg                  = var.asg
 
-  cluster_data = local.cluster_data
-
   controlplane_allowed_cirds = var.controlplane_allowed_cidrs
   server_tg_arn              = module.cp_lb.server_tg_arn
   server_supervisor_tg_arn   = module.cp_lb.server_supervisor_tg_arn
+
+  cluster_data  = local.cluster_data
+  rke2_config   = var.rke2_config
+  pre_userdata  = var.pre_userdata
+  post_userdata = var.post_userdata
 
   tags = merge({
     "Role" = "Server",
