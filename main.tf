@@ -1,6 +1,13 @@
 locals {
+  uname = "${var.name}-${random_string.uid.result}"
+
   ccm_tags = {
     "kubernetes.io/cluster/${var.name}" = "owned"
+  }
+
+  default_tags = {
+    "ClusterName" = local.uname,
+    "Cluster" = "rke2",
   }
 
   token_store = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0] : module.s3_token_store[0]
@@ -14,6 +21,13 @@ locals {
   }
 }
 
+resource "random_string" "uid" {
+  # NOTE: Don't get too crazy here, several aws resources have tight limits on lengths (such as load balancers)
+  length = 3
+  special = false
+  lower = true
+}
+
 #
 # Cluster join token
 #
@@ -25,28 +39,29 @@ resource "random_password" "token" {
 module "s3_token_store" {
   count  = var.token_store == "s3" ? 1 : 0
   source = "./modules/token/s3"
-  name   = var.name
+  name   = local.uname
   token  = random_password.token.result
+  tags = merge(local.default_tags, var.tags)
 }
 
 module "secretsmanager_token_store" {
   count  = var.token_store == "secretsmanager" ? 1 : 0
   source = "./modules/token/secretsmanager"
-  name   = var.name
+  name   = local.uname
   token  = random_password.token.result
+  tags = merge(local.default_tags, var.tags)
 }
 
 #
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/loadbalancer"
-  name    = var.name
+  source  = "./modules/nlb"
+  name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
   tags = merge({
-
-  }, local.ccm_tags, var.tags)
+  }, local.ccm_tags, local.default_tags, var.tags)
 }
 
 #
@@ -54,7 +69,7 @@ module "cp_lb" {
 #
 module "servers" {
   source               = "./modules/server-nodepool"
-  name                 = "server"
+  name                 = local.uname
   vpc_id               = var.vpc_id
   subnets              = var.subnets
   ami                  = var.ami
@@ -73,7 +88,7 @@ module "servers" {
 
   tags = merge({
     "Role" = "Server",
-  }, var.tags)
+  }, local.default_tags, var.tags)
 }
 
 #
@@ -86,7 +101,7 @@ resource "aws_security_group" "cluster" {
 
   tags = merge({
     "shared" = "true",
-  }, var.tags)
+  }, local.default_tags, var.tags)
 }
 
 resource "aws_security_group_rule" "cluster_shared" {

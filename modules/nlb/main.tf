@@ -4,11 +4,9 @@ resource "aws_lb" "controlplane" {
   internal                         = false
   load_balancer_type               = "network"
   enable_cross_zone_load_balancing = true
-
   subnets = var.subnets
 
   tags = merge({
-
   }, var.tags)
 }
 
