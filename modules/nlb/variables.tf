@@ -12,12 +12,12 @@ variable "subnets" {
 
 variable "internal" {
   default = true
-  type = bool
+  type    = bool
 }
 
 variable "enable_cross_zone_load_balancing" {
   default = true
-  type = bool
+  type    = bool
 }
 
 variable "cp_port" {

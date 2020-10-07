@@ -1,7 +1,8 @@
 locals {
   tags = merge({
-    "Name"                                           = "${var.cluster_data.name}-${var.name}-nodepool",
+    "Name"                                           = "${var.name}-rke2-nodepool",
     "kubernetes.io/cluster/${var.cluster_data.name}" = "owned"
+    "Role"                                           = "Server",
   }, var.tags)
 }
 
@@ -33,7 +34,7 @@ resource "aws_security_group_rule" "server_cp_supervisor" {
 module "nodepool" {
   source = "../nodepool"
 
-  name                   = "${var.name}-server"
+  name                   = var.name
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   instance_type          = var.instance_type

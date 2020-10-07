@@ -1,20 +1,21 @@
 locals {
-  uname = "${var.name}-${random_string.uid.result}"
+  # Create a unique cluster name we'll prefix to all resources created and ensure it's lowercase
+  uname = lower("${var.cluster_name}-${random_string.uid.result}")
 
   ccm_tags = {
-    "kubernetes.io/cluster/${var.name}" = "owned"
+    "kubernetes.io/cluster/${local.uname}" = "owned"
   }
 
   default_tags = {
     "ClusterName" = local.uname,
-    "Cluster" = "rke2",
+    "ClusterType" = "rke2",
   }
 
   token_store = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0] : module.s3_token_store[0]
 
   # Map of generated objects required for cluster joining, not intended for user interaction
   cluster_data = {
-    name       = var.name
+    name       = local.uname
     server_dns = module.cp_lb.dns
     cluster_sg = aws_security_group.cluster.id
     token      = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0].token : module.s3_token_store[0].token
@@ -22,10 +23,12 @@ locals {
 }
 
 resource "random_string" "uid" {
-  # NOTE: Don't get too crazy here, several aws resources have tight limits on lengths (such as load balancers)
-  length = 3
+  # NOTE: Don't get too crazy here, several aws resources have tight limits on lengths (such as load balancers), in practice we are also relying on users to uniquely identify their cluster names
+  length  = 3
   special = false
-  lower = true
+  lower   = true
+  upper   = false
+  number  = false
 }
 
 #
@@ -41,7 +44,7 @@ module "s3_token_store" {
   source = "./modules/token/s3"
   name   = local.uname
   token  = random_password.token.result
-  tags = merge(local.default_tags, var.tags)
+  tags   = merge(local.default_tags, var.tags)
 }
 
 module "secretsmanager_token_store" {
@@ -49,7 +52,7 @@ module "secretsmanager_token_store" {
   source = "./modules/token/secretsmanager"
   name   = local.uname
   token  = random_password.token.result
-  tags = merge(local.default_tags, var.tags)
+  tags   = merge(local.default_tags, var.tags)
 }
 
 #
@@ -69,7 +72,7 @@ module "cp_lb" {
 #
 module "servers" {
   source               = "./modules/server-nodepool"
-  name                 = local.uname
+  name                 = "${local.uname}-server"
   vpc_id               = var.vpc_id
   subnets              = var.subnets
   ami                  = var.ami
@@ -87,7 +90,6 @@ module "servers" {
   post_userdata = var.post_userdata
 
   tags = merge({
-    "Role" = "Server",
   }, local.default_tags, var.tags)
 }
 
@@ -95,8 +97,8 @@ module "servers" {
 # Shared Cluster Security Group
 #
 resource "aws_security_group" "cluster" {
-  name        = "${var.name}-cluster"
-  description = "Shared ${var.name} cluster security group"
+  name        = "${local.uname}-rke2-cluster"
+  description = "Shared ${local.uname} cluster security group"
   vpc_id      = var.vpc_id
 
   tags = merge({
@@ -105,7 +107,7 @@ resource "aws_security_group" "cluster" {
 }
 
 resource "aws_security_group_rule" "cluster_shared" {
-  description       = "Allow all inbound traffic between cluster nodes"
+  description       = "Allow all inbound traffic between ${local.uname} cluster nodes"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
