@@ -2,6 +2,7 @@
 set -e
 
 export INSTALL_RKE2_TYPE="${type}"
+export INSTALL_RKE2_VERSION="${rke2_version}"
 
 if [ "$${DEBUG}" == 1 ]; then
   set -x

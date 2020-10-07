@@ -114,6 +114,12 @@ variable "post_userdata" {
 #
 # RKE2 Variables
 #
+variable "rke2_version" {
+  description = "Version to use for RKE2 agent nodepool"
+  type        = string
+  default     = "v1.18.9+rke2r1"
+}
+
 variable "rke2_config" {
   description = "Nodepool additional agent configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for a full list of options"
   default     = ""

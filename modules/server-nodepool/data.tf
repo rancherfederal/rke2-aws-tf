@@ -26,7 +26,9 @@ data "template_cloudinit_config" "this" {
       server_dns    = var.cluster_data.server_dns
       token_address = var.cluster_data.token.address
 
-      config = var.rke2_config
+      # Must not use `version` here since that is reserved
+      rke2_version = var.rke2_version
+      config       = var.rke2_config
 
       pre_userdata  = var.pre_userdata
       post_userdata = var.post_userdata

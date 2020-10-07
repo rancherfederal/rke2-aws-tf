@@ -11,6 +11,7 @@ We highly recommend you use this repository as a stepping stone for solutions th
 ## Usage
 
 ```hcl
+# Provision rke2 server(s) and controlplane loadbalancer
 module "rke2" {
   source  = "git::https://github.com/rancherfederal/rke2-aws-tf.git"
   name    = "rke2-quickstart"
@@ -19,6 +20,7 @@ module "rke2" {
   ami     = "ami-###"
 }
 
+# Provision Auto Scaling Group of agents to auto-join cluster
 module "rke2_agents" {
   source  = "git::https://github.com/rancherfederal/rke2-aws-tf.git/modules/agent-nodepool"
   name    = "agents"

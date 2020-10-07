@@ -113,6 +113,12 @@ variable "post_userdata" {
 #
 # RKE2 Variables
 #
+variable "rke2_version" {
+  description = "Version to use for RKE2 server nodepool"
+  type        = string
+  default     = "v1.18.9+rke2r1"
+}
+
 variable "rke2_config" {
   default = ""
 }

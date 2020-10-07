@@ -89,6 +89,7 @@ module "servers" {
   server_supervisor_tg_arn   = module.cp_lb.server_supervisor_tg_arn
 
   cluster_data  = local.cluster_data
+  rke2_version  = var.rke2_version
   rke2_config   = var.rke2_config
   pre_userdata  = var.pre_userdata
   post_userdata = var.post_userdata
