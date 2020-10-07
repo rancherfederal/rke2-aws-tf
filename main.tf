@@ -63,6 +63,10 @@ module "cp_lb" {
   name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
+
+  enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
+  internal                         = var.controlplane_internal
+
   tags = merge({
   }, local.ccm_tags, local.default_tags, var.tags)
 }

@@ -80,8 +80,20 @@ variable "ssh_authorized_keys" {
 }
 
 #
-# Cluster Variables
+# Controlplane Variables
 #
+variable "controlplane_enable_cross_zone_load_balancing" {
+  description = "Toggle between controlplane cross zone load balancing"
+  default     = true
+  type        = bool
+}
+
+variable "controlplane_internal" {
+  description = "Toggle between public or private control plane load balancer"
+  default     = true
+  type        = bool
+}
+
 variable "controlplane_allowed_cidrs" {
   description = "Server pool security group allowed cidr ranges"
   type        = list(string)

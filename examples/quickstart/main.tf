@@ -50,11 +50,12 @@ resource "local_file" "pem" {
 module "rke2" {
   source = "../.."
 
-  cluster_name        = local.cluster_name
-  vpc_id              = data.aws_vpc.default.id
-  subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.rhel7.image_id
-  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
+  cluster_name          = local.cluster_name
+  vpc_id                = data.aws_vpc.default.id
+  subnets               = [data.aws_subnet.default.id]
+  ami                   = data.aws_ami.rhel7.image_id
+  ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
+  controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
 
   tags = local.tags
 }
