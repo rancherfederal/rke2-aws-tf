@@ -3,8 +3,8 @@ provider "aws" {
 }
 
 locals {
-  name       = "cloud-enabled"
-  aws_region = "us-gov-west-1"
+  cluster_name = "cloud-enabled"
+  aws_region   = "us-gov-west-1"
 
   tags = {
     "terraform" = "true",
@@ -99,7 +99,7 @@ resource "tls_private_key" "ssh" {
 }
 
 resource "local_file" "ssh_pem" {
-  filename        = "${local.name}.pem"
+  filename        = "${local.cluster_name}.pem"
   content         = tls_private_key.ssh.private_key_pem
   file_permission = "0600"
 }
@@ -110,7 +110,7 @@ resource "local_file" "ssh_pem" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "rke2-${local.name}"
+  name = "rke2-${local.cluster_name}"
   cidr = "10.88.0.0/16"
 
   azs             = ["${local.aws_region}a", "${local.aws_region}b", "${local.aws_region}c"]
@@ -124,17 +124,17 @@ module "vpc" {
   enable_dns_support   = true
 
   public_subnet_tags = merge({
-    "kubernetes.io/cluster/${local.name}" = "shared"
-    "kubernetes.io/role/elb"              = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
   }, local.tags)
 
   private_subnet_tags = merge({
-    "kubernetes.io/cluster/${local.name}" = "shared"
-    "kubernetes.io/role/internal-elb"     = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
   }, local.tags)
 
   tags = merge({
-    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
   }, local.tags)
 }
 
@@ -144,14 +144,15 @@ module "vpc" {
 module "rke2" {
   source = "../.."
 
-  name    = local.name
-  vpc_id  = module.vpc.vpc_id
-  subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
+  cluster_name = local.cluster_name
+  vpc_id       = module.vpc.vpc_id
+  subnets      = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                 = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
-  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
-  asg                 = { min : 1, max : 5, desired : 1 }
-  instance_type       = "t3a.medium"
+  ami                   = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
+  ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
+  asg                   = { min : 1, max : 5, desired : 1 }
+  instance_type         = "t3a.medium"
+  controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
 
   rke2_config = <<-EOT
 cloud-provider-name: "aws"
@@ -169,7 +170,7 @@ EOT
 module "agents" {
   source = "../../modules/agent-nodepool"
 
-  name    = "agent"
+  name    = "generic"
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
@@ -182,15 +183,15 @@ module "agents" {
   rke2_config = <<-EOT
 cloud-provider-name: "aws"
 node-label:
-  - "name=generic-agent"
+  - "name=generic"
   - "os=rhel8"
 EOT
 
   cluster_data = module.rke2.cluster_data
 
   tags = merge({
-    "k8s.io/cluster-autoscaler/enabled"       = "true"
-    "k8s.io/cluster-autoscaler/${local.name}" = "true"
+    "k8s.io/cluster-autoscaler/enabled"               = "true"
+    "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
   }, local.tags)
 }
 

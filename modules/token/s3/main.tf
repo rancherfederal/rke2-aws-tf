@@ -1,11 +1,5 @@
-resource "random_string" "uid" {
-  length  = 5
-  special = false
-  lower   = true
-}
-
 resource "aws_s3_bucket" "bucket" {
-  bucket = lower("rke2-${var.name}-${random_string.uid.result}")
+  bucket = lower("${var.name}-rke2")
   acl    = "private"
 
   versioning {

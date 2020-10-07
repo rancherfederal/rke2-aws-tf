@@ -1,10 +1,5 @@
-resource "random_string" "uid" {
-  length  = 5
-  special = false
-}
-
 resource "aws_secretsmanager_secret" "cluster" {
-  name = "rke2-${var.name}-${random_string.uid.result}-token"
+  name = "${var.name}-rke2-token"
 
   tags = merge({}, var.tags)
 }

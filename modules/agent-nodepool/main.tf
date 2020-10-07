@@ -1,22 +1,23 @@
 locals {
   tags = merge({
-    "Name"                                           = "${var.cluster_data.name}-${var.name}-nodepool",
+    "Name"                                           = "${var.cluster_data.name}-${var.name}-rke2-nodepool",
     "kubernetes.io/cluster/${var.cluster_data.name}" = "owned"
+    "Role"                                           = "agent",
   }, var.tags)
 }
 
 
 resource "aws_security_group" "this" {
-  name        = "${var.name}-rke2-nodepool"
+  name        = "${var.cluster_data.name}-${var.name}-rke2-nodepool"
   vpc_id      = var.vpc_id
-  description = "${var.name} node pool"
+  description = "${var.cluster_data.name} ${var.name} node pool"
   tags        = local.tags
 }
 
 module "nodepool" {
   source = "../nodepool"
 
-  name                   = "${var.name}-agent"
+  name                   = "${var.cluster_data.name}-${var.name}-agent"
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   instance_type          = var.instance_type
@@ -61,7 +62,7 @@ module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
   source       = "../policies"
-  name         = var.name
+  name         = "${var.cluster_data.name}-${var.name}"
   token_policy = var.cluster_data.token.policy_document
   ccm_policy   = data.aws_iam_policy_document.aws_ccm[0].json
 }

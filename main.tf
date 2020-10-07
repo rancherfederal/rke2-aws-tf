@@ -1,17 +1,34 @@
 locals {
+  # Create a unique cluster name we'll prefix to all resources created and ensure it's lowercase
+  uname = lower("${var.cluster_name}-${random_string.uid.result}")
+
   ccm_tags = {
-    "kubernetes.io/cluster/${var.name}" = "owned"
+    "kubernetes.io/cluster/${local.uname}" = "owned"
+  }
+
+  default_tags = {
+    "ClusterName" = local.uname,
+    "ClusterType" = "rke2",
   }
 
   token_store = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0] : module.s3_token_store[0]
 
   # Map of generated objects required for cluster joining, not intended for user interaction
   cluster_data = {
-    name       = var.name
+    name       = local.uname
     server_dns = module.cp_lb.dns
     cluster_sg = aws_security_group.cluster.id
     token      = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0].token : module.s3_token_store[0].token
   }
+}
+
+resource "random_string" "uid" {
+  # NOTE: Don't get too crazy here, several aws resources have tight limits on lengths (such as load balancers), in practice we are also relying on users to uniquely identify their cluster names
+  length  = 3
+  special = false
+  lower   = true
+  upper   = false
+  number  = false
 }
 
 #
@@ -25,28 +42,33 @@ resource "random_password" "token" {
 module "s3_token_store" {
   count  = var.token_store == "s3" ? 1 : 0
   source = "./modules/token/s3"
-  name   = var.name
+  name   = local.uname
   token  = random_password.token.result
+  tags   = merge(local.default_tags, var.tags)
 }
 
 module "secretsmanager_token_store" {
   count  = var.token_store == "secretsmanager" ? 1 : 0
   source = "./modules/token/secretsmanager"
-  name   = var.name
+  name   = local.uname
   token  = random_password.token.result
+  tags   = merge(local.default_tags, var.tags)
 }
 
 #
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/loadbalancer"
-  name    = var.name
+  source  = "./modules/nlb"
+  name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
-  tags = merge({
 
-  }, local.ccm_tags, var.tags)
+  enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
+  internal                         = var.controlplane_internal
+
+  tags = merge({
+  }, local.ccm_tags, local.default_tags, var.tags)
 }
 
 #
@@ -54,7 +76,7 @@ module "cp_lb" {
 #
 module "servers" {
   source               = "./modules/server-nodepool"
-  name                 = "server"
+  name                 = "${local.uname}-server"
   vpc_id               = var.vpc_id
   subnets              = var.subnets
   ami                  = var.ami
@@ -72,25 +94,24 @@ module "servers" {
   post_userdata = var.post_userdata
 
   tags = merge({
-    "Role" = "Server",
-  }, var.tags)
+  }, local.default_tags, var.tags)
 }
 
 #
 # Shared Cluster Security Group
 #
 resource "aws_security_group" "cluster" {
-  name        = "${var.name}-cluster"
-  description = "Shared ${var.name} cluster security group"
+  name        = "${local.uname}-rke2-cluster"
+  description = "Shared ${local.uname} cluster security group"
   vpc_id      = var.vpc_id
 
   tags = merge({
     "shared" = "true",
-  }, var.tags)
+  }, local.default_tags, var.tags)
 }
 
 resource "aws_security_group_rule" "cluster_shared" {
-  description       = "Allow all inbound traffic between cluster nodes"
+  description       = "Allow all inbound traffic between ${local.uname} cluster nodes"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"

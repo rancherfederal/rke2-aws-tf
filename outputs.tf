@@ -1,6 +1,6 @@
 output "cluster_name" {
   description = "Name of the rke2 cluster"
-  value       = var.name
+  value       = local.uname
 }
 
 output "cluster_data" {

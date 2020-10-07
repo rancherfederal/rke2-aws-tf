@@ -10,6 +10,16 @@ variable "subnets" {
   type = list(string)
 }
 
+variable "internal" {
+  default = true
+  type    = bool
+}
+
+variable "enable_cross_zone_load_balancing" {
+  default = true
+  type    = bool
+}
+
 variable "cp_port" {
   type    = number
   default = 6443

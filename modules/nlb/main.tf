@@ -1,14 +1,12 @@
 resource "aws_lb" "controlplane" {
-  name = "${var.name}-cp"
+  name = "${var.name}-rke2-cp"
 
-  internal                         = false
+  internal                         = var.internal
   load_balancer_type               = "network"
-  enable_cross_zone_load_balancing = true
-
-  subnets = var.subnets
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
+  subnets                          = var.subnets
 
   tags = merge({
-
   }, var.tags)
 }
 
