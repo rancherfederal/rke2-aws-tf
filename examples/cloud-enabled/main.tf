@@ -123,6 +123,7 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
+  # Add in required tags for proper AWS CCM integration
   public_subnet_tags = merge({
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
@@ -150,7 +151,7 @@ module "rke2" {
 
   ami                   = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
-  asg                   = { min : 1, max : 5, desired : 1 }
+  asg                   = { min : 1, max : 5, desired : 3 }
   instance_type         = "t3a.medium"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
 

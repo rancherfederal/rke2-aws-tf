@@ -15,7 +15,9 @@ data "template_cloudinit_config" "this" {
     filename     = "00_download.sh"
     content_type = "text/x-shellscript"
     content = templatefile("${path.module}/../common/download.sh", {
-      type = "agent"
+      # Must not use `version` here since that is reserved
+      rke2_version = var.rke2_version
+      type         = "agent"
     })
   }
 
@@ -26,9 +28,7 @@ data "template_cloudinit_config" "this" {
       server_dns    = var.cluster_data.server_dns
       token_address = var.cluster_data.token.address
 
-      # Must not use `version` here since that is reserved
-      rke2_version = var.rke2_version
-      config       = var.rke2_config
+      config = var.rke2_config
 
       pre_userdata  = var.pre_userdata
       post_userdata = var.post_userdata
