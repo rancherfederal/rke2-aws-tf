@@ -29,3 +29,7 @@ output "server_nodepool_id" {
 output "server_nodepool_name" {
   value = module.servers.nodepool_name
 }
+
+output "server_nodepool_arn" {
+  value = module.servers.nodepool_arn
+}

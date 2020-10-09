@@ -9,3 +9,7 @@ output "nodepool_id" {
 output "nodepool_name" {
   value = module.nodepool.asg_name
 }
+
+output "nodepool_arn" {
+  value = module.nodepool.asg_arn
+}
