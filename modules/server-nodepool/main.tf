@@ -50,9 +50,11 @@ module "nodepool" {
     var.server_supervisor_tg_arn,
   ]
 
+  # TODO: Ideally set this to `var.servers`, but currently blocked by: https://github.com/rancher/rke2/issues/349
+  min_elb_capacity = 1
+
   tags = local.tags
 }
-
 
 #
 # Required IAM Policy for AWS CCM

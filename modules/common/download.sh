@@ -29,15 +29,8 @@ read_os() {
   VERSION=$(grep -oP '(?<=^VERSION_ID=).+' /etc/os-release | tr -d '"')
 }
 
-download_rke2() {
-  # TODO: Install from repo
-  yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
-
-  curl -fsSL https://raw.githubusercontent.com/rancher/rke2/master/install.sh | sh -s -
-}
-
-get_rke2_installer() {
-  curl -fsSL https://raw.githubusercontent.com/rancher/rke2/master/install.sh -o install.sh
+get_installer() {
+  curl -fsSL https://get.rke2.io -o install.sh
   chmod u+x install.sh
 }
 
@@ -53,8 +46,7 @@ install_awscli() {
 
 do_download() {
   read_os
-
-  get_rke2_installer
+  get_installer
 
   case $ID in
   centos)
