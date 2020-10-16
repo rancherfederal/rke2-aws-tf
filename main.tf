@@ -75,14 +75,18 @@ module "cp_lb" {
 # Server Nodepool
 #
 module "servers" {
-  source               = "./modules/server-nodepool"
-  name                 = "${local.uname}-server"
-  vpc_id               = var.vpc_id
-  subnets              = var.subnets
-  ami                  = var.ami
-  ssh_authorized_keys  = var.ssh_authorized_keys
-  iam_instance_profile = var.iam_instance_profile
-  asg                  = var.asg
+  source = "./modules/server-nodepool"
+  name   = "${local.uname}-server"
+
+  vpc_id                = var.vpc_id
+  subnets               = var.subnets
+  ami                   = var.ami
+  ssh_authorized_keys   = var.ssh_authorized_keys
+  iam_instance_profile  = var.iam_instance_profile
+  block_device_mappings = var.block_device_mappings
+
+  # Don't allow the user to do something not recommended within etcd scaling, set max deliberately and only let them control desired
+  asg = { min : 1, max : 7, desired : var.servers }
 
   controlplane_allowed_cirds = var.controlplane_allowed_cidrs
   server_tg_arn              = module.cp_lb.server_tg_arn

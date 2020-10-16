@@ -21,24 +21,32 @@ fatal() {
     exit 1
 }
 
-identify() {
+# The most simple "leader election" you've ever seen in your life
+elect_leader() {
   NODE_TYPE="server"
 
+  # Fetch other instances in ASG
+  instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+  asg_name=$(aws autoscaling describe-auto-scaling-instances --instance-ids "$instance_id" --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
+  instances=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$asg_name" --query 'AutoScalingGroups[*].Instances[*].InstanceId' --output text)
+
+  # Simply identify the leader as the first of the instance ids sorted alphanumerically
+  leader=$(echo $instances | tr ' ' '\n' | sort -n | head -n1)
+  if [[ $instance_id == $leader ]]; then
+    NODE_TYPE="leader"
+  fi
+}
+
+identify() {
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-  LAUNCH_INDEX=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/ami-launch-index)
 
-  if [ $LAUNCH_INDEX -eq 0 ]; then
-    info "Identified potential leader from zero launch index"
-
-    if timeout 1 bash -c "true <>/dev/tcp/${server_dns}/6443" 2>/dev/null
-    then
-      info "API server available, identifying as server joining existing cluster"
-    else
-      info "API server unavailable, identifying as leader"
-      NODE_TYPE="leader"
-    fi
+  if timeout 1 bash -c "true <>/dev/tcp/${server_dns}/6443" 2>/dev/null
+  then
+    info "API server available, identifying as server joining existing cluster"
   else
-    info "Identified as server joining existing cluster from non zero launch index"
+    info "API server unavailable, performing simple leader election"
+
+    elect_leader
   fi
 }
 

@@ -11,9 +11,12 @@ resource "aws_launch_template" "this" {
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
-      volume_size           = var.block_device_mappings.size
-      encrypted             = var.block_device_mappings.encrypted
-      delete_on_termination = true
+      volume_type           = lookup(var.block_device_mappings, "type", null)
+      volume_size           = lookup(var.block_device_mappings, "size", null)
+      iops                  = lookup(var.block_device_mappings, "iops", null)
+      kms_key_id            = lookup(var.block_device_mappings, "kms_key_id", null)
+      encrypted             = lookup(var.block_device_mappings, "encrypted", null)
+      delete_on_termination = lookup(var.block_device_mappings, "delete_on_termination", null)
     }
   }
 
