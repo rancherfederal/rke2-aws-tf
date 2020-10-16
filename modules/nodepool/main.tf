@@ -45,6 +45,8 @@ resource "aws_autoscaling_group" "this" {
   health_check_type = var.health_check_type
   target_group_arns = var.target_group_arns
 
+  min_elb_capacity = var.min_elb_capacity
+
   dynamic "launch_template" {
     for_each = var.spot ? [] : ["spot"]
 

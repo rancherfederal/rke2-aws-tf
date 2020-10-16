@@ -81,3 +81,8 @@ variable "ssh_authorized_keys" {
   type    = list(string)
   default = []
 }
+
+variable "min_elb_capacity" {
+  type = number
+  default = null
+}
