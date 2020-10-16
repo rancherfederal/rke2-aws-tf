@@ -58,19 +58,10 @@ variable "block_device_mappings" {
   }
 }
 
-variable "asg" {
-  description = "Server pool Auto Scaling Group capacities"
-  type = object({
-    min     = number
-    max     = number
-    desired = number
-  })
-
-  default = {
-    min     = 1
-    max     = 9
-    desired = 1
-  }
+variable "servers" {
+  description = "Number of servers to create"
+  type        = number
+  default     = 1
 }
 
 variable "ssh_authorized_keys" {

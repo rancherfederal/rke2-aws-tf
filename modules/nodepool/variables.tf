@@ -50,14 +50,11 @@ variable "vpc_security_group_ids" {
 }
 
 variable "block_device_mappings" {
-  type = object({
-    size      = number
-    encrypted = bool
-  })
+  type = map(string)
 
   default = {
-    "size"      = 30
-    "encrypted" = false
+    "size" = 30
+    type   = "gp2"
   }
 }
 
