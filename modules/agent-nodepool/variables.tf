@@ -117,7 +117,7 @@ variable "post_userdata" {
 variable "rke2_version" {
   description = "Version to use for RKE2 agent nodepool"
   type        = string
-  default     = "v1.18.9+rke2r1"
+  default     = "v1.18.10+rke2r1"
 }
 
 variable "rke2_config" {
