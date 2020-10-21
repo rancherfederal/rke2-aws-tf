@@ -18,10 +18,11 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 resource "aws_s3_bucket_object" "token" {
-  bucket       = aws_s3_bucket.bucket.id
-  key          = "token"
-  content_type = "text/plain"
-  content      = var.token
+  bucket                 = aws_s3_bucket.bucket.id
+  key                    = "token"
+  content_type           = "text/plain"
+  content                = var.token
+  server_side_encryption = "aws:kms"
 }
 
 data "aws_iam_policy_document" "getter" {
@@ -29,7 +30,7 @@ data "aws_iam_policy_document" "getter" {
     effect  = "Allow"
     actions = ["s3:GetObject"]
     resources = [
-      aws_s3_bucket.bucket.arn
+      "${aws_s3_bucket.bucket.arn}/${aws_s3_bucket_object.token.id}",
     ]
   }
 }

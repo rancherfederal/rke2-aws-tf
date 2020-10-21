@@ -55,8 +55,9 @@ cp_wait() {
     if timeout 1 bash -c "true <>/dev/tcp/${server_dns}/6443" 2>/dev/null; then
       info "Cluster is ready"
 
-      # TODO: Fix this
-      sleep 30
+      # Let things settle down for a bit, not required
+      # TODO: Remove this after some testing
+      sleep 10
       break
     fi
     info "Waiting for cluster to be ready..."

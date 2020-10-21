@@ -83,6 +83,6 @@ variable "ssh_authorized_keys" {
 }
 
 variable "min_elb_capacity" {
-  type = number
+  type    = number
   default = null
 }
