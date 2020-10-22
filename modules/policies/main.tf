@@ -26,35 +26,12 @@ resource "aws_iam_instance_profile" "this" {
 }
 
 #
-# Token Policy
+# Role Policies
 #
-resource "aws_iam_policy" "token" {
-  name        = "${var.name}-rke2-get-token"
-  path        = "/"
-  description = "${var.name} rke2 token get"
+resource "aws_iam_role_policy" "this" {
+  count = length(var.policies)
 
-  policy = var.token_policy
-}
-
-resource "aws_iam_policy_attachment" "token" {
-  name       = "${var.name}-rke2-token-attachment"
-  roles      = [aws_iam_role.this.name]
-  policy_arn = aws_iam_policy.token.arn
-}
-
-#
-# $NODE_TYPE Policy
-#
-resource "aws_iam_policy" "ccm" {
-  name        = "${var.name}-rke2-aws-ccm"
-  path        = "/"
-  description = "${var.name} aws ccm policy"
-
-  policy = var.ccm_policy
-}
-
-resource "aws_iam_policy_attachment" "ccm" {
-  name       = "${var.name}-rke2-aws-ccm-attachment"
-  roles      = [aws_iam_role.this.name]
-  policy_arn = aws_iam_policy.ccm.arn
+  name   = var.policies[count.index].name
+  role   = aws_iam_role.this.id
+  policy = var.policies[count.index].policy
 }

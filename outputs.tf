@@ -14,22 +14,22 @@ output "cluster_sg" {
   value       = local.cluster_data.cluster_sg
 }
 
-output "server_dns" {
-  value = local.cluster_data.server_dns
+output "server_url" {
+  value = local.cluster_data.server_url
 }
 
-output "server_sg" {
-  value = module.servers.security_group
-}
-
-output "server_nodepool_id" {
-  value = module.servers.nodepool_id
-}
-
-output "server_nodepool_name" {
-  value = module.servers.nodepool_name
-}
-
-output "server_nodepool_arn" {
-  value = module.servers.nodepool_arn
-}
+//output "server_sg" {
+//  value = module.servers.security_group
+//}
+//
+//output "server_nodepool_id" {
+//  value = module.servers.nodepool_id
+//}
+//
+//output "server_nodepool_name" {
+//  value = module.servers.nodepool_name
+//}
+//
+//output "server_nodepool_arn" {
+//  value = module.servers.nodepool_arn
+//}

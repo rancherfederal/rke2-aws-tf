@@ -1,4 +1,11 @@
-data "template_cloudinit_config" "this" {
+module "init" {
+  source = "../userdata"
+
+  server_url   = var.cluster_data.server_url
+  token_bucket = var.cluster_data.token.bucket
+}
+
+data "template_cloudinit_config" "init" {
   gzip          = true
   base64_encode = true
 
@@ -17,21 +24,13 @@ data "template_cloudinit_config" "this" {
     content = templatefile("${path.module}/../common/download.sh", {
       # Must not use `version` here since that is reserved
       rke2_version = var.rke2_version
-      type         = "server"
+      type         = "agent"
     })
   }
 
   part {
     filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/server.sh", {
-      server_dns    = var.cluster_data.server_dns
-      token_address = var.cluster_data.token.address
-
-      config = var.rke2_config
-
-      pre_userdata  = var.pre_userdata
-      post_userdata = var.post_userdata
-    })
+    content      = module.init.templated
   }
 }

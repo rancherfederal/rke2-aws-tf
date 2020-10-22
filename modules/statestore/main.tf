@@ -1,10 +1,7 @@
 resource "aws_s3_bucket" "bucket" {
-  bucket = lower("${var.name}-rke2")
-  acl    = "private"
-
-  versioning {
-    enabled = true
-  }
+  bucket        = lower("${var.name}-rke2")
+  acl           = "private"
+  force_destroy = true
 
   server_side_encryption_configuration {
     rule {
@@ -31,6 +28,16 @@ data "aws_iam_policy_document" "getter" {
     actions = ["s3:GetObject"]
     resources = [
       "${aws_s3_bucket.bucket.arn}/${aws_s3_bucket_object.token.id}",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "setter" {
+  statement {
+    effect  = "Allow"
+    actions = ["s3:PutObject"]
+    resources = [
+      "${aws_s3_bucket.bucket.arn}/rke2.yaml",
     ]
   }
 }

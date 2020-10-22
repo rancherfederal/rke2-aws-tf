@@ -65,7 +65,7 @@ module "rke2" {
 # Generic Agent Pool
 #
 module "agents" {
-  source = "../../modules/agent-nodepool"
+  source = "../../modules/nodepool"
 
   name                = "generic"
   vpc_id              = data.aws_vpc.default.id

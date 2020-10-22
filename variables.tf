@@ -13,12 +13,6 @@ variable "subnets" {
   type        = list(string)
 }
 
-variable "token_store" {
-  description = "Token store to use, can be either `secretmanager` or `s3`"
-  type        = string
-  default     = "secretsmanager"
-}
-
 variable "tags" {
   description = "Map of tags to add to all resources created"
   default     = {}

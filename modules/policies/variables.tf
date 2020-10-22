@@ -2,12 +2,13 @@ variable "name" {
   type = string
 }
 
-variable "token_policy" {
-  type = string
-}
+variable "policies" {
+  type = list(object({
+    name   = string
+    policy = string
+  }))
 
-variable "ccm_policy" {
-  type = string
+  default = []
 }
 
 variable "tags" {

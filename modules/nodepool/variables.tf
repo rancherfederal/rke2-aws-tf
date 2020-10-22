@@ -15,6 +15,28 @@ variable "tags" {
   default = {}
 }
 
+variable "agent" {
+  description = "Toggle server or agent init, defaults to agent"
+  type        = bool
+  default     = true
+}
+
+variable "cluster_data" {
+  description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module"
+
+  type = object({
+    name       = string
+    server_url = string
+    cluster_sg = string
+    token = object({
+      bucket          = string
+      bucket_arn      = string
+      object          = string
+      policy_document = string
+    })
+  })
+}
+
 variable "userdata" {
   type    = string
   default = ""
@@ -85,4 +107,17 @@ variable "ssh_authorized_keys" {
 variable "min_elb_capacity" {
   type    = number
   default = null
+}
+
+#
+# RKE2 Variables
+#
+variable "rke2_version" {
+  description = "Version to use for RKE2 server nodepool"
+  type        = string
+  default     = "v1.18.9+rke2r1"
+}
+
+variable "rke2_config" {
+  default = ""
 }
