@@ -125,7 +125,7 @@ resource "aws_security_group_rule" "server_cp_supervisor" {
 # IAM Role
 #
 module "iam" {
-  count = var.iam_instance_profile == "" ? 1 : 0
+  //  count = var.iam_instance_profile == "" ? 1 : 0
 
   source = "./modules/policies"
 
@@ -165,14 +165,15 @@ module "servers" {
   ]
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this.rendered
-  iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+  userdata = data.template_cloudinit_config.this.rendered
+  //  iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+  iam_instance_profile = module.iam.iam_instance_profile
 
   # Don't allow the user to do something not recommended within etcd scaling, set max deliberately and only let them control desired
   asg = { min : 1, max : 7, desired : var.servers }
 
   # TODO: Ideally set this to `var.servers`, but currently blocked by: https://github.com/rancher/rke2/issues/349
-  //  min_elb_capacity = 1
+  min_elb_capacity = 1
 
   # RKE2 Variables
   cluster_data = local.cluster_data

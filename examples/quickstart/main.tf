@@ -56,7 +56,7 @@ module "rke2" {
   ami                   = data.aws_ami.rhel7.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
-  servers               = 1
+  servers               = 3
 
   tags = local.tags
 }
@@ -64,19 +64,19 @@ module "rke2" {
 #
 # Generic Agent Pool
 #
-module "agents" {
-  source = "../../modules/nodepool"
-
-  name                = "generic"
-  vpc_id              = data.aws_vpc.default.id
-  subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.rhel7.image_id
-  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
-  asg                 = { min : 1, max : 5, desired : 2 }
-  tags                = local.tags
-
-  cluster_data = module.rke2.cluster_data
-}
+//module "agents" {
+//  source = "../../modules/nodepool"
+//
+//  name                = "generic"
+//  vpc_id              = data.aws_vpc.default.id
+//  subnets             = [data.aws_subnet.default.id]
+//  ami                 = data.aws_ami.rhel7.image_id
+//  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
+//  asg                 = { min : 1, max : 5, desired : 2 }
+//  tags                = local.tags
+//
+//  cluster_data = module.rke2.cluster_data
+//}
 
 // For demonstration only, lock down ssh access in production
 resource "aws_security_group_rule" "quickstart_ssh" {

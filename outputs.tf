@@ -18,18 +18,18 @@ output "server_url" {
   value = local.cluster_data.server_url
 }
 
-//output "server_sg" {
-//  value = module.servers.security_group
-//}
-//
-//output "server_nodepool_id" {
-//  value = module.servers.nodepool_id
-//}
-//
-//output "server_nodepool_name" {
-//  value = module.servers.nodepool_name
-//}
-//
-//output "server_nodepool_arn" {
-//  value = module.servers.nodepool_arn
-//}
+output "server_sg" {
+  value = aws_security_group.server.id
+}
+
+output "server_nodepool_id" {
+  value = module.servers.asg_id
+}
+
+output "server_nodepool_name" {
+  value = module.servers.asg_name
+}
+
+output "server_nodepool_arn" {
+  value = module.servers.asg_arn
+}
