@@ -1,47 +1,21 @@
-locals {
-  fullname = "${var.cluster_data.name}-${var.name}"
-  ccm_tags = {
-    "Name"                                           = "${local.fullname}-rke2-nodepool",
-    "kubernetes.io/cluster/${var.cluster_data.name}" = "owned",
-  }
-}
+locals {}
 
 resource "aws_security_group" "this" {
-  name        = "${local.fullname}-rke2-nodepool"
+  name        = "${var.name}-rke2-nodepool"
   vpc_id      = var.vpc_id
   description = "${var.name} node pool"
-  tags        = merge(local.ccm_tags, var.tags)
-}
-
-#
-# IAM Role
-#
-module "iam" {
-  count = var.iam_instance_profile == null ? 1 : 0
-
-  source = "../policies"
-  name   = local.fullname
-  policies = [
-    {
-      name   = "${local.fullname}-aws-ccm",
-      policy = data.aws_iam_policy_document.aws_ccm[0].json,
-    },
-    {
-      name   = "${local.fullname}-get-token",
-      policy = var.cluster_data.token.policy_document,
-    }
-  ]
+  tags        = merge({}, var.tags)
 }
 
 #
 # Launch template
 #
 resource "aws_launch_template" "this" {
-  name                   = "${local.fullname}-rke2-nodepool"
+  name                   = "${var.name}-rke2-nodepool"
   image_id               = var.ami
   instance_type          = var.instance_type
-  user_data              = var.userdata == "" ? data.template_cloudinit_config.init.rendered : var.userdata
-  vpc_security_group_ids = concat([aws_security_group.this.id], [var.cluster_data.cluster_sg], var.vpc_security_group_ids)
+  user_data              = var.userdata
+  vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
 
   block_device_mappings {
     device_name = "/dev/sda1"
@@ -55,21 +29,18 @@ resource "aws_launch_template" "this" {
     }
   }
 
-  dynamic "iam_instance_profile" {
-    for_each = var.iam_instance_profile == null ? [module.iam[0].iam_instance_profile] : [var.iam_instance_profile]
-    content {
-      name = iam_instance_profile.value
-    }
+  iam_instance_profile {
+    name = var.iam_instance_profile
   }
 
-  tags = merge(local.ccm_tags, var.tags)
+  tags = merge({}, var.tags)
 }
 
 #
 # Autoscaling group
 #
 resource "aws_autoscaling_group" "this" {
-  name                = "${local.fullname}-rke2-nodepool"
+  name                = "${var.name}-rke2-nodepool"
   vpc_zone_identifier = var.subnets
 
   min_size         = var.asg.min
@@ -111,7 +82,7 @@ resource "aws_autoscaling_group" "this" {
   }
 
   dynamic "tag" {
-    for_each = merge(local.ccm_tags, var.tags)
+    for_each = merge({}, var.tags)
 
     content {
       key                 = tag.key

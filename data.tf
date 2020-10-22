@@ -1,5 +1,6 @@
 module "init" {
-  source       = "./modules/userdata"
+  source = "./modules/userdata"
+
   server_url   = module.cp_lb.dns
   token_bucket = module.statestore.bucket
   token_object = module.statestore.token_object
@@ -39,9 +40,23 @@ data "template_cloudinit_config" "this" {
 #
 # IAM Policies
 #
+data "aws_iam_policy_document" "aws_required" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  # "Leader election" requires querying the instances autoscaling group/instances
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+    ]
+  }
+}
+
 # Required IAM Policy for AWS CCM
 data "aws_iam_policy_document" "aws_ccm" {
-  count = var.iam_instance_profile == null ? 1 : 0
+  count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
   statement {
     effect    = "Allow"

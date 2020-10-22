@@ -125,42 +125,55 @@ resource "aws_security_group_rule" "server_cp_supervisor" {
 # IAM Role
 #
 module "iam" {
-  count = var.iam_instance_profile == null ? 1 : 0
+  count = var.iam_instance_profile == "" ? 1 : 0
 
   source = "./modules/policies"
+  name   = "${local.uname}-server"
+}
 
-  name = "${local.uname}-server"
-  policies = [
-    {
-      name   = "${local.uname}-aws-ccm",
-      policy = data.aws_iam_policy_document.aws_ccm[0].json,
-    },
-    {
-      name   = "${local.uname}-get-token",
-      policy = module.statestore.token.policy_document,
-    },
-    {
-      name   = "${local.uname}-put-kubeconfig",
-      policy = module.statestore.kubeconfig_put_policy,
-    }
-  ]
+#
+# Policies
+#
+resource "aws_iam_role_policy" "aws_required" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_required[count.index].json
+}
+
+resource "aws_iam_role_policy" "aws_ccm" {
+  count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
+
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_ccm[count.index].json
+}
+
+resource "aws_iam_role_policy" "get_token" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  role   = module.iam[count.index].role
+  policy = module.statestore.token.policy_document
+}
+
+resource "aws_iam_role_policy" "put_kubeconfig" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  role   = module.iam[count.index].role
+  policy = module.statestore.kubeconfig_put_policy
 }
 
 #
 # Server Nodepool
 #
 module "servers" {
-  depends_on = [module.iam]
-
   source = "./modules/nodepool"
   name   = "server"
 
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   ami                    = var.ami
-  ssh_authorized_keys    = var.ssh_authorized_keys
   block_device_mappings  = var.block_device_mappings
-  vpc_security_group_ids = [aws_security_group.server.id]
+  vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
   target_group_arns = [
     module.cp_lb.server_tg_arn,
     module.cp_lb.server_supervisor_tg_arn,
@@ -168,7 +181,7 @@ module "servers" {
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered
-  iam_instance_profile = var.iam_instance_profile == null ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+  iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow the user to do something not recommended within etcd scaling, set max deliberately and only let them control desired
   asg = { min : 1, max : 7, desired : var.servers }
@@ -176,11 +189,10 @@ module "servers" {
   # TODO: Ideally set this to `var.servers`, but currently blocked by: https://github.com/rancher/rke2/issues/349
   min_elb_capacity = 1
 
-  # RKE2 Variables
-  cluster_data = local.cluster_data
-  rke2_version = var.rke2_version
-  rke2_config  = var.rke2_config
-
-  tags = merge({}, local.default_tags, var.tags)
+  tags = merge({
+    "Name"                                 = "${local.uname}-rke2-server-nodepool",
+    "kubernetes.io/cluster/${local.uname}" = "owned",
+    "Role"                                 = "server",
+  }, local.default_tags, var.tags)
 }
 

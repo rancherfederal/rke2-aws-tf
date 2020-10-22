@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "ec2_access" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.name}-rke2-role"
+  name               = "${var.name}-rke2"
   assume_role_policy = data.aws_iam_policy_document.ec2_access.json
 }
 
@@ -21,17 +21,6 @@ resource "aws_iam_role" "this" {
 # Profile
 #
 resource "aws_iam_instance_profile" "this" {
-  name = "${var.name}-rke2-profile"
+  name = "${var.name}-rke2"
   role = aws_iam_role.this.name
-}
-
-#
-# Role Policies
-#
-resource "aws_iam_role_policy" "this" {
-  count = length(var.policies)
-
-  name   = var.policies[count.index].name
-  role   = aws_iam_role.this.id
-  policy = var.policies[count.index].policy
 }

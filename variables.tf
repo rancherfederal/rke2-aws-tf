@@ -36,7 +36,7 @@ variable "ami" {
 variable "iam_instance_profile" {
   description = "Server pool IAM Instance Profile, created if left blank"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "block_device_mappings" {
@@ -113,3 +113,8 @@ variable "post_userdata" {
   default     = ""
 }
 
+variable "enable_ccm" {
+  description = "Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present"
+  type        = bool
+  default     = false
+}
