@@ -16,38 +16,15 @@ resource "aws_security_group" "this" {
 #
 # IAM Role
 #
-# Required IAM Policy for AWS CCM
-data "aws_iam_policy_document" "aws_ccm" {
-  statement {
-    effect    = "Allow"
-    resources = ["*"]
-    actions = [
-      "ec2:DescribeInstances",
-      "ec2:DescribeRegions",
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetRepositoryPolicy",
-      "ecr:DescribeRepositories",
-      "ecr:ListImages",
-      "ecr:BatchGetImage",
-      "autoscaling:DescribeTags",
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeTags",
-    ]
-  }
-}
-
 module "iam" {
-  count = var.iam_instance_profile == "" ? 1 : 0
+  count = var.iam_instance_profile == null ? 1 : 0
 
   source = "../policies"
   name   = local.fullname
   policies = [
     {
       name   = "${local.fullname}-aws-ccm",
-      policy = data.aws_iam_policy_document.aws_ccm.json,
+      policy = data.aws_iam_policy_document.aws_ccm[0].json,
     },
     {
       name   = "${local.fullname}-get-token",
@@ -79,7 +56,7 @@ resource "aws_launch_template" "this" {
   }
 
   dynamic "iam_instance_profile" {
-    for_each = var.iam_instance_profile == "" ? [module.iam[0].iam_instance_profile] : [var.iam_instance_profile]
+    for_each = var.iam_instance_profile == null ? [module.iam[0].iam_instance_profile] : [var.iam_instance_profile]
     content {
       name = iam_instance_profile.value
     }

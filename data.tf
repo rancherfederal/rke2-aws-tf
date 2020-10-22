@@ -41,7 +41,7 @@ data "template_cloudinit_config" "this" {
 #
 # Required IAM Policy for AWS CCM
 data "aws_iam_policy_document" "aws_ccm" {
-  count = var.iam_instance_profile == "" ? 1 : 0
+  count = var.iam_instance_profile == null ? 1 : 0
 
   statement {
     effect    = "Allow"

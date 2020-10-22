@@ -53,7 +53,7 @@ variable "ami" {
 
 variable "iam_instance_profile" {
   type    = string
-  default = ""
+  default = null
 }
 
 variable "health_check_type" {
