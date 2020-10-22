@@ -94,3 +94,9 @@ variable "enable_ccm" {
   type        = bool
   default     = false
 }
+
+variable "enable_autoscaler" {
+  description = "Toggle configure the nodepool for cluster autoscaler, this will ensure the appropriate IAM policies are present, you are still responsible for ensuring cluster autoscaler is installed"
+  type        = bool
+  default     = false
+}

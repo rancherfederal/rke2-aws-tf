@@ -22,3 +22,22 @@ data "aws_iam_policy_document" "aws_ccm" {
     ]
   }
 }
+
+# Required IAM Policy for AWS Cluster Autoscaler
+data "aws_iam_policy_document" "aws_autoscaler" {
+  count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
+
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "ec2:DescribeLaunchTemplateVersions"
+    ]
+  }
+}
