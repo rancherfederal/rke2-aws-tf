@@ -33,3 +33,13 @@ output "server_nodepool_name" {
 output "server_nodepool_arn" {
   value = module.servers.asg_arn
 }
+
+output "iam_role" {
+  description = "IAM role of server nodes"
+  value       = module.iam.role
+}
+
+output "iam_instance_profile" {
+  description = "IAM instance profile attached to server nodes"
+  value       = module.iam.iam_instance_profile
+}

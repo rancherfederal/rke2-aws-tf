@@ -107,3 +107,48 @@ Optional policies have the option of being created by default, but are specified
     * [agents](./modules/agent-nodepool/data.tf#2)
 * AWS Cluster Autoscaler: will configure `rke2` to autoscale based off kubernetes resource requests
     * [agents](./modules/agent-nodepool/data.tf#27)
+    
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.13, < 0.14 |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| ami | Server pool ami | `string` | n/a | yes |
+| block\_device\_mappings | Server pool block device mapping configuration | <pre>object({<br>    size      = number<br>    encrypted = bool<br>  })</pre> | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no |
+| cluster\_name | Name of the rkegov cluster to create | `string` | n/a | yes |
+| controlplane\_allowed\_cidrs | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| controlplane\_enable\_cross\_zone\_load\_balancing | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
+| controlplane\_internal | Toggle between public or private control plane load balancer | `bool` | `true` | no |
+| enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
+| iam\_instance\_profile | Server pool IAM Instance Profile, created if left blank | `string` | `""` | no |
+| instance\_type | Server pool instance type | `string` | `"t3a.medium"` | no |
+| post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
+| pre\_userdata | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
+| rke2\_config | Server pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/server_config for full list of options | `string` | `""` | no |
+| rke2\_version | Version to use for RKE2 server nodes | `string` | `"v1.18.10+rke2r1"` | no |
+| servers | Number of servers to create | `number` | `1` | no |
+| ssh\_authorized\_keys | Server pool list of public keys to add as authorized ssh keys | `list(string)` | `[]` | no |
+| subnets | List of subnet IDs to create resources in | `list(string)` | n/a | yes |
+| tags | Map of tags to add to all resources created | `map(string)` | `{}` | no |
+| vpc\_id | VPC ID to create resources in | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| cluster\_data | Map of cluster data required by agent pools for joining cluster, do not modify this |
+| cluster\_name | Name of the rke2 cluster |
+| cluster\_sg | Security group shared by cluster nodes, this is different than nodepool security groups |
+| iam\_instance\_profile | IAM instance profile attached to server nodes |
+| iam\_role | IAM role of server nodes |
+| server\_nodepool\_arn | n/a |
+| server\_nodepool\_id | n/a |
+| server\_nodepool\_name | n/a |
+| server\_sg | n/a |
+| server\_url | n/a |
+
