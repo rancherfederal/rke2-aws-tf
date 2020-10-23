@@ -13,12 +13,6 @@ variable "subnets" {
   type        = list(string)
 }
 
-variable "token_store" {
-  description = "Token store to use, can be either `secretmanager` or `s3`"
-  type        = string
-  default     = "secretsmanager"
-}
-
 variable "tags" {
   description = "Map of tags to add to all resources created"
   default     = {}
@@ -62,6 +56,12 @@ variable "servers" {
   description = "Number of servers to create"
   type        = number
   default     = 1
+}
+
+variable "spot" {
+  description = "Toggle spot requests for server pool"
+  type        = bool
+  default     = false
 }
 
 variable "ssh_authorized_keys" {
@@ -119,3 +119,8 @@ variable "post_userdata" {
   default     = ""
 }
 
+variable "enable_ccm" {
+  description = "Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present"
+  type        = bool
+  default     = false
+}

@@ -1,3 +1,12 @@
+locals {}
+
+resource "aws_security_group" "this" {
+  name        = "${var.name}-rke2-nodepool"
+  vpc_id      = var.vpc_id
+  description = "${var.name} node pool"
+  tags        = merge({}, var.tags)
+}
+
 #
 # Launch template
 #
@@ -6,7 +15,7 @@ resource "aws_launch_template" "this" {
   image_id               = var.ami
   instance_type          = var.instance_type
   user_data              = var.userdata
-  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
 
   block_device_mappings {
     device_name = "/dev/sda1"
@@ -20,14 +29,11 @@ resource "aws_launch_template" "this" {
     }
   }
 
-  dynamic "iam_instance_profile" {
-    for_each = var.iam_instance_profile != "" ? [var.iam_instance_profile] : []
-    content {
-      name = iam_instance_profile.value
-    }
+  iam_instance_profile {
+    name = var.iam_instance_profile
   }
 
-  tags = var.tags
+  tags = merge({}, var.tags)
 }
 
 #
@@ -76,7 +82,9 @@ resource "aws_autoscaling_group" "this" {
   }
 
   dynamic "tag" {
-    for_each = var.tags
+    for_each = merge({
+      "Name" = "${var.name}-rke2-nodepool"
+    }, var.tags)
 
     content {
       key                 = tag.key

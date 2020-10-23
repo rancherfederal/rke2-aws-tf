@@ -64,12 +64,6 @@ variable "asg" {
     max     = number
     desired = number
   })
-
-  default = {
-    min     = 1
-    max     = 3
-    desired = 2
-  }
 }
 
 variable "spot" {
@@ -77,12 +71,7 @@ variable "spot" {
   type    = bool
 }
 
-variable "ssh_authorized_keys" {
-  type    = list(string)
-  default = []
-}
-
 variable "min_elb_capacity" {
-  type = number
+  type    = number
   default = null
 }

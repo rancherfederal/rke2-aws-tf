@@ -4,70 +4,59 @@ variable "name" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID to create nodepool in"
+  description = "VPC ID to create resources in"
   type        = string
 }
 
 variable "subnets" {
-  description = "List of subnet IDs to create nodepool in"
+  description = "List of subnet IDs to create resources in"
   type        = list(string)
 }
 
-variable "cluster_data" {
-  description = "Required data for joining to an existing rke2 cluster, sourced from main rke2 module"
+variable "instance_type" {
+  description = "Node pool instance type"
+  default     = "t3.medium"
+}
 
-  type = object({
-    name       = string
-    server_dns = string
-    cluster_sg = string
-    token = object({
-      address         = string
-      policy_document = string
-    })
-  })
+variable "ami" {
+  description = "Node pool ami"
+  type        = string
+  default     = ""
 }
 
 variable "tags" {
-  description = "Map of tags to add to all resources created"
+  description = "Map of additional tags to add to all resources created"
   type        = map(string)
   default     = {}
 }
 
 #
-# Server Instance Variables
+# Nodepool Variables
 #
-variable "ami" {
-  description = "Nodepool ami"
-  type        = string
-}
-
-variable "instance_type" {
-  description = "Nodepool instance type"
-  type        = string
-  default     = "t3.medium"
-}
-
 variable "iam_instance_profile" {
-  description = "Nodepool IAM Instance Profile, created if left empty"
+  description = "Node pool IAM Instance Profile, created if node specified"
   type        = string
   default     = ""
 }
 
+variable "ssh_authorized_keys" {
+  description = "Node pool list of public keys to add as authorized ssh keys, not required"
+  type        = list(string)
+  default     = []
+}
+
 variable "block_device_mappings" {
-  description = "Nodepool block device mapping configuration"
-  type = object({
-    size      = number
-    encrypted = bool
-  })
+  description = "Node pool block device mapping configuration"
+  type        = map(string)
 
   default = {
-    "size"      = 30
-    "encrypted" = false
+    "size" = 30
+    type   = "gp2"
   }
 }
 
 variable "asg" {
-  description = "Nodepool Auto Scaling Group capacities"
+  description = "Node pool AutoScalingGroup scaling definition"
   type = object({
     min     = number
     max     = number
@@ -76,51 +65,55 @@ variable "asg" {
 
   default = {
     min     = 1
-    max     = 3
-    desired = 2
+    max     = 10
+    desired = 1
   }
 }
 
 variable "spot" {
-  default = false
-  type    = bool
-}
-
-variable "ssh_authorized_keys" {
-  description = "Nodepool list of public keys to add as authorized ssh keys"
-  type        = list(string)
-  default     = []
-}
-
-variable "extra_security_groups" {
-  description = "Nodepool list of extra security groups to add"
-  type        = list(string)
-  default     = []
-}
-
-#
-# Custom Userdata
-#
-variable "pre_userdata" {
-  description = "Custom userdata to run immediately before rke2 agent attempts to join cluster, after required rke2, dependencies are installed"
-  default     = ""
-}
-
-variable "post_userdata" {
-  description = "Custom userdata to run immediately after rke2 agent attempts to join cluster"
-  default     = ""
+  description = "Toggle spot requests for node pool"
+  type        = bool
+  default     = false
 }
 
 #
 # RKE2 Variables
 #
+variable "cluster_data" {
+  description = "Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module, do NOT modify"
+
+  type = object({
+    name       = string
+    server_url = string
+    cluster_sg = string
+    token = object({
+      bucket          = string
+      bucket_arn      = string
+      object          = string
+      policy_document = string
+    })
+  })
+}
+
 variable "rke2_version" {
-  description = "Version to use for RKE2 agent nodepool"
+  description = "Version to use for RKE2 server nodepool"
   type        = string
   default     = "v1.18.10+rke2r1"
 }
 
 variable "rke2_config" {
-  description = "Nodepool additional agent configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for a full list of options"
+  description = "Node pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for full list of options"
   default     = ""
+}
+
+variable "enable_ccm" {
+  description = "Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present"
+  type        = bool
+  default     = false
+}
+
+variable "enable_autoscaler" {
+  description = "Toggle configure the nodepool for cluster autoscaler, this will ensure the appropriate IAM policies are present, you are still responsible for ensuring cluster autoscaler is installed"
+  type        = bool
+  default     = false
 }

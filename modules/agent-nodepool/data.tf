@@ -1,37 +1,43 @@
-data "template_cloudinit_config" "this" {
-  gzip          = true
-  base64_encode = true
+# Required IAM Policy for AWS CCM
+data "aws_iam_policy_document" "aws_ccm" {
+  count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
-  # Main cloud-init config file
-  part {
-    filename     = "cloud-config.yaml"
-    content_type = "text/cloud-config"
-    content = templatefile("${path.module}/files/cloud-config.yaml", {
-      ssh_authorized_keys = var.ssh_authorized_keys
-    })
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeRegions",
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetRepositoryPolicy",
+      "ecr:DescribeRepositories",
+      "ecr:ListImages",
+      "ecr:BatchGetImage",
+      "autoscaling:DescribeTags",
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+    ]
   }
+}
 
-  part {
-    filename     = "00_download.sh"
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/../common/download.sh", {
-      # Must not use `version` here since that is reserved
-      rke2_version = var.rke2_version
-      type         = "agent"
-    })
-  }
+# Required IAM Policy for AWS Cluster Autoscaler
+data "aws_iam_policy_document" "aws_autoscaler" {
+  count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
 
-  part {
-    filename     = "01_rke2.sh"
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/files/agent.sh", {
-      server_dns    = var.cluster_data.server_dns
-      token_address = var.cluster_data.token.address
-
-      config = var.rke2_config
-
-      pre_userdata  = var.pre_userdata
-      post_userdata = var.post_userdata
-    })
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeTags",
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "ec2:DescribeLaunchTemplateVersions"
+    ]
   }
 }

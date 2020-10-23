@@ -22,13 +22,23 @@ data "aws_subnet" "default" {
   default_for_az    = true
 }
 
-data "aws_ami" "rhel7" {
+data "aws_ami" "ubuntu" {
+  owners      = ["513442679011"] # owner is for aws gov cloud
   most_recent = true
-  owners      = ["219670896067"]
 
   filter {
     name   = "name"
-    values = ["RHEL-7*"]
+    values = ["ubuntu*-20.04*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 }
 
@@ -53,10 +63,9 @@ module "rke2" {
   cluster_name          = local.cluster_name
   vpc_id                = data.aws_vpc.default.id
   subnets               = [data.aws_subnet.default.id]
-  ami                   = data.aws_ami.rhel7.image_id
+  ami                   = data.aws_ami.ubuntu.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
-  servers               = 1
 
   tags = local.tags
 }
@@ -70,9 +79,8 @@ module "agents" {
   name                = "generic"
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.rhel7.image_id
+  ami                 = data.aws_ami.ubuntu.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
-  asg                 = { min : 1, max : 5, desired : 2 }
   tags                = local.tags
 
   cluster_data = module.rke2.cluster_data

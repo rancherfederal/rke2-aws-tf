@@ -2,23 +2,19 @@ locals {
   # Create a unique cluster name we'll prefix to all resources created and ensure it's lowercase
   uname = lower("${var.cluster_name}-${random_string.uid.result}")
 
+  default_tags = {
+    "ClusterType" = "rke2",
+  }
+
   ccm_tags = {
     "kubernetes.io/cluster/${local.uname}" = "owned"
   }
 
-  default_tags = {
-    "ClusterName" = local.uname,
-    "ClusterType" = "rke2",
-  }
-
-  token_store = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0] : module.s3_token_store[0]
-
-  # Map of generated objects required for cluster joining, not intended for user interaction
   cluster_data = {
     name       = local.uname
-    server_dns = module.cp_lb.dns
+    server_url = module.cp_lb.dns
     cluster_sg = aws_security_group.cluster.id
-    token      = var.token_store == "secretsmanager" ? module.secretsmanager_token_store[0].token : module.s3_token_store[0].token
+    token      = module.statestore.token
   }
 }
 
@@ -28,7 +24,7 @@ resource "random_string" "uid" {
   special = false
   lower   = true
   upper   = false
-  number  = false
+  number  = true
 }
 
 #
@@ -39,17 +35,8 @@ resource "random_password" "token" {
   special = false
 }
 
-module "s3_token_store" {
-  count  = var.token_store == "s3" ? 1 : 0
-  source = "./modules/token/s3"
-  name   = local.uname
-  token  = random_password.token.result
-  tags   = merge(local.default_tags, var.tags)
-}
-
-module "secretsmanager_token_store" {
-  count  = var.token_store == "secretsmanager" ? 1 : 0
-  source = "./modules/token/secretsmanager"
+module "statestore" {
+  source = "./modules/statestore"
   name   = local.uname
   token  = random_password.token.result
   tags   = merge(local.default_tags, var.tags)
@@ -67,44 +54,14 @@ module "cp_lb" {
   enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
   internal                         = var.controlplane_internal
 
-  tags = merge({
-  }, local.ccm_tags, local.default_tags, var.tags)
+  tags = merge({}, local.default_tags, local.default_tags, var.tags)
 }
 
 #
-# Server Nodepool
+# Security Groups
 #
-module "servers" {
-  source = "./modules/server-nodepool"
-  name   = "${local.uname}-server"
 
-  vpc_id                = var.vpc_id
-  subnets               = var.subnets
-  ami                   = var.ami
-  ssh_authorized_keys   = var.ssh_authorized_keys
-  iam_instance_profile  = var.iam_instance_profile
-  block_device_mappings = var.block_device_mappings
-
-  # Don't allow the user to do something not recommended within etcd scaling, set max deliberately and only let them control desired
-  asg = { min : 1, max : 7, desired : var.servers }
-
-  controlplane_allowed_cirds = var.controlplane_allowed_cidrs
-  server_tg_arn              = module.cp_lb.server_tg_arn
-  server_supervisor_tg_arn   = module.cp_lb.server_supervisor_tg_arn
-
-  cluster_data  = local.cluster_data
-  rke2_version  = var.rke2_version
-  rke2_config   = var.rke2_config
-  pre_userdata  = var.pre_userdata
-  post_userdata = var.post_userdata
-
-  tags = merge({
-  }, local.default_tags, var.tags)
-}
-
-#
 # Shared Cluster Security Group
-#
 resource "aws_security_group" "cluster" {
   name        = "${local.uname}-rke2-cluster"
   description = "Shared ${local.uname} cluster security group"
@@ -134,4 +91,109 @@ resource "aws_security_group_rule" "cluster_egress" {
   security_group_id = aws_security_group.cluster.id
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
+}
+
+# Server Security Group
+resource "aws_security_group" "server" {
+  name        = "${local.uname}-rke2-server"
+  vpc_id      = var.vpc_id
+  description = "${local.uname} rke2 server node pool"
+  tags        = merge(local.default_tags, var.tags)
+}
+
+resource "aws_security_group_rule" "server_cp" {
+  from_port         = 6443
+  to_port           = 6443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.server.id
+  type              = "ingress"
+  cidr_blocks       = var.controlplane_allowed_cidrs
+}
+
+resource "aws_security_group_rule" "server_cp_supervisor" {
+  from_port         = 9345
+  to_port           = 9345
+  protocol          = "tcp"
+  security_group_id = aws_security_group.server.id
+  type              = "ingress"
+  cidr_blocks       = var.controlplane_allowed_cidrs
+}
+
+#
+# IAM Role
+#
+module "iam" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  source = "./modules/policies"
+  name   = "${local.uname}-rke2-server"
+  tags   = merge({}, local.default_tags, var.tags)
+}
+
+#
+# Policies
+#
+resource "aws_iam_role_policy" "aws_required" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-aws-introspect"
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_required[count.index].json
+}
+
+resource "aws_iam_role_policy" "aws_ccm" {
+  count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-aws-ccm"
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_ccm[count.index].json
+}
+
+resource "aws_iam_role_policy" "get_token" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-get-token"
+  role   = module.iam[count.index].role
+  policy = module.statestore.token.policy_document
+}
+
+resource "aws_iam_role_policy" "put_kubeconfig" {
+  count = var.iam_instance_profile == "" ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-put-kubeconfig"
+  role   = module.iam[count.index].role
+  policy = module.statestore.kubeconfig_put_policy
+}
+
+#
+# Server Nodepool
+#
+module "servers" {
+  source = "./modules/nodepool"
+  name   = "${local.uname}-server"
+
+  vpc_id                 = var.vpc_id
+  subnets                = var.subnets
+  ami                    = var.ami
+  block_device_mappings  = var.block_device_mappings
+  vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
+  spot                   = var.spot
+  target_group_arns = [
+    module.cp_lb.server_tg_arn,
+    module.cp_lb.server_supervisor_tg_arn,
+  ]
+
+  # Overrideable variables
+  userdata             = data.template_cloudinit_config.this.rendered
+  iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+
+  # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
+  asg = { min : 1, max : 7, desired : var.servers }
+
+  # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
+  min_elb_capacity = 1
+
+  tags = merge({
+    "Role" = "server",
+  }, local.ccm_tags, var.tags)
 }

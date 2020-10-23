@@ -14,22 +14,32 @@ output "cluster_sg" {
   value       = local.cluster_data.cluster_sg
 }
 
-output "server_dns" {
-  value = local.cluster_data.server_dns
+output "server_url" {
+  value = local.cluster_data.server_url
 }
 
 output "server_sg" {
-  value = module.servers.security_group
+  value = aws_security_group.server.id
 }
 
 output "server_nodepool_id" {
-  value = module.servers.nodepool_id
+  value = module.servers.asg_id
 }
 
 output "server_nodepool_name" {
-  value = module.servers.nodepool_name
+  value = module.servers.asg_name
 }
 
 output "server_nodepool_arn" {
-  value = module.servers.nodepool_arn
+  value = module.servers.asg_arn
+}
+
+output "iam_role" {
+  description = "IAM role of server nodes"
+  value       = var.iam_instance_profile == "" ? module.iam[0].role : var.iam_instance_profile
+}
+
+output "iam_instance_profile" {
+  description = "IAM instance profile attached to server nodes"
+  value       = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 }
