@@ -26,6 +26,12 @@ variable "config" {
   default     = ""
 }
 
+variable "ccm" {
+  description = "Toggle cloud controller manager"
+  type        = bool
+  default     = false
+}
+
 #
 # Custom Userdata
 #

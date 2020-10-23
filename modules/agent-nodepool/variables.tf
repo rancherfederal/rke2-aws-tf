@@ -70,6 +70,12 @@ variable "asg" {
   }
 }
 
+variable "spot" {
+  description = "Toggle spot requests for node pool"
+  type        = bool
+  default     = false
+}
+
 #
 # RKE2 Variables
 #

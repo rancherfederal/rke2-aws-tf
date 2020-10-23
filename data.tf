@@ -4,6 +4,7 @@ module "init" {
   server_url   = module.cp_lb.dns
   token_bucket = module.statestore.bucket
   token_object = module.statestore.token_object
+  ccm          = var.enable_ccm
   agent        = false
 }
 

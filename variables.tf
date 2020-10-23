@@ -58,6 +58,12 @@ variable "servers" {
   default     = 1
 }
 
+variable "spot" {
+  description = "Toggle spot requests for server pool"
+  type        = bool
+  default     = false
+}
+
 variable "ssh_authorized_keys" {
   description = "Server pool list of public keys to add as authorized ssh keys"
   type        = list(string)

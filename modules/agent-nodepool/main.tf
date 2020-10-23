@@ -1,5 +1,18 @@
 locals {
   name = "${var.cluster_data.name}-${var.name}"
+
+  default_tags = {
+    "ClusterType" = "rke2",
+  }
+
+  ccm_tags = {
+    "kubernetes.io/cluster/${var.cluster_data.name}" = "owned",
+  }
+
+  autoscaler_tags = {
+    "k8s.io/cluster-autoscaler/enabled"                  = var.enable_autoscaler,
+    "k8s.io/cluster-autoscaler/${var.cluster_data.name}" = var.enable_autoscaler,
+  }
 }
 
 #
@@ -9,12 +22,14 @@ module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
   source = "../policies"
-  name   = "${local.name}-agent"
+  name   = "${local.name}-rke2-agent"
+  tags   = merge({}, local.default_tags, var.tags)
 }
 
 resource "aws_iam_role_policy" "aws_ccm" {
   count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
+  name   = "${local.name}-rke2-agent-aws-ccm"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_ccm[count.index].json
 }
@@ -22,6 +37,7 @@ resource "aws_iam_role_policy" "aws_ccm" {
 resource "aws_iam_role_policy" "aws_autoscaler" {
   count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
 
+  name   = "${local.name}-rke2-agent-aws-autoscaler"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_autoscaler[count.index].json
 }
@@ -29,6 +45,7 @@ resource "aws_iam_role_policy" "aws_autoscaler" {
 resource "aws_iam_role_policy" "get_token" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
+  name   = "${local.name}-rke2-agent-aws-get-token"
   role   = module.iam[count.index].role
   policy = var.cluster_data.token.policy_document
 }
@@ -42,6 +59,7 @@ module "init" {
   server_url   = var.cluster_data.server_url
   token_bucket = var.cluster_data.token.bucket
   token_object = var.cluster_data.token.object
+  ccm          = var.enable_ccm
   agent        = true
 }
 
@@ -80,7 +98,7 @@ data "template_cloudinit_config" "init" {
 #
 module "nodepool" {
   source = "../nodepool"
-  name   = local.name
+  name   = "${local.name}-agent"
 
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
@@ -90,10 +108,9 @@ module "nodepool" {
   userdata               = data.template_cloudinit_config.init.rendered
   iam_instance_profile   = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                    = var.asg
+  spot                   = var.spot
 
   tags = merge({
-    "Name"                                           = "${local.name}-rke2-agent-nodepool",
-    "kubernetes.io/cluster/${var.cluster_data.name}" = "owned",
-    "Role"                                           = "agent",
-  }, var.tags)
+    "Role" = "agent",
+  }, local.default_tags, local.ccm_tags, local.autoscaler_tags, var.tags)
 }

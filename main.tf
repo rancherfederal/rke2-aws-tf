@@ -2,13 +2,12 @@ locals {
   # Create a unique cluster name we'll prefix to all resources created and ensure it's lowercase
   uname = lower("${var.cluster_name}-${random_string.uid.result}")
 
-  ccm_tags = {
-    "kubernetes.io/cluster/${local.uname}" = "owned"
+  default_tags = {
+    "ClusterType" = "rke2",
   }
 
-  default_tags = {
-    "ClusterName" = local.uname,
-    "ClusterType" = "rke2",
+  ccm_tags = {
+    "kubernetes.io/cluster/${local.uname}" = "owned"
   }
 
   cluster_data = {
@@ -25,7 +24,7 @@ resource "random_string" "uid" {
   special = false
   lower   = true
   upper   = false
-  number  = false
+  number  = true
 }
 
 #
@@ -55,8 +54,7 @@ module "cp_lb" {
   enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
   internal                         = var.controlplane_internal
 
-  tags = merge({
-  }, local.ccm_tags, local.default_tags, var.tags)
+  tags = merge({}, local.default_tags, local.default_tags, var.tags)
 }
 
 #
@@ -128,7 +126,8 @@ module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
   source = "./modules/policies"
-  name   = "${local.uname}-server"
+  name   = "${local.uname}-rke2-server"
+  tags   = merge({}, local.default_tags, var.tags)
 }
 
 #
@@ -137,6 +136,7 @@ module "iam" {
 resource "aws_iam_role_policy" "aws_required" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
+  name   = "${local.uname}-rke2-server-aws-introspect"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_required[count.index].json
 }
@@ -144,6 +144,7 @@ resource "aws_iam_role_policy" "aws_required" {
 resource "aws_iam_role_policy" "aws_ccm" {
   count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
+  name   = "${local.uname}-rke2-server-aws-ccm"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_ccm[count.index].json
 }
@@ -151,6 +152,7 @@ resource "aws_iam_role_policy" "aws_ccm" {
 resource "aws_iam_role_policy" "get_token" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
+  name   = "${local.uname}-rke2-server-get-token"
   role   = module.iam[count.index].role
   policy = module.statestore.token.policy_document
 }
@@ -158,6 +160,7 @@ resource "aws_iam_role_policy" "get_token" {
 resource "aws_iam_role_policy" "put_kubeconfig" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
+  name   = "${local.uname}-rke2-server-put-kubeconfig"
   role   = module.iam[count.index].role
   policy = module.statestore.kubeconfig_put_policy
 }
@@ -167,13 +170,14 @@ resource "aws_iam_role_policy" "put_kubeconfig" {
 #
 module "servers" {
   source = "./modules/nodepool"
-  name   = "server"
+  name   = "${local.uname}-server"
 
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   ami                    = var.ami
   block_device_mappings  = var.block_device_mappings
   vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
+  spot                   = var.spot
   target_group_arns = [
     module.cp_lb.server_tg_arn,
     module.cp_lb.server_supervisor_tg_arn,
@@ -183,16 +187,13 @@ module "servers" {
   userdata             = data.template_cloudinit_config.this.rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
-  # Don't allow the user to do something not recommended within etcd scaling, set max deliberately and only let them control desired
+  # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
   asg = { min : 1, max : 7, desired : var.servers }
 
-  # TODO: Ideally set this to `var.servers`, but currently blocked by: https://github.com/rancher/rke2/issues/349
+  # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
   min_elb_capacity = 1
 
   tags = merge({
-    "Name"                                 = "${local.uname}-rke2-server-nodepool",
-    "kubernetes.io/cluster/${local.uname}" = "owned",
-    "Role"                                 = "server",
-  }, local.default_tags, var.tags)
+    "Role" = "server",
+  }, local.ccm_tags, var.tags)
 }
-

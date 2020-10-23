@@ -16,10 +16,10 @@ output "nodepool_id" {
 
 output "iam_role" {
   description = "IAM role of node pool"
-  value       = module.iam.role
+  value       = var.iam_instance_profile == "" ? module.iam[0].role : var.iam_instance_profile
 }
 
 output "iam_instance_profile" {
   description = "IAM instance profile attached to nodes in nodepool"
-  value       = module.iam.iam_instance_profile
+  value       = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 }

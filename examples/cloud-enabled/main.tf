@@ -125,17 +125,17 @@ module "vpc" {
 
   # Add in required tags for proper AWS CCM integration
   public_subnet_tags = merge({
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                      = "1"
+    "kubernetes.io/cluster/${module.rke2.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                            = "1"
   }, local.tags)
 
   private_subnet_tags = merge({
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"             = "1"
+    "kubernetes.io/cluster/${module.rke2.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"                   = "1"
   }, local.tags)
 
   tags = merge({
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${module.rke2.cluster_name}" = "shared"
   }, local.tags)
 }
 
@@ -151,12 +151,14 @@ module "rke2" {
 
   ami                   = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
-  servers               = 3
   instance_type         = "t3a.medium"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
+  servers               = 1
+
+  # Enable AWS Cloud Controller Manager
+  enable_ccm = true
 
   rke2_config = <<-EOT
-cloud-provider-name: "aws"
 node-label:
   - "name=server"
   - "os=rhel8"
@@ -181,8 +183,11 @@ module "agents" {
   asg                 = { min : 1, max : 10, desired : 2 }
   instance_type       = "t3a.large"
 
+  # Enable AWS Cloud Controller Manager and Cluster Autoscaler
+  enable_ccm        = true
+  enable_autoscaler = true
+
   rke2_config = <<-EOT
-cloud-provider-name: "aws"
 node-label:
   - "name=generic"
   - "os=rhel8"

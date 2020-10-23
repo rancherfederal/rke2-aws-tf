@@ -13,14 +13,15 @@ data "aws_iam_policy_document" "ec2_access" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.name}-rke2"
+  name               = var.name
   assume_role_policy = data.aws_iam_policy_document.ec2_access.json
+  tags               = var.tags
 }
 
 #
 # Profile
 #
 resource "aws_iam_instance_profile" "this" {
-  name = "${var.name}-rke2"
+  name = var.name
   role = aws_iam_role.this.name
 }

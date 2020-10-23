@@ -82,7 +82,9 @@ resource "aws_autoscaling_group" "this" {
   }
 
   dynamic "tag" {
-    for_each = merge({}, var.tags)
+    for_each = merge({
+      "Name" = "${var.name}-rke2-nodepool"
+    }, var.tags)
 
     content {
       key                 = tag.key

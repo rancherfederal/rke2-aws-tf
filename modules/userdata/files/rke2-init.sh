@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export TYPE="${type}"
+export CCM="${ccm}"
 
 if [ "$${DEBUG}" == 2 ]; then
   set -x
@@ -29,17 +30,15 @@ ${config}
 EOF
 }
 
-append_server() {
-  cat <<EOF >> "/etc/rancher/rke2/config.yaml"
-server: "https://${server_url}:9345"
-EOF
+append_config() {
+  echo $1 >> "/etc/rancher/rke2/config.yaml"
 }
 
 # The most simple "leader election" you've ever seen in your life
 elect_leader() {
   SERVER_TYPE="server"
 
-  # Fetch other instances in ASG
+  # Fetch other running instances in ASG
   instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
   asg_name=$(aws autoscaling describe-auto-scaling-instances --instance-ids "$instance_id" --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
   instances=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$asg_name" --query 'AutoScalingGroups[*].Instances[?HealthStatus==`Healthy`].InstanceId' --output text)
@@ -136,6 +135,10 @@ post_userdata() {
   config
   fetch_token
 
+  if [ $CCM = "true" ]; then
+    append_config 'cloud-provider-name: "aws"'
+  fi
+
   if [ $TYPE = "server" ]; then
     # Initialize server
     identify
@@ -146,7 +149,7 @@ tls-san:
 EOF
 
     if [ $SERVER_TYPE = "server" ]; then
-      append_server
+      append_config 'server: https://${server_url}:9345'
       # Wait for cluster to exist, then init another server
       cp_wait
     fi
@@ -162,7 +165,7 @@ EOF
     upload
 
   else
-    append_server
+    append_config 'server: https://${server_url}:9345'
 
     # Default to agent
     systemctl enable rke2-agent
