@@ -23,7 +23,7 @@ data "aws_subnet" "default" {
 }
 
 data "aws_ami" "ubuntu" {
-  owners      = ["513442679011"]
+  owners      = ["513442679011"] # owner is for aws gov cloud
   most_recent = true
 
   filter {

@@ -14,7 +14,7 @@ locals {
 
 data "aws_ami" "rhel7" {
   most_recent = true
-  owners      = ["219670896067"]
+  owners      = ["219670896067"] # owner is specific to aws gov cloud
 
   filter {
     name   = "name"
@@ -29,7 +29,7 @@ data "aws_ami" "rhel7" {
 
 data "aws_ami" "rhel8" {
   most_recent = true
-  owners      = ["219670896067"]
+  owners      = ["219670896067"] # owner is specific to aws gov cloud
 
   filter {
     name   = "name"
@@ -44,7 +44,7 @@ data "aws_ami" "rhel8" {
 
 data "aws_ami" "centos7" {
   most_recent = true
-  owners      = ["345084742485"]
+  owners      = ["345084742485"] # owner is specific to aws gov cloud
 
   filter {
     name   = "name"
@@ -59,7 +59,7 @@ data "aws_ami" "centos7" {
 
 data "aws_ami" "centos8" {
   most_recent = true
-  owners      = ["345084742485"]
+  owners      = ["345084742485"] # owner is specific to aws gov cloud
 
   filter {
     name   = "name"
