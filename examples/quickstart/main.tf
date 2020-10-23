@@ -66,7 +66,6 @@ module "rke2" {
   ami                   = data.aws_ami.ubuntu.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
-  servers               = 1
 
   tags = local.tags
 }
