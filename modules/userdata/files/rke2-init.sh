@@ -3,10 +3,6 @@
 export TYPE="${type}"
 export CCM="${ccm}"
 
-if [ "$${DEBUG}" == 2 ]; then
-  set -x
-fi
-
 # info logs the given argument at info log level.
 info() {
     echo "[INFO] " "$@"
@@ -45,7 +41,7 @@ elect_leader() {
 
   # Simply identify the leader as the first of the instance ids sorted alphanumerically
   leader=$(echo $instances | tr ' ' '\n' | sort -n | head -n1)
-  if [[ $instance_id == $leader ]]; then
+  if [ $instance_id = $leader ]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
   else
@@ -107,10 +103,10 @@ upload() {
 
   while [ ! -f /etc/rancher/rke2/rke2.yaml ]; do
     sleep 10
-    if [[ "$retries" == 0 ]]; then
+    if [ "$retries" = 0 ]; then
       fatal "Failed to create kubeconfig"
     fi
-    ((retries--))
+    (retries--)
   done
 
   # Upload to s3 bucket

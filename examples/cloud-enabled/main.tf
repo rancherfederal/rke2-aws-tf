@@ -72,26 +72,6 @@ data "aws_ami" "centos8" {
   }
 }
 
-data "aws_ami" "ubuntu" {
-  owners      = ["513442679011"]
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu*-20.04*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-}
-
 # Key Pair
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
