@@ -43,3 +43,7 @@ output "iam_instance_profile" {
   description = "IAM instance profile attached to server nodes"
   value       = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 }
+
+output "kubeconfig_path" {
+  value = "s3://${module.statestore.bucket}/rke2.yaml"
+}

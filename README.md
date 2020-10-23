@@ -83,6 +83,8 @@ Required policies are created by default, but are specified below if you are usi
 
 ##### Get Token
 
+Servers and agents need to be able to fetch the cluster join token
+
 ```json
 {
     "Version": "2012-10-17",
@@ -91,6 +93,26 @@ Required policies are created by default, but are specified below if you are usi
             "Effect": "Allow",
             "Action": "s3:GetObject",
             "Resource": "arn:<aws-region>:s3:<aws-region>:<aws-account>:<bucket>:<object>"
+        }
+    ]
+}
+```
+
+##### Get Autoscaling Instances
+
+Servers need to be able to query instances within their autoscaling group for "leader election".
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Resource": "*",
+            "Action": [
+              "autoscaling:DescribeAutoScalingGroups",
+              "autoscaling:DescribeAutoScalingInstances"
+            ]
         }
     ]
 }
