@@ -14,7 +14,7 @@ This repository contains 2 terraform modules intended for user consumption:
 # Provision rke2 server(s) and controlplane loadbalancer
 module "rke2" {
   source  = "git::https://github.com/rancherfederal/rke2-aws-tf.git"
-  name    = "rke2-quickstart"
+  name    = "quickstart"
   vpc_id  = "vpc-###"
   subnets = ["subnet-###"]
   ami     = "ami-###"
@@ -22,8 +22,8 @@ module "rke2" {
 
 # Provision Auto Scaling Group of agents to auto-join cluster
 module "rke2_agents" {
-  source  = "git::https://github.com/rancherfederal/rke2-aws-tf.git/modules/agent-nodepool"
-  name    = "agents"
+  source  = "git::https://github.com/rancherfederal/rke2-aws-tf.git//modules/agent-nodepool"
+  name    = "generic"
   vpc_id  = "vpc-###"
   subnets = ["subnet-###"]
   ami     = "ami-###"
