@@ -59,6 +59,10 @@ module "init" {
   server_url   = var.cluster_data.server_url
   token_bucket = var.cluster_data.token.bucket
   token_object = var.cluster_data.token.object
+
+  pre_userdata = var.pre_userdata
+  post_userdata = var.post_userdata
+
   ccm          = var.enable_ccm
   agent        = true
 }
