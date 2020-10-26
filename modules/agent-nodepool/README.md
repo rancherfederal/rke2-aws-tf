@@ -17,6 +17,8 @@
 | iam\_instance\_profile | Node pool IAM Instance Profile, created if node specified | `string` | `""` | no |
 | instance\_type | Node pool instance type | `string` | `"t3.medium"` | no |
 | name | Nodepool name | `string` | n/a | yes |
+| post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
+| pre\_userdata | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
 | rke2\_config | Node pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for full list of options | `string` | `""` | no |
 | rke2\_version | Version to use for RKE2 server nodepool | `string` | `"v1.18.10+rke2r1"` | no |
 | ssh\_authorized\_keys | Node pool list of public keys to add as authorized ssh keys, not required | `list(string)` | `[]` | no |

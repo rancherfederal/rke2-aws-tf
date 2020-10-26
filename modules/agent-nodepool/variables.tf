@@ -117,3 +117,15 @@ variable "enable_autoscaler" {
   type        = bool
   default     = false
 }
+
+variable "pre_userdata" {
+description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
+type        = string
+default     = ""
+}
+
+variable "post_userdata" {
+description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
+type        = string
+default     = ""
+}
