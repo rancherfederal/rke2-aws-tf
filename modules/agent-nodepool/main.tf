@@ -78,14 +78,17 @@ data "template_cloudinit_config" "init" {
     })
   }
 
-  part {
-    filename     = "00_download.sh"
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/../common/download.sh", {
-      # Must not use `version` here since that is reserved
-      rke2_version = var.rke2_version
-      type         = "agent"
-    })
+  dynamic "part" {
+    for_each = var.do_download == true ? [1] : []
+    content {
+      filename     = "00_download.sh"
+      content_type = "text/x-shellscript"
+      content = templatefile("${path.module}/../common/download.sh", {
+        # Must not use `version` here since that is reserved
+        rke2_version = var.rke2_version
+        type         = "agent"
+      })
+    }
   }
 
   part {

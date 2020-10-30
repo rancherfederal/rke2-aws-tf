@@ -40,6 +40,8 @@ module "statestore" {
   name   = local.uname
   token  = random_password.token.result
   tags   = merge(local.default_tags, var.tags)
+  aws_partition = var.aws_partition
+  existing_statebucket = var.existing_statebucket
 }
 
 #

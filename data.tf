@@ -2,7 +2,7 @@ module "init" {
   source = "./modules/userdata"
 
   server_url   = module.cp_lb.dns
-  token_bucket = module.statestore.bucket
+  token_bucket = var.existing_statebucket == null ? module.statestore.bucket : var.existing_statebucket
   token_object = module.statestore.token_object
   pre_userdata = var.pre_userdata
   post_userdata = var.post_userdata
@@ -23,14 +23,17 @@ data "template_cloudinit_config" "this" {
     })
   }
 
-  part {
-    filename     = "00_download.sh"
-    content_type = "text/x-shellscript"
-    content = templatefile("${path.module}/modules/common/download.sh", {
-      # Must not use `version` here since that is reserved
-      rke2_version = var.rke2_version
-      type         = "server"
-    })
+  dynamic "part" {
+    for_each = var.do_download == true ? [1] : []
+    content {
+      filename     = "00_download.sh"
+      content_type = "text/x-shellscript"
+      content = templatefile("${path.module}/modules/common/download.sh", {
+        # Must not use `version` here since that is reserved
+        rke2_version = var.rke2_version
+        type         = "server"
+      })
+    }
   }
 
   part {

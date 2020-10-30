@@ -35,3 +35,5 @@ override.tf.json
 *.pem
 rke2.yaml
 admin.conf
+
+**/.DS_Store

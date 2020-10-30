@@ -12,9 +12,14 @@ output "kubeconfig_put_policy" {
 
 output "token" {
   value = {
-    bucket          = aws_s3_bucket_object.token.bucket
+    bucket = var.existing_statebucket == null ? aws_s3_bucket.bucket[0].id : var.existing_statebucket
     object          = aws_s3_bucket_object.token.id
     policy_document = data.aws_iam_policy_document.getter.json
-    bucket_arn      = aws_s3_bucket.bucket.arn
+    bucket_arn = var.existing_statebucket == null ? "${aws_s3_bucket.bucket[0].arn}/rke2.yaml" : "arn:${var.aws_partition}:s3:::${var.existing_statebucket}/${aws_s3_bucket_object.token.id}"
   }
 }
+
+
+
+
+

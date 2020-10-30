@@ -45,5 +45,5 @@ output "iam_instance_profile" {
 }
 
 output "kubeconfig_path" {
-  value = "s3://${module.statestore.bucket}/rke2.yaml"
+  value = var.existing_statebucket == null ? "s3://${module.statestore.bucket}/rke2.yaml" : "s3://${var.existing_statebucket}/rke2.yaml"
 }

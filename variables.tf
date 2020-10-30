@@ -124,3 +124,22 @@ variable "enable_ccm" {
   type        = bool
   default     = false
 }
+
+variable "existing_statebucket" {
+  description = "Name of an existing S3 bucket"
+  type        = string
+  default     = null
+}
+
+variable "do_download" {
+  description = "Download RKE components from internet"
+  type        = bool
+  default     = true
+}
+
+variable "aws_partition" {
+  description = "AWS Partition for s3 buckets (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) aws, aws-us-gov, etc"
+  type = string
+  default = "aws"
+}
+

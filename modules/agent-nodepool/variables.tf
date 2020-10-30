@@ -129,3 +129,9 @@ description = "Custom userdata to run immediately after rke2 node attempts to jo
 type        = string
 default     = ""
 }
+
+variable "do_download" {
+  description = "Download RKE components from internet"
+  type        = bool
+  default     = true
+}
