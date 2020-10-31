@@ -175,6 +175,7 @@ module "servers" {
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   ami                    = var.ami
+  instance_type          = var.instance_type
   block_device_mappings  = var.block_device_mappings
   vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
   spot                   = var.spot

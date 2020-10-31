@@ -105,6 +105,7 @@ module "nodepool" {
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   ami                    = var.ami
+  instance_type          = var.instance_type
   block_device_mappings  = var.block_device_mappings
   vpc_security_group_ids = [var.cluster_data.cluster_sg]
   userdata               = data.template_cloudinit_config.init.rendered
