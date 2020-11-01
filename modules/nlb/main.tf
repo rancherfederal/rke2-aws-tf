@@ -1,5 +1,13 @@
+locals {
+  # Handle case where target group name exceeds 32 character limit
+  controlplane_name = substr("${var.name}-server", 0, 31)
+  server_name = substr("${var.name}-server", 0, 31)
+  supervisor_name = substr("${var.name}-supervisor", 0, 31)
+
+}
+
 resource "aws_lb" "controlplane" {
-  name = "${var.name}-rke2-cp"
+  name = local.controlplane_name
 
   internal                         = var.internal
   load_balancer_type               = "network"
@@ -11,7 +19,7 @@ resource "aws_lb" "controlplane" {
 }
 
 resource "aws_lb_target_group" "server" {
-  name     = "${var.name}-server"
+  name     = local.server_name
   port     = var.cp_port
   protocol = "TCP"
   vpc_id   = var.vpc_id
@@ -37,7 +45,7 @@ resource "aws_lb_listener" "server" {
 }
 
 resource "aws_lb_target_group" "server_supervisor" {
-  name     = "${var.name}-supervisor"
+  name     = local.supervisor_name
   port     = var.cp_supervisor_port
   protocol = "TCP"
   vpc_id   = var.vpc_id
