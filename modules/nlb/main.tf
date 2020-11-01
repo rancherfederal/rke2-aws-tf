@@ -1,5 +1,5 @@
 locals {
-  # Handle case where target group name exceeds 32 character limit
+  # Handle case where target group/load balancer name exceeds 32 character limit
   controlplane_name = substr("${var.name}-server", 0, 31)
   server_name = substr("${var.name}-server", 0, 31)
   supervisor_name = substr("${var.name}-supervisor", 0, 31)
