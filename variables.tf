@@ -107,6 +107,12 @@ variable "rke2_config" {
   default     = ""
 }
 
+variable "download" {
+  description = "Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH"
+  type        = bool
+  default     = true
+}
+
 variable "pre_userdata" {
   description = "Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed"
   type        = string
