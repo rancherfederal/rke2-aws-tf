@@ -1,7 +1,7 @@
 locals {}
 
 resource "aws_security_group" "this" {
-  name        = "${var.name}-nodepool"
+  name        = "${var.name}-rke2-nodepool"
   vpc_id      = var.vpc_id
   description = "${var.name} node pool"
   tags        = merge({}, var.tags)
@@ -11,7 +11,7 @@ resource "aws_security_group" "this" {
 # Launch template
 #
 resource "aws_launch_template" "this" {
-  name                   = "${var.name}-nodepool"
+  name                   = "${var.name}-rke2-nodepool"
   image_id               = var.ami
   instance_type          = var.instance_type
   user_data              = var.userdata
@@ -40,7 +40,7 @@ resource "aws_launch_template" "this" {
 # Autoscaling group
 #
 resource "aws_autoscaling_group" "this" {
-  name                = "${var.name}-nodepool"
+  name                = "${var.name}-rke2-nodepool"
   vpc_zone_identifier = var.subnets
 
   min_size         = var.asg.min
@@ -83,7 +83,7 @@ resource "aws_autoscaling_group" "this" {
 
   dynamic "tag" {
     for_each = merge({
-      "Name" = "${var.name}-nodepool"
+      "Name" = "${var.name}-rke2-nodepool"
     }, var.tags)
 
     content {

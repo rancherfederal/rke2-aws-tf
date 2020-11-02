@@ -22,14 +22,14 @@ module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
   source = "../policies"
-  name   = "${local.name}-agent"
+  name   = "${local.name}-rke2-agent"
   tags   = merge({}, local.default_tags, var.tags)
 }
 
 resource "aws_iam_role_policy" "aws_ccm" {
   count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
-  name   = "${local.name}-agent-aws-ccm"
+  name   = "${local.name}-rke2-agent-aws-ccm"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_ccm[count.index].json
 }
@@ -37,7 +37,7 @@ resource "aws_iam_role_policy" "aws_ccm" {
 resource "aws_iam_role_policy" "aws_autoscaler" {
   count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
 
-  name   = "${local.name}-agent-aws-autoscaler"
+  name   = "${local.name}-rke2-agent-aws-autoscaler"
   role   = module.iam[count.index].role
   policy = data.aws_iam_policy_document.aws_autoscaler[count.index].json
 }
@@ -45,7 +45,7 @@ resource "aws_iam_role_policy" "aws_autoscaler" {
 resource "aws_iam_role_policy" "get_token" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
-  name   = "${local.name}-agent-aws-get-token"
+  name   = "${local.name}-rke2-agent-aws-get-token"
   role   = module.iam[count.index].role
   policy = var.cluster_data.token.policy_document
 }
