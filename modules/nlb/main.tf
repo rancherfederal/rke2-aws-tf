@@ -25,11 +25,15 @@ resource "aws_lb_target_group" "server" {
   vpc_id   = var.vpc_id
 
   health_check {
+    protocol            = "TCP"
     interval            = "10"
     port                = var.cp_port
-    protocol            = "TCP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -52,10 +56,14 @@ resource "aws_lb_target_group" "server_supervisor" {
 
   health_check {
     interval            = "10"
-    port                = var.cp_port
+    port                = var.cp_supervisor_port
     protocol            = "TCP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 

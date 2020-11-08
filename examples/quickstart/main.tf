@@ -54,6 +54,21 @@ resource "local_file" "pem" {
   file_permission = "0600"
 }
 
+data "aws_ami" "rhel8" {
+  most_recent = true
+  owners      = ["219670896067"] # owner is specific to aws gov cloud
+
+  filter {
+    name   = "name"
+    values = ["RHEL-8*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
 #
 # Server
 #
@@ -63,9 +78,16 @@ module "rke2" {
   cluster_name          = local.cluster_name
   vpc_id                = data.aws_vpc.default.id
   subnets               = [data.aws_subnet.default.id]
-  ami                   = data.aws_ami.ubuntu.image_id
+  ami                   = data.aws_ami.rhel8.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
+
+  enable_ccm = true
+
+  pre_userdata = <<-EOT
+setenforce 0
+sysctl -w vm.max_map_count=262144
+EOT
 
   tags = local.tags
 }
@@ -79,9 +101,18 @@ module "agents" {
   name                = "generic"
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.ubuntu.image_id
+  ami                 = data.aws_ami.rhel8.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   tags                = local.tags
+  instance_type       = "m5d.2xlarge"
+  asg                 = { min : 2, desired : 2, max : 3 }
+
+  enable_ccm = true
+
+  pre_userdata = <<-EOT
+setenforce 0
+sysctl -w vm.max_map_count=262144
+EOT
 
   cluster_data = module.rke2.cluster_data
 }

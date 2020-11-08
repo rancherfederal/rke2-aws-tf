@@ -46,7 +46,7 @@ module "statestore" {
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/nlb"
+  source  = "./modules/elb"
   name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
@@ -179,10 +179,7 @@ module "servers" {
   block_device_mappings  = var.block_device_mappings
   vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
   spot                   = var.spot
-  target_group_arns = [
-    module.cp_lb.server_tg_arn,
-    module.cp_lb.server_supervisor_tg_arn,
-  ]
+  load_balancers         = [module.cp_lb.name]
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered

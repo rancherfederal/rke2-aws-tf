@@ -44,6 +44,11 @@ variable "target_group_arns" {
   default = []
 }
 
+variable "load_balancers" {
+  type    = list(string)
+  default = []
+}
+
 variable "vpc_security_group_ids" {
   type    = list(string)
   default = []
