@@ -22,26 +22,6 @@ data "aws_subnet" "default" {
   default_for_az    = true
 }
 
-data "aws_ami" "ubuntu" {
-  owners      = ["513442679011"] # owner is for aws gov cloud
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu*-20.04*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-}
-
 # Private Key
 resource "tls_private_key" "ssh" {
   algorithm = "RSA"
@@ -82,13 +62,6 @@ module "rke2" {
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
 
-  enable_ccm = true
-
-  pre_userdata = <<-EOT
-setenforce 0
-sysctl -w vm.max_map_count=262144
-EOT
-
   tags = local.tags
 }
 
@@ -104,15 +77,6 @@ module "agents" {
   ami                 = data.aws_ami.rhel8.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   tags                = local.tags
-  instance_type       = "m5d.2xlarge"
-  asg                 = { min : 2, desired : 2, max : 3 }
-
-  enable_ccm = true
-
-  pre_userdata = <<-EOT
-setenforce 0
-sysctl -w vm.max_map_count=262144
-EOT
 
   cluster_data = module.rke2.cluster_data
 }

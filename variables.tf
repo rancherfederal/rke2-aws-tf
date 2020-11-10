@@ -91,7 +91,6 @@ variable "controlplane_allowed_cidrs" {
   default     = ["0.0.0.0/0"]
 }
 
-
 #
 # RKE2 Variables
 #

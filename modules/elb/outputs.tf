@@ -1,7 +1,3 @@
-//output "sg" {
-//  value = aws_elb.controlplane.source_security_group_id
-//}
-
 output "dns" {
   value = aws_elb.controlplane.dns_name
 }

@@ -19,7 +19,7 @@ resource "aws_security_group_rule" "apiserver" {
   security_group_id = aws_security_group.controlplane.id
   type              = "ingress"
 
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks = var.cp_ingress_cidr_blocks
 }
 
 resource "aws_security_group_rule" "supervisor" {
@@ -29,7 +29,7 @@ resource "aws_security_group_rule" "supervisor" {
   security_group_id = aws_security_group.controlplane.id
   type              = "ingress"
 
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks = var.cp_supervisor_ingress_cidr_blocks
 }
 
 resource "aws_security_group_rule" "egress" {

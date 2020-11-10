@@ -54,6 +54,9 @@ module "cp_lb" {
   enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
   internal                         = var.controlplane_internal
 
+  cp_ingress_cidr_blocks            = var.controlplane_allowed_cidrs
+  cp_supervisor_ingress_cidr_blocks = var.controlplane_allowed_cidrs
+
   tags = merge({}, local.default_tags, local.default_tags, var.tags)
 }
 
@@ -102,21 +105,21 @@ resource "aws_security_group" "server" {
 }
 
 resource "aws_security_group_rule" "server_cp" {
-  from_port         = 6443
-  to_port           = 6443
-  protocol          = "tcp"
-  security_group_id = aws_security_group.server.id
-  type              = "ingress"
-  cidr_blocks       = var.controlplane_allowed_cidrs
+  from_port                = 6443
+  to_port                  = 6443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.server.id
+  type                     = "ingress"
+  source_security_group_id = module.cp_lb.security_group
 }
 
 resource "aws_security_group_rule" "server_cp_supervisor" {
-  from_port         = 9345
-  to_port           = 9345
-  protocol          = "tcp"
-  security_group_id = aws_security_group.server.id
-  type              = "ingress"
-  cidr_blocks       = var.controlplane_allowed_cidrs
+  from_port                = 9345
+  to_port                  = 9345
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.server.id
+  type                     = "ingress"
+  source_security_group_id = module.cp_lb.security_group
 }
 
 #
