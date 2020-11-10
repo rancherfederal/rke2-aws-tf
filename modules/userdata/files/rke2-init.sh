@@ -32,8 +32,6 @@ append_config() {
 
 # The most simple "leader election" you've ever seen in your life
 elect_leader() {
-  SERVER_TYPE="server"
-
   # Fetch other running instances in ASG
   instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
   asg_name=$(aws autoscaling describe-auto-scaling-instances --instance-ids "$instance_id" --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
@@ -41,6 +39,9 @@ elect_leader() {
 
   # Simply identify the leader as the first of the instance ids sorted alphanumerically
   leader=$(echo $instances | tr ' ' '\n' | sort -n | head -n1)
+
+  info "Current instance: $instance_id | Leader instance: $leader"
+
   if [ $instance_id = $leader ]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
@@ -50,21 +51,24 @@ elect_leader() {
 }
 
 identify() {
+  # Default to server
+  SERVER_TYPE="server"
+
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
 
-  if timeout 1 bash -c "true <>/dev/tcp/${server_url}/6443" 2>/dev/null
-  then
-    info "API server available, identifying as server joining existing cluster"
-  else
+  if [ $supervisor_status -ne 200 ]; then
     info "API server unavailable, performing simple leader election"
-
     elect_leader
+  else
+    info "API server available, identifying as server joining existing cluster"
   fi
 }
 
 cp_wait() {
   while true; do
-    if timeout 1 bash -c "true <>/dev/tcp/${server_url}/6443" 2>/dev/null; then
+    supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
+    if [ $supervisor_status -eq 200 ]; then
       info "Cluster is ready"
 
       # Let things settle down for a bit, not required

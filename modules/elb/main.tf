@@ -69,7 +69,7 @@ resource "aws_elb" "controlplane" {
   health_check {
     healthy_threshold   = 3
     interval            = 10
-    target              = "TCP:${var.cp_supervisor_port}"
+    target              = "TCP:${var.cp_port}"
     timeout             = 3
     unhealthy_threshold = 3
   }
