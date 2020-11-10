@@ -106,7 +106,7 @@ upload() {
     if [ "$retries" = 0 ]; then
       fatal "Failed to create kubeconfig"
     fi
-    (retries--)
+    ((retries--))
   done
 
   # Replace localhost with server url and upload to s3 bucket
