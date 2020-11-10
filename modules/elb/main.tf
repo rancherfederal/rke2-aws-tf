@@ -8,6 +8,7 @@ locals {
 resource "aws_security_group" "controlplane" {
   name        = local.controlplane_name
   description = "${local.controlplane_name} sg"
+  vpc_id      = var.vpc_id
 
   tags = merge({}, var.tags)
 }
