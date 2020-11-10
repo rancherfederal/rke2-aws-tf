@@ -175,10 +175,7 @@ EOT
 
   cluster_data = module.rke2.cluster_data
 
-  tags = merge({
-    "k8s.io/cluster-autoscaler/enabled"               = "true"
-    "k8s.io/cluster-autoscaler/${local.cluster_name}" = "true"
-  }, local.tags)
+  tags = local.tags
 }
 
 # For demonstration only, lock down ssh access in production

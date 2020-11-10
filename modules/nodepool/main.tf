@@ -50,6 +50,7 @@ resource "aws_autoscaling_group" "this" {
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
   health_check_type = var.health_check_type
   target_group_arns = var.target_group_arns
+  load_balancers    = var.load_balancers
 
   min_elb_capacity = var.min_elb_capacity
 
@@ -91,5 +92,9 @@ resource "aws_autoscaling_group" "this" {
       value               = tag.value
       propagate_at_launch = true
     }
+  }
+
+  lifecycle {
+    ignore_changes = [load_balancers, target_group_arns]
   }
 }

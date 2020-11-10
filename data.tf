@@ -6,8 +6,8 @@ module "init" {
   token_object = module.statestore.token_object
   pre_userdata = var.pre_userdata
   post_userdata = var.post_userdata
-  ccm          = var.enable_ccm
-  agent        = false
+  ccm           = var.enable_ccm
+  agent         = false
 }
 
 data "template_cloudinit_config" "this" {
@@ -23,8 +23,8 @@ data "template_cloudinit_config" "this" {
     })
   }
 
-  dynamic "part" {
-    for_each = var.do_download == true ? [1] : []
+  dynamic part {
+    for_each = var.download ? [1] : []
     content {
       filename     = "00_download.sh"
       content_type = "text/x-shellscript"

@@ -91,7 +91,6 @@ variable "controlplane_allowed_cidrs" {
   default     = ["0.0.0.0/0"]
 }
 
-
 #
 # RKE2 Variables
 #
@@ -105,6 +104,12 @@ variable "rke2_config" {
   description = "Server pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/server_config for full list of options"
   type        = string
   default     = ""
+}
+
+variable "download" {
+  description = "Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH"
+  type        = bool
+  default     = true
 }
 
 variable "pre_userdata" {

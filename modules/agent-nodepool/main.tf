@@ -56,13 +56,13 @@ resource "aws_iam_role_policy" "get_token" {
 module "init" {
   source = "../userdata"
 
-  server_url   = var.cluster_data.server_url
-  token_bucket = var.cluster_data.token.bucket
-  token_object = var.cluster_data.token.object
-  pre_userdata = var.pre_userdata
+  server_url    = var.cluster_data.server_url
+  token_bucket  = var.cluster_data.token.bucket
+  token_object  = var.cluster_data.token.object
+  pre_userdata  = var.pre_userdata
   post_userdata = var.post_userdata
-  ccm          = var.enable_ccm
-  agent        = true
+  ccm           = var.enable_ccm
+  agent         = true
 }
 
 data "template_cloudinit_config" "init" {
@@ -78,8 +78,8 @@ data "template_cloudinit_config" "init" {
     })
   }
 
-  dynamic "part" {
-    for_each = var.do_download == true ? [1] : []
+  dynamic part {
+    for_each = var.download ? [1] : []
     content {
       filename     = "00_download.sh"
       content_type = "text/x-shellscript"
@@ -108,6 +108,7 @@ module "nodepool" {
   vpc_id                 = var.vpc_id
   subnets                = var.subnets
   ami                    = var.ami
+  instance_type          = var.instance_type
   block_device_mappings  = var.block_device_mappings
   vpc_security_group_ids = [var.cluster_data.cluster_sg]
   userdata               = data.template_cloudinit_config.init.rendered
