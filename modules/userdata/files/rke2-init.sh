@@ -84,11 +84,6 @@ cp_wait() {
 fetch_token() {
   info "Fetching rke2 join token..."
 
-  # Validate aws caller identity, fatal if not valid
-  if ! aws sts get-caller-identity 2>/dev/null; then
-    fatal "No valid aws caller identity"
-  fi
-
   # Either
   #   a) fetch token from s3 bucket
   #   b) fail
