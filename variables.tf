@@ -97,7 +97,7 @@ variable "controlplane_allowed_cidrs" {
 variable "rke2_version" {
   description = "Version to use for RKE2 server nodes"
   type        = string
-  default     = "v1.18.10+rke2r1"
+  default     = "v1.18.12+rke2r2"
 }
 
 variable "rke2_config" {
