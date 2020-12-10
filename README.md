@@ -168,6 +168,7 @@ Optional policies have the option of being created by default, but are specified
 | cluster\_sg | Security group shared by cluster nodes, this is different than nodepool security groups |
 | iam\_instance\_profile | IAM instance profile attached to server nodes |
 | iam\_role | IAM role of server nodes |
+| iam\_role\_arn | IAM role arn of server nodes |
 | server\_nodepool\_arn | n/a |
 | server\_nodepool\_id | n/a |
 | server\_nodepool\_name | n/a |
