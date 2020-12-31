@@ -33,6 +33,12 @@ variable "ami" {
   type        = string
 }
 
+variable "permissions_boundary" {
+  description = "If provided, all IAM roles will be created with this permissions boundary attached."
+  type        = string
+  default     = null
+}
+
 variable "iam_instance_profile" {
   description = "Server pool IAM Instance Profile, created if left blank"
   type        = string

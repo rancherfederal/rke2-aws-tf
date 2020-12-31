@@ -43,10 +43,10 @@ output "iam_instance_profile" {
   description = "IAM instance profile attached to server nodes"
   value       = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 }
-  
+
 output "iam_role_arn" {
   description = "IAM role arn of server nodes"
-  value       =  var.iam_instance_profile == "" ? module.iam[0].role_arn : var.iam_instance_profile
+  value       = var.iam_instance_profile == "" ? module.iam[0].role_arn : var.iam_instance_profile
 }
 
 output "kubeconfig_path" {

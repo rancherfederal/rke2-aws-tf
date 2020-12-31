@@ -128,9 +128,10 @@ resource "aws_security_group_rule" "server_cp_supervisor" {
 module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
-  source = "./modules/policies"
-  name   = "${local.uname}-rke2-server"
-  tags   = merge({}, local.default_tags, var.tags)
+  source               = "./modules/policies"
+  name                 = "${local.uname}-rke2-server"
+  tags                 = merge({}, local.default_tags, var.tags)
+  permissions_boundary = var.permissions_boundary
 }
 
 #

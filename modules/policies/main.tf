@@ -13,9 +13,10 @@ data "aws_iam_policy_document" "ec2_access" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = var.name
-  assume_role_policy = data.aws_iam_policy_document.ec2_access.json
-  tags               = var.tags
+  name                 = var.name
+  assume_role_policy   = data.aws_iam_policy_document.ec2_access.json
+  tags                 = var.tags
+  permissions_boundary = var.permissions_boundary
 }
 
 #

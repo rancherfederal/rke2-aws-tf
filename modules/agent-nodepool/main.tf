@@ -21,9 +21,10 @@ locals {
 module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
-  source = "../policies"
-  name   = "${local.name}-rke2-agent"
-  tags   = merge({}, local.default_tags, var.tags)
+  source               = "../policies"
+  name                 = "${local.name}-rke2-agent"
+  tags                 = merge({}, local.default_tags, var.tags)
+  permissions_boundary = var.permissions_boundary
 }
 
 resource "aws_iam_role_policy" "aws_ccm" {
