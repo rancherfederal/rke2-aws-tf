@@ -79,7 +79,7 @@ data "template_cloudinit_config" "init" {
     })
   }
 
-  dynamic part {
+  dynamic "part" {
     for_each = var.download ? [1] : []
     content {
       filename     = "00_download.sh"
