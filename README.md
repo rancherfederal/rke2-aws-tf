@@ -98,6 +98,9 @@ Servers and agents need to be able to fetch the cluster join token
 }
 ```
 
+**Note:** The S3 bucket will be dynamically created during cluster creation, in order to pre create an iam policy that points to this bucket, the use of wildcards is recommended. 
+For example: `s3:::us-gov-west-1:${var.cluster_name}-*`
+
 ##### Get Autoscaling Instances
 
 Servers need to be able to query instances within their autoscaling group for "leader election".
