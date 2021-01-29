@@ -28,7 +28,7 @@ preflight_container_selinux_check () {
 
 export INSTALL_RKE2_TYPE="${type}"
 export INSTALL_RKE2_VERSION="${rke2_version}"
-export SELINUX_DEPENDENCY_VERSION="2.119.2"
+export SELINUX_DEPENDENCY_VERSION="2.107"
 
 if [ "$${DEBUG}" == 1 ]; then
   set -x
