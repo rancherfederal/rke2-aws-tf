@@ -1,8 +1,34 @@
 #!/bin/bash
 set -e
 
+preflight_container_selinux_check () {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 1
+        fi
+    done
+    return 0
+}
+
 export INSTALL_RKE2_TYPE="${type}"
 export INSTALL_RKE2_VERSION="${rke2_version}"
+export SELINUX_DEPENDENCY_VERSION="2.119.2"
 
 if [ "$${DEBUG}" == 1 ]; then
   set -x
@@ -76,7 +102,11 @@ do_download() {
     7*)
       info "Identified RHEL 7"
 
-      yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
+      # Check if proper version of container-selinux is already installed
+      if rpm -q container-selinux 2>&1 > /dev/null && ! preflight_container_selinux_check $(rpm -q container-selinux --qf "%{VERSION}") "$SELINUX_DEPENDENCY_VERSION"; then
+          yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
+      fi
+
       INSTALL_RKE2_METHOD='yum' INSTALL_RKE2_TYPE="${type}" ./install.sh
       ;;
     8*)
