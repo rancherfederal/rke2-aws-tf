@@ -150,6 +150,7 @@ Optional policies have the option of being created by default, but are specified
 | controlplane\_enable\_cross\_zone\_load\_balancing | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
 | controlplane\_internal | Toggle between public or private control plane load balancer | `bool` | `true` | no |
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
+| extra\_security\_group\_ids | List of additional security group IDs | `list(string)` | `[]` | no |
 | iam\_instance\_profile | Server pool IAM Instance Profile, created if left blank | `string` | `""` | no |
 | instance\_type | Server pool instance type | `string` | `"t3a.medium"` | no |
 | post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
