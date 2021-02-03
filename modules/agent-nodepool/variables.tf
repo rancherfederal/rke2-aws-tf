@@ -78,8 +78,8 @@ variable "spot" {
 
 variable "extra_security_group_ids" {
   description = "List of additional security group IDs"
-  type    = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 
 #
