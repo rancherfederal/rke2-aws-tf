@@ -41,7 +41,7 @@ variable "iam_instance_profile" {
 
 variable "block_device_mappings" {
   description = "Server pool block device mapping configuration"
-  type = map(string)
+  type        = map(string)
   default = {
     "size"      = 30
     "encrypted" = false
