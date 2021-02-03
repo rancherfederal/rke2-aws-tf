@@ -144,8 +144,7 @@ Optional policies have the option of being created by default, but are specified
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | ami | Server pool ami | `string` | n/a | yes |
-| block\_device\_mappings | Server pool block device mapping configuration | <pre>object({<br>    size      = number<br>    encrypted = bool<br>  })</pre> | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no |
-| cluster\_name | Name of the rkegov cluster to create | `string` | n/a | yes |
+| block\_device\_mappings | Server pool block device mapping configuration | `map(string)` | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no || cluster\_name | Name of the rkegov cluster to create | `string` | n/a | yes |
 | controlplane\_allowed\_cidrs | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | controlplane\_enable\_cross\_zone\_load\_balancing | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
 | controlplane\_internal | Toggle between public or private control plane load balancer | `bool` | `true` | no |
