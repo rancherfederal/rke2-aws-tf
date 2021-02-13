@@ -183,6 +183,7 @@ module "servers" {
   vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
   spot                   = var.spot
   load_balancers         = [module.cp_lb.name]
+  cpu_credits            = var.cpu_credits
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered

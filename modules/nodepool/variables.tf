@@ -80,3 +80,12 @@ variable "min_elb_capacity" {
   type    = number
   default = null
 }
+
+variable "cpu_credits" {
+  type    = string
+  default = "standard"
+  validation {
+    condition     = contains(["standard", "unlimited"], var.cpu_credits)
+    error_message = "Unsupported CPU Credit option supplied. Can be 'standard', or 'unlimited'."
+  }
+}

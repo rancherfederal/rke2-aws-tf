@@ -116,6 +116,7 @@ module "nodepool" {
   iam_instance_profile   = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                    = var.asg
   spot                   = var.spot
+  cpu_credits            = var.cpu_credits
 
   tags = merge({
     "Role" = "agent",
