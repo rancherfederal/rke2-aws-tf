@@ -14,6 +14,7 @@
 | cluster\_data | Required data relevant to joining an existing rke2 cluster, sourced from main rke2 module, do NOT modify | <pre>object({<br>    name       = string<br>    server_url = string<br>    cluster_sg = string<br>    token = object({<br>      bucket          = string<br>      bucket_arn      = string<br>      object          = string<br>      policy_document = string<br>    })<br>  })</pre> | n/a | yes |
 | enable\_autoscaler | Toggle configure the nodepool for cluster autoscaler, this will ensure the appropriate IAM policies are present, you are still responsible for ensuring cluster autoscaler is installed | `bool` | `false` | no |
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
+| extra\_security\_group\_ids | List of additional security group IDs | `list(string)` | `[]` | no |
 | iam\_instance\_profile | Node pool IAM Instance Profile, created if node specified | `string` | `""` | no |
 | instance\_type | Node pool instance type | `string` | `"t3.medium"` | no |
 | name | Nodepool name | `string` | n/a | yes |

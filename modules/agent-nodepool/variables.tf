@@ -76,6 +76,12 @@ variable "spot" {
   default     = false
 }
 
+variable "extra_security_group_ids" {
+  description = "List of additional security group IDs"
+  type        = list(string)
+  default     = []
+}
+
 #
 # RKE2 Variables
 #
