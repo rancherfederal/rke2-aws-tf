@@ -98,6 +98,9 @@ Servers and agents need to be able to fetch the cluster join token
 }
 ```
 
+**Note:** The S3 bucket will be dynamically created during cluster creation, in order to pre create an iam policy that points to this bucket, the use of wildcards is recommended. 
+For example: `s3:::us-gov-west-1:${var.cluster_name}-*`
+
 ##### Get Autoscaling Instances
 
 Servers need to be able to query instances within their autoscaling group for "leader election".
@@ -158,6 +161,7 @@ Optional policies have the option of being created by default, but are specified
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
 | iam\_instance\_profile | Server pool IAM Instance Profile, created if left blank (default behavior) | `string` | `""` | no |
 | iam\_permissions\_boundary | If provided, the IAM role created for the servers will be created with this permissions boundary attached. | `string` | `null` | no |
+| extra\_security\_group\_ids | List of additional security group IDs | `list(string)` | `[]` | no |
 | instance\_type | Server pool instance type | `string` | `"t3a.medium"` | no |
 | post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | pre\_userdata | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
