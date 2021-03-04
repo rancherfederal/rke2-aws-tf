@@ -21,10 +21,12 @@ locals {
 module "iam" {
   count = var.iam_instance_profile == "" ? 1 : 0
 
-  source               = "../policies"
-  name                 = "${local.name}-rke2-agent"
-  tags                 = merge({}, local.default_tags, var.tags)
-  permissions_boundary = var.permissions_boundary
+  source = "../policies"
+  name   = "${local.name}-rke2-agent"
+
+  permissions_boundary = var.iam_permissions_boundary
+
+  tags = merge({}, local.default_tags, var.tags)
 }
 
 resource "aws_iam_role_policy" "aws_ccm" {
@@ -80,7 +82,7 @@ data "template_cloudinit_config" "init" {
     })
   }
 
-  dynamic part {
+  dynamic "part" {
     for_each = var.download ? [1] : []
     content {
       filename     = "00_download.sh"
