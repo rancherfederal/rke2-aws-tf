@@ -34,18 +34,20 @@ variable "ami" {
 }
 
 variable "iam_instance_profile" {
-  description = "Server pool IAM Instance Profile, created if left blank"
+  description = "Server pool IAM Instance Profile, created if left blank (default behavior)"
   type        = string
   default     = ""
 }
 
+variable "iam_permissions_boundary" {
+  description = "If provided, the IAM role created for the servers will be created with this permissions boundary attached."
+  type        = string
+  default     = null
+}
+
 variable "block_device_mappings" {
   description = "Server pool block device mapping configuration"
-  type = object({
-    size      = number
-    encrypted = bool
-  })
-
+  type        = map(string)
   default = {
     "size"      = 30
     "encrypted" = false
@@ -66,6 +68,12 @@ variable "spot" {
 
 variable "ssh_authorized_keys" {
   description = "Server pool list of public keys to add as authorized ssh keys"
+  type        = list(string)
+  default     = []
+}
+
+variable "extra_security_group_ids" {
+  description = "List of additional security group IDs"
   type        = list(string)
   default     = []
 }

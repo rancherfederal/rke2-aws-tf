@@ -130,7 +130,10 @@ module "iam" {
 
   source = "./modules/policies"
   name   = "${local.uname}-rke2-server"
-  tags   = merge({}, local.default_tags, var.tags)
+
+  permissions_boundary = var.iam_permissions_boundary
+
+  tags = merge({}, local.default_tags, var.tags)
 }
 
 #
@@ -180,7 +183,7 @@ module "servers" {
   ami                    = var.ami
   instance_type          = var.instance_type
   block_device_mappings  = var.block_device_mappings
-  vpc_security_group_ids = [aws_security_group.server.id, aws_security_group.cluster.id]
+  vpc_security_group_ids = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
   spot                   = var.spot
   load_balancers         = [module.cp_lb.name]
   cpu_credits            = var.cpu_credits

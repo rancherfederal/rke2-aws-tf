@@ -132,27 +132,36 @@ Optional policies have the option of being created by default, but are specified
     * [agents](./modules/agent-nodepool/data.tf#2)
 * AWS Cluster Autoscaler: will configure `rke2` to autoscale based off kubernetes resource requests
     * [agents](./modules/agent-nodepool/data.tf#27)
-    
+
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.13, < 0.14 |
+| terraform | >= 0.13 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | n/a |
+| random | n/a |
+| template | n/a |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | ami | Server pool ami | `string` | n/a | yes |
-| block\_device\_mappings | Server pool block device mapping configuration | <pre>object({<br>    size      = number<br>    encrypted = bool<br>  })</pre> | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no |
-| cluster\_name | Name of the rkegov cluster to create | `string` | n/a | yes |
+| block\_device\_mappings | Server pool block device mapping configuration | `map(string)` | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no || cluster\_name | Name of the rkegov cluster to create | `string` | n/a | yes |
 | controlplane\_allowed\_cidrs | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | controlplane\_enable\_cross\_zone\_load\_balancing | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
 | controlplane\_internal | Toggle between public or private control plane load balancer | `bool` | `true` | no |
 | cpu\_credits | n/a | `string` | `"standard"` | no |
 | download | Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH | `bool` | `true` | no |
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
-| iam\_instance\_profile | Server pool IAM Instance Profile, created if left blank | `string` | `""` | no |
+| iam\_instance\_profile | Server pool IAM Instance Profile, created if left blank (default behavior) | `string` | `""` | no |
+| iam\_permissions\_boundary | If provided, the IAM role created for the servers will be created with this permissions boundary attached. | `string` | `null` | no |
+| extra\_security\_group\_ids | List of additional security group IDs | `list(string)` | `[]` | no |
 | instance\_type | Server pool instance type | `string` | `"t3a.medium"` | no |
 | post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | pre\_userdata | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |

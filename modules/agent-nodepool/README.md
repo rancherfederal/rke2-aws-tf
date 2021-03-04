@@ -16,6 +16,7 @@
 | download | Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH | `bool` | `true` | no |
 | enable\_autoscaler | Toggle configure the nodepool for cluster autoscaler, this will ensure the appropriate IAM policies are present, you are still responsible for ensuring cluster autoscaler is installed | `bool` | `false` | no |
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
+| extra\_security\_group\_ids | List of additional security group IDs | `list(string)` | `[]` | no |
 | iam\_instance\_profile | Node pool IAM Instance Profile, created if node specified | `string` | `""` | no |
 | instance\_type | Node pool instance type | `string` | `"t3.medium"` | no |
 | name | Nodepool name | `string` | n/a | yes |

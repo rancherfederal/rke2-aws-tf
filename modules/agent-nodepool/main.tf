@@ -23,7 +23,10 @@ module "iam" {
 
   source = "../policies"
   name   = "${local.name}-rke2-agent"
-  tags   = merge({}, local.default_tags, var.tags)
+
+  permissions_boundary = var.iam_permissions_boundary
+
+  tags = merge({}, local.default_tags, var.tags)
 }
 
 resource "aws_iam_role_policy" "aws_ccm" {
@@ -111,7 +114,7 @@ module "nodepool" {
   ami                    = var.ami
   instance_type          = var.instance_type
   block_device_mappings  = var.block_device_mappings
-  vpc_security_group_ids = [var.cluster_data.cluster_sg]
+  vpc_security_group_ids = concat([var.cluster_data.cluster_sg], var.extra_security_group_ids)
   userdata               = data.template_cloudinit_config.init.rendered
   iam_instance_profile   = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                    = var.asg

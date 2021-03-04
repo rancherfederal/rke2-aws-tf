@@ -18,7 +18,7 @@ resource "aws_launch_template" "this" {
   vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
 
   block_device_mappings {
-    device_name = "/dev/sda1"
+    device_name = lookup(var.block_device_mappings, "device_name", "/dev/sda1")
     ebs {
       volume_type           = lookup(var.block_device_mappings, "type", null)
       volume_size           = lookup(var.block_device_mappings, "size", null)
