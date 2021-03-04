@@ -130,7 +130,10 @@ module "iam" {
 
   source = "./modules/policies"
   name   = "${local.uname}-rke2-server"
-  tags   = merge({}, local.default_tags, var.tags)
+
+  permissions_boundary = var.iam_permissions_boundary
+
+  tags = merge({}, local.default_tags, var.tags)
 }
 
 #

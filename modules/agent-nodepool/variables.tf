@@ -34,9 +34,15 @@ variable "tags" {
 # Nodepool Variables
 #
 variable "iam_instance_profile" {
-  description = "Node pool IAM Instance Profile, created if node specified"
+  description = "Node pool IAM Instance Profile, created if left blank (default behavior)"
   type        = string
   default     = ""
+}
+
+variable "iam_permissions_boundary" {
+  description = "If provided, the IAM role created for the nodepool will be created with this permissions boundary attached."
+  type        = string
+  default     = null
 }
 
 variable "ssh_authorized_keys" {
