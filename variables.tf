@@ -54,6 +54,13 @@ variable "block_device_mappings" {
   }
 }
 
+variable "extra_block_device_mappings" {
+  description = "Used to specify additional block device mapping configurations"
+   type = list(map(string))
+   default = [
+   ]
+}
+
 variable "servers" {
   description = "Number of servers to create"
   type        = number
