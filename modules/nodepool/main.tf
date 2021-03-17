@@ -17,15 +17,18 @@ resource "aws_launch_template" "this" {
   user_data              = var.userdata
   vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
 
-  block_device_mappings {
-    device_name = lookup(var.block_device_mappings, "device_name", "/dev/sda1")
-    ebs {
-      volume_type           = lookup(var.block_device_mappings, "type", null)
-      volume_size           = lookup(var.block_device_mappings, "size", null)
-      iops                  = lookup(var.block_device_mappings, "iops", null)
-      kms_key_id            = lookup(var.block_device_mappings, "kms_key_id", null)
-      encrypted             = lookup(var.block_device_mappings, "encrypted", null)
-      delete_on_termination = lookup(var.block_device_mappings, "delete_on_termination", null)
+  dynamic "block_device_mappings" {
+    for_each = concat([var.block_device_mappings],var.extra_block_device_mappings)
+    content {
+      device_name = lookup(var.block_device_mappings, "device_name", "/dev/sda1")
+      ebs {
+        volume_type           = lookup(var.block_device_mappings, "type", null)
+        volume_size           = lookup(var.block_device_mappings, "size", null)
+        iops                  = lookup(var.block_device_mappings, "iops", null)
+        kms_key_id            = lookup(var.block_device_mappings, "kms_key_id", null)
+        encrypted             = lookup(var.block_device_mappings, "encrypted", null)
+        delete_on_termination = lookup(var.block_device_mappings, "delete_on_termination", null)
+      }
     }
   }
 
