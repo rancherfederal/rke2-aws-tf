@@ -20,14 +20,14 @@ resource "aws_launch_template" "this" {
   dynamic "block_device_mappings" {
     for_each = concat([var.block_device_mappings],var.extra_block_device_mappings)
     content {
-      device_name = lookup(var.block_device_mappings, "device_name", "/dev/sda1")
+      device_name = lookup(block_device_mappings, "device_name", "/dev/sda1")
       ebs {
-        volume_type           = lookup(var.block_device_mappings, "type", null)
-        volume_size           = lookup(var.block_device_mappings, "size", null)
-        iops                  = lookup(var.block_device_mappings, "iops", null)
-        kms_key_id            = lookup(var.block_device_mappings, "kms_key_id", null)
-        encrypted             = lookup(var.block_device_mappings, "encrypted", null)
-        delete_on_termination = lookup(var.block_device_mappings, "delete_on_termination", null)
+        volume_type           = lookup(block_device_mappings, "type", null)
+        volume_size           = lookup(block_device_mappings, "size", null)
+        iops                  = lookup(block_device_mappings, "iops", null)
+        kms_key_id            = lookup(block_device_mappings, "kms_key_id", null)
+        encrypted             = lookup(block_device_mappings, "encrypted", null)
+        delete_on_termination = lookup(block_device_mappings, "delete_on_termination", null)
       }
     }
   }
