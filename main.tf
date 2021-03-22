@@ -178,15 +178,15 @@ module "servers" {
   source = "./modules/nodepool"
   name   = "${local.uname}-server"
 
-  vpc_id                 = var.vpc_id
-  subnets                = var.subnets
-  ami                    = var.ami
-  instance_type          = var.instance_type
-  block_device_mappings  = var.block_device_mappings
-  extra_block_device_mappings  = var.extra_block_device_mappings
-  vpc_security_group_ids = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
-  spot                   = var.spot
-  load_balancers         = [module.cp_lb.name]
+  vpc_id                      = var.vpc_id
+  subnets                     = var.subnets
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  block_device_mappings       = var.block_device_mappings
+  extra_block_device_mappings = var.extra_block_device_mappings
+  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
+  spot                        = var.spot
+  load_balancers              = [module.cp_lb.name]
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered

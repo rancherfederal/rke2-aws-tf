@@ -18,7 +18,7 @@ resource "aws_launch_template" "this" {
   vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
 
   dynamic "block_device_mappings" {
-    for_each = concat([var.block_device_mappings],var.extra_block_device_mappings)
+    for_each = concat([var.block_device_mappings], var.extra_block_device_mappings)
     content {
       device_name = lookup(block_device_mappings.value, "device_name", "/dev/sda1")
       ebs {

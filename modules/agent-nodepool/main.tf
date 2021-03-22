@@ -109,17 +109,17 @@ module "nodepool" {
   source = "../nodepool"
   name   = "${local.name}-agent"
 
-  vpc_id                 = var.vpc_id
-  subnets                = var.subnets
-  ami                    = var.ami
-  instance_type          = var.instance_type
-  block_device_mappings  = var.block_device_mappings
-  extra_block_device_mappings  = var.extra_block_device_mappings
-  vpc_security_group_ids = concat([var.cluster_data.cluster_sg], var.extra_security_group_ids)
-  userdata               = data.template_cloudinit_config.init.rendered
-  iam_instance_profile   = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
-  asg                    = var.asg
-  spot                   = var.spot
+  vpc_id                      = var.vpc_id
+  subnets                     = var.subnets
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  block_device_mappings       = var.block_device_mappings
+  extra_block_device_mappings = var.extra_block_device_mappings
+  vpc_security_group_ids      = concat([var.cluster_data.cluster_sg], var.extra_security_group_ids)
+  userdata                    = data.template_cloudinit_config.init.rendered
+  iam_instance_profile        = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+  asg                         = var.asg
+  spot                        = var.spot
 
   tags = merge({
     "Role" = "agent",
