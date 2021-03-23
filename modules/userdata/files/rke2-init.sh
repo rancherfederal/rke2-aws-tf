@@ -43,7 +43,7 @@ elect_leader() {
   instances=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$asg_name" --query 'AutoScalingGroups[*].Instances[?HealthStatus==`Healthy`].InstanceId' --output text)
 
   # Simply identify the leader as the first of the instance ids sorted alphanumerically
-  leader=$(echo "$instances" | tr ' ' '\n' | sort -n | head -n1)
+  leader=$(echo $instances | tr ' ' '\n' | sort -n | head -n1)
 
   info "Current instance: $instance_id | Leader instance: $leader"
 
