@@ -110,7 +110,7 @@ variable "cluster_data" {
 variable "rke2_version" {
   description = "Version to use for RKE2 server nodepool"
   type        = string
-  default     = "v1.19.7+rke2r1"
+  default     = "v1.19.8+rke2r1"
 }
 
 variable "rke2_config" {
