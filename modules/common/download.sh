@@ -40,8 +40,6 @@ install_awscli() {
   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   unzip -q awscliv2.zip
   ./aws/install --bin-dir /usr/bin
-
-  aws configure set default.region $(curl -s http://169.254.169.254/latest/meta-data/placement/region)
 }
 
 do_download() {
@@ -93,7 +91,7 @@ do_download() {
     # TODO: Determine minimum supported version, for now just carry on assuming ignorance
     apt update -y
     apt install -y unzip less iptables resolvconf linux-headers-$(uname -r) telnet
-    hostnamectl set-hostname $(curl http://169.254.169.254/latest/meta-data/hostname)
+    hostnamectl set-hostname "$(curl http://169.254.169.254/latest/meta-data/hostname)"
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh
 
