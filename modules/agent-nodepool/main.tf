@@ -106,8 +106,8 @@ data "template_cloudinit_config" "init" {
 # RKE2 Node Pool
 #
 module "nodepool" {
-  source = "../nodepool"
-  name   = "${local.name}-agent"
+  source                      = "../nodepool"
+  name                        = "${local.name}-agent"
   vpc_id                      = var.vpc_id
   subnets                     = var.subnets
   ami                         = var.ami

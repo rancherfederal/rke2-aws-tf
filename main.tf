@@ -175,8 +175,8 @@ resource "aws_iam_role_policy" "put_kubeconfig" {
 # Server Nodepool
 #
 module "servers" {
-  source = "./modules/nodepool"
-  name   = "${local.uname}-server"
+  source                      = "./modules/nodepool"
+  name                        = "${local.uname}-server"
   vpc_id                      = var.vpc_id
   subnets                     = var.subnets
   ami                         = var.ami
