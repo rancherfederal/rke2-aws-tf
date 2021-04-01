@@ -19,6 +19,10 @@ fatal() {
     exit 1
 }
 
+timestamp() {
+  date "+%Y-%m-%d %H:%M:%S"
+}
+
 config() {
   mkdir -p "/etc/rancher/rke2"
   cat <<EOF > "/etc/rancher/rke2/config.yaml"
@@ -28,7 +32,7 @@ EOF
 }
 
 append_config() {
-  echo $1 >> "/etc/rancher/rke2/config.yaml"
+  echo "$1" >> "/etc/rancher/rke2/config.yaml"
 }
 
 # The most simple "leader election" you've ever seen in your life
@@ -43,7 +47,7 @@ elect_leader() {
 
   info "Current instance: $instance_id | Leader instance: $leader"
 
-  if [ $instance_id = $leader ]; then
+  if [ "$instance_id" = "$leader" ]; then
     SERVER_TYPE="leader"
     info "Electing as cluster leader"
   else
@@ -58,7 +62,7 @@ identify() {
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
 
-  if [ $supervisor_status -ne 200 ]; then
+  if [ "$supervisor_status" -ne 200 ]; then
     info "API server unavailable, performing simple leader election"
     elect_leader
   else
@@ -69,7 +73,7 @@ identify() {
 cp_wait() {
   while true; do
     supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
-    if [ $supervisor_status -eq 200 ]; then
+    if [ "$supervisor_status" -eq 200 ]; then
       info "Cluster is ready"
 
       # Let things settle down for a bit, not required
@@ -82,8 +86,33 @@ cp_wait() {
   done
 }
 
+local_cp_api_wait() {
+  export PATH=$PATH:/var/lib/rancher/rke2/bin
+  export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+
+  while true; do
+    info "$(timestamp) Waiting for kube-apiserver..."
+    if timeout 1 bash -c "true <>/dev/tcp/localhost/6443" 2>/dev/null; then
+        break
+    fi
+    sleep 5
+  done
+
+  wait $!
+
+  nodereadypath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
+  until kubectl get nodes --selector='node-role.kubernetes.io/master' -o jsonpath="$nodereadypath" | grep -E "Ready=True"; do
+    info "$(timestamp) Waiting for servers to be ready..."
+    sleep 5
+  done
+
+  info "$(timestamp) all kube-system deployments are ready!"
+}
+
 fetch_token() {
   info "Fetching rke2 join token..."
+
+  aws configure set default.region "$(curl -s http://169.254.169.254/latest/meta-data/placement/region)"
 
   # Validate aws caller identity, fatal if not valid
   if ! aws sts get-caller-identity 2>/dev/null; then
@@ -149,7 +178,7 @@ tls-san:
   - ${server_url}
 EOF
 
-    if [ $SERVER_TYPE = "server" ]; then
+    if [ $SERVER_TYPE = "server" ]; then     # additional server joining an existing cluster
       append_config 'server: https://${server_url}:9345'
       # Wait for cluster to exist, then init another server
       cp_wait
@@ -162,8 +191,13 @@ EOF
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
 
-    # Upload kubeconfig to s3 bucket
-    upload
+    if [ $SERVER_TYPE = "leader" ]; then
+      # Upload kubeconfig to s3 bucket
+      upload
+
+      # For servers, wait for apiserver to be ready before continuing so that `post_userdata` can operate on the cluster
+      local_cp_api_wait
+    fi
 
   else
     append_config 'server: https://${server_url}:9345'
