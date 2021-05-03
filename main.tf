@@ -1,6 +1,6 @@
 locals {
   # Create a unique cluster name we'll prefix to all resources created and ensure it's lowercase
-  uname = lower("${var.cluster_name}-${random_string.uid.result}")
+  uname = var.unique_suffix ? lower("${var.cluster_name}-${random_string.uid.result}") : lower(var.cluster_name)
 
   default_tags = {
     "ClusterType" = "rke2",

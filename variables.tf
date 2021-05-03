@@ -3,6 +3,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "unique_suffix" {
+  description = "Enables/disables generation of a unique suffix to cluster name"
+  type        = bool
+  default     = true
+}
+
 variable "vpc_id" {
   description = "VPC ID to create resources in"
   type        = string
