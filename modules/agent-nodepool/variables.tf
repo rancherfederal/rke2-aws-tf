@@ -166,3 +166,8 @@ variable "post_userdata" {
   type        = string
   default     = ""
 }
+
+variable "wait_for_capacity_timeout" {
+  type    = number
+  default = "10m"
+}
