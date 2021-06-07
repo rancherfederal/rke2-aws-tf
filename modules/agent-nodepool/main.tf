@@ -120,6 +120,7 @@ module "nodepool" {
   iam_instance_profile        = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                         = var.asg
   spot                        = var.spot
+  wait_for_capacity_timeout   = var.wait_for_capacity_timeout
 
   tags = merge({
     "Role" = "agent",

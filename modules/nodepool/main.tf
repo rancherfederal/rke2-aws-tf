@@ -63,9 +63,10 @@ resource "aws_autoscaling_group" "this" {
   desired_capacity = var.asg.desired
 
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
-  health_check_type = var.health_check_type
-  target_group_arns = var.target_group_arns
-  load_balancers    = var.load_balancers
+  health_check_type         = var.health_check_type
+  wait_for_capacity_timeout = var.wait_for_capacity_timeout
+  target_group_arns         = var.target_group_arns
+  load_balancers            = var.load_balancers
 
   min_elb_capacity = var.min_elb_capacity
 

@@ -150,3 +150,8 @@ variable "enable_ccm" {
   type        = bool
   default     = false
 }
+
+variable "wait_for_capacity_timeout" {
+  type    = number
+  default = "10m"
+}
