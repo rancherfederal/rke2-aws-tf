@@ -112,6 +112,12 @@ variable "controlplane_allowed_cidrs" {
   default     = ["0.0.0.0/0"]
 }
 
+variable "controlplane_access_logs_bucket" {
+  description = "Bucket name for logging requests to control plane load balancer"
+  type        = string
+  default     = "disabled"
+}
+
 #
 # RKE2 Variables
 #

@@ -74,5 +74,10 @@ resource "aws_elb" "controlplane" {
     unhealthy_threshold = 3
   }
 
+  access_logs {
+    bucket  = var.access_logs_bucket
+    enabled = var.access_logs_bucket != "disabled"
+  }
+
   tags = merge({}, var.tags)
 }
