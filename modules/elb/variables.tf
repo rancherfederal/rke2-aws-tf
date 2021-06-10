@@ -44,3 +44,8 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "access_logs_bucket" {
+  type    = string
+  default = "disabled"
+}
