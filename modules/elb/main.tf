@@ -75,6 +75,7 @@ resource "aws_elb" "controlplane" {
   }
 
   access_logs {
+    # the bucket name isn't allowed to be empty in this block, so use its default value as the flag
     bucket  = var.access_logs_bucket
     enabled = var.access_logs_bucket != "disabled"
   }
