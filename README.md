@@ -176,6 +176,7 @@ Optional policies have the option of being created by default, but are specified
 | tags | Map of tags to add to all resources created | `map(string)` | `{}` | no |
 | unique\_suffix | Enables/disables generation of a unique suffix to cluster name | `bool` | `true` | yes |
 | vpc\_id | VPC ID to create resources in | `string` | n/a | yes |
+| wait_for_capacity_timeout | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
 
 ## Outputs
 
