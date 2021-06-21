@@ -175,6 +175,7 @@ Optional policies have the option of being created by default, but are specified
 | subnets | List of subnet IDs to create resources in | `list(string)` | n/a | yes |
 | tags | Map of tags to add to all resources created | `map(string)` | `{}` | no |
 | vpc\_id | VPC ID to create resources in | `string` | n/a | yes |
+| wait_for_capacity_timeout | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
 
 ## Outputs
 

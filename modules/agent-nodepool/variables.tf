@@ -154,3 +154,9 @@ variable "post_userdata" {
   type        = string
   default     = ""
 }
+
+variable "wait_for_capacity_timeout" {
+  description = "How long Terraform should wait for ASG instances to be healthy before timing out."
+  type        = string
+  default     = "10m"
+}
