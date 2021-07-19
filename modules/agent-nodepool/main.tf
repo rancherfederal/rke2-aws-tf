@@ -106,9 +106,8 @@ data "template_cloudinit_config" "init" {
 # RKE2 Node Pool
 #
 module "nodepool" {
-  source = "../nodepool"
-  name   = "${local.name}-agent"
-
+  source                      = "../nodepool"
+  name                        = "${local.name}-agent"
   vpc_id                      = var.vpc_id
   subnets                     = var.subnets
   ami                         = var.ami
@@ -120,7 +119,7 @@ module "nodepool" {
   iam_instance_profile        = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                         = var.asg
   spot                        = var.spot
-
+  cpu_credits                 = var.cpu_credits
   tags = merge({
     "Role" = "agent",
   }, local.default_tags, local.ccm_tags, local.autoscaler_tags, var.tags)

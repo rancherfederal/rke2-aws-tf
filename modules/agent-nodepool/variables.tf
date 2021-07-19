@@ -154,3 +154,13 @@ variable "post_userdata" {
   type        = string
   default     = ""
 }
+
+variable "cpu_credits" {
+  type    = string
+  default = "standard"
+  validation {
+    condition     = contains(["standard", "unlimited"], var.cpu_credits)
+    error_message = "Unsupported CPU Credit option supplied. Can be 'standard', or 'unlimited'."
+  }
+}
+

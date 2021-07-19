@@ -49,6 +49,11 @@ resource "aws_launch_template" "this" {
   }
 
   tags = merge({}, var.tags)
+
+  credit_specification {
+    cpu_credits = var.cpu_credits
+  }
+
 }
 
 #
