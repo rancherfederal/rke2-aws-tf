@@ -74,5 +74,11 @@ resource "aws_elb" "controlplane" {
     unhealthy_threshold = 3
   }
 
+  access_logs {
+    # the bucket name isn't allowed to be empty in this block, so use its default value as the flag
+    bucket  = var.access_logs_bucket
+    enabled = var.access_logs_bucket != "disabled"
+  }
+
   tags = merge({}, var.tags)
 }
