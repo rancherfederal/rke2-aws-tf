@@ -176,9 +176,8 @@ resource "aws_iam_role_policy" "put_kubeconfig" {
 # Server Nodepool
 #
 module "servers" {
-  source = "./modules/nodepool"
-  name   = "${local.uname}-server"
-
+  source                      = "./modules/nodepool"
+  name                        = "${local.uname}-server"
   vpc_id                      = var.vpc_id
   subnets                     = var.subnets
   ami                         = var.ami
@@ -188,6 +187,7 @@ module "servers" {
   vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
   spot                        = var.spot
   load_balancers              = [module.cp_lb.name]
+  cpu_credits                 = var.cpu_credits
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered

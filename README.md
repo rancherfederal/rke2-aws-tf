@@ -158,6 +158,7 @@ Optional policies have the option of being created by default, but are specified
 | controlplane\_allowed\_cidrs | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | controlplane\_enable\_cross\_zone\_load\_balancing | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
 | controlplane\_internal | Toggle between public or private control plane load balancer | `bool` | `true` | no |
+| cpu\_credits | n/a | `string` | `"standard"` | no |
 | download | Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH | `bool` | `true` | no |
 | enable\_ccm | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
 | extra\_block\_device\_mappings | Additional server pool block device mappings configuration | `list(map(string))` | `[]` | no |
@@ -168,7 +169,7 @@ Optional policies have the option of being created by default, but are specified
 | post\_userdata | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | pre\_userdata | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
 | rke2\_config | Server pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/server_config for full list of options | `string` | `""` | no |
-| rke2\_version | Version to use for RKE2 server nodes | `string` | `"v1.18.12+rke2r2"` | no |
+| rke2\_version | Version to use for RKE2 server nodes | `string` | `"v1.19.7+rke2r1"` | no |
 | servers | Number of servers to create | `number` | `1` | no |
 | spot | Toggle spot requests for server pool | `bool` | `false` | no |
 | ssh\_authorized\_keys | Server pool list of public keys to add as authorized ssh keys | `list(string)` | `[]` | no |
