@@ -52,3 +52,11 @@ output "iam_role_arn" {
 output "kubeconfig_path" {
   value = "s3://${module.statestore.bucket}/rke2.yaml"
 }
+
+output "lb_name" {
+  value = module.cp_lb.name
+}
+
+output "lb_dns" {
+  value = module.cp_lb.dns
+}
