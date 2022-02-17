@@ -144,7 +144,7 @@ upload() {
   done
 
   # Replace localhost with server url and upload to s3 bucket
-  sed "s/127.0.0.1/${server_url}/g" /etc/rancher/rke2/rke2.yaml | aws s3 cp - "s3://${token_bucket}/rke2.yaml"
+  sed "s/127.0.0.1/${server_url}/g" /etc/rancher/rke2/rke2.yaml | aws s3 cp - "s3://${token_bucket}/rke2.yaml" --content-type "text/yaml"
 }
 
 pre_userdata() {
