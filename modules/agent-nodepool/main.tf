@@ -89,9 +89,10 @@ data "template_cloudinit_config" "init" {
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/../common/download.sh", {
         # Must not use `version` here since that is reserved
-        rke2_version = var.rke2_version
-        rke2_channel = var.rke2_channel
-        type         = "agent"
+        set_rke2_version = length(var.rke2_version) > 0 ? true : false
+        rke2_version     = var.rke2_version
+        rke2_channel     = var.rke2_channel
+        type             = "agent"
       })
     }
   }
