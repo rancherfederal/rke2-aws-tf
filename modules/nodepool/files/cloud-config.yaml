@@ -4,6 +4,8 @@ ssh_authorized_keys:
   - ${_}
 %{ endfor }
 
+write-kubeconfig-mode: "0644"
+
 users:
   - default
   - name: rke2

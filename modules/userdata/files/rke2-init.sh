@@ -2,6 +2,7 @@
 
 export TYPE="${type}"
 export CCM="${ccm}"
+export IS_LEADER="${is_leader}"
 
 # info logs the given argument at info log level.
 info() {
@@ -35,24 +36,34 @@ append_config() {
   echo "$1" >> "/etc/rancher/rke2/config.yaml"
 }
 
-# The most simple "leader election" you've ever seen in your life
-elect_leader() {
+elect_monitor() {
   # Fetch other running instances in ASG
   instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
   asg_name=$(aws autoscaling describe-auto-scaling-instances --instance-ids "$instance_id" --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
   instances=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$asg_name" --query 'AutoScalingGroups[*].Instances[?HealthStatus==`Healthy`].InstanceId' --output text)
 
-  # Simply identify the leader as the first of the instance ids sorted alphanumerically
-  leader=$(echo $instances | tr ' ' '\n' | sort -n | head -n1)
+  # Select the monitoring node as the last of the instance ids sorted alphanumerically
+  monitor=$(echo $instances | tr ' ' '\n' | sort -n | tail -n1)
+  monitor_ip=$(aws ec2 describe-instances --instance-ids "$monitor" --query 'Reservations[*].Instances[*].[PrivateIpAddress]' --output text)
 
-  info "Current instance: $instance_id | Leader instance: $leader"
+  info "Current instance: $instance_id | Monitor instance: $monitor"
 
-  if [ "$instance_id" = "$leader" ]; then
-    SERVER_TYPE="leader"
-    info "Electing as cluster leader"
-  else
-    info "Electing as joining server"
+  if [ "$instance_id" = "$monitor" ]; then
+    MONITOR=true
+    info "Electing as dedicated monitor"
+    append_config 'node-taint: monitoring=yes:NoSchedule'
+    append_config 'node-label: monitoring=yes'
   fi
+  info "Electing as joining agent"
+}
+
+mark_monitor() {
+  export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+  export PATH=$PATH:/var/lib/rancher/rke2/bin
+  info "Tainting and labelling monitor node: $monitor  $monitor_ip"
+  k8s_monitor=$(kubectl get nodes --no-headers -o=custom-columns="NAME:.metadata.name" | grep $monitor_ip)
+  kubectl taint nodes $k8s_monitor monitoring=yes:NoSchedule
+  kubectl label nodes $k8s_monitor monitoring=yes
 }
 
 identify() {
@@ -62,10 +73,7 @@ identify() {
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   supervisor_status=$(curl --write-out '%%{http_code}' -sk --output /dev/null https://${server_url}:9345/ping)
 
-  if [ "$supervisor_status" -ne 200 ]; then
-    info "API server unavailable, performing simple leader election"
-    elect_leader
-  else
+  if [ "$supervisor_status" -eq 200 ]; then
     info "API server available, identifying as server joining existing cluster"
   fi
 }
@@ -170,15 +178,15 @@ post_userdata() {
   fi
 
   if [ $TYPE = "server" ]; then
-    # Initialize server
-    identify
 
     cat <<EOF >> "/etc/rancher/rke2/config.yaml"
 tls-san:
   - ${server_url}
 EOF
 
-    if [ $SERVER_TYPE = "server" ]; then     # additional server joining an existing cluster
+    if [ $TYPE = "server" ] && [ $IS_LEADER = "false" ]; then     # additional server joining an existing cluster
+        # Initialize server
+      identify
       append_config 'server: https://${server_url}:9345'
       # Wait for cluster to exist, then init another server
       cp_wait
@@ -191,7 +199,7 @@ EOF
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
 
-    if [ $SERVER_TYPE = "leader" ]; then
+    if [ $IS_LEADER = "true" ]; then
       # Upload kubeconfig to s3 bucket
       upload
 
@@ -201,7 +209,7 @@ EOF
 
   else
     append_config 'server: https://${server_url}:9345'
-
+    # elect_monitor
     # Default to agent
     systemctl enable rke2-agent
     systemctl daemon-reload

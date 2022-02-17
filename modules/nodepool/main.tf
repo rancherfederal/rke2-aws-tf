@@ -1,21 +1,25 @@
 locals {}
 
-resource "aws_security_group" "this" {
-  name        = "${var.name}-rke2-nodepool"
-  vpc_id      = var.vpc_id
-  description = "${var.name} node pool"
-  tags        = merge({}, var.tags)
-}
+# resource "aws_security_group" "this" {
+#   name        = "${var.name}-rke2-nodepool"
+#   vpc_id      = var.vpc_id
+#   description = "${var.name} node pool"
+#   tags        = merge({}, var.tags)
+# }
 
 #
 # Launch template
 #
 resource "aws_launch_template" "this" {
-  name                   = "${var.name}-rke2-nodepool"
-  image_id               = var.ami
-  instance_type          = var.instance_type
-  user_data              = var.userdata
-  vpc_security_group_ids = concat([aws_security_group.this.id], var.vpc_security_group_ids)
+  name          = "${var.name}-rke2-nodepool"
+  image_id      = var.ami
+  instance_type = var.instance_type
+  user_data     = var.userdata
+
+  network_interfaces {
+    delete_on_termination = true
+    security_groups       = var.vpc_security_group_ids
+  }
 
   block_device_mappings {
     device_name = lookup(var.block_device_mappings, "device_name", "/dev/sda1")
@@ -65,7 +69,6 @@ resource "aws_autoscaling_group" "this" {
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
   health_check_type = var.health_check_type
   target_group_arns = var.target_group_arns
-  load_balancers    = var.load_balancers
 
   min_elb_capacity = var.min_elb_capacity
 

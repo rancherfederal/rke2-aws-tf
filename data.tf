@@ -1,7 +1,8 @@
-module "init" {
+module "init-leader" {
   source = "./modules/userdata"
 
-  server_url    = module.cp_lb.dns
+  # server_url     = aws_route53_record.public.fqdn
+  server_url    = var.fqdn
   token_bucket  = module.statestore.bucket
   token_object  = module.statestore.token_object
   config        = var.rke2_config
@@ -9,9 +10,10 @@ module "init" {
   post_userdata = var.post_userdata
   ccm           = var.enable_ccm
   agent         = false
+  is_leader     = true
 }
 
-data "template_cloudinit_config" "this" {
+data "template_cloudinit_config" "leader" {
   gzip          = true
   base64_encode = true
 
@@ -31,8 +33,10 @@ data "template_cloudinit_config" "this" {
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/modules/common/download.sh", {
         # Must not use `version` here since that is reserved
-        rke2_version = var.rke2_version
-        type         = "server"
+        set_rke2_version = length(var.rke2_version) > 0 ? true : false
+        rke2_channel     = var.rke2_channel
+        rke2_version     = var.rke2_version
+        type             = "server"
       })
     }
   }
@@ -40,7 +44,66 @@ data "template_cloudinit_config" "this" {
   part {
     filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
-    content      = module.init.templated
+    content      = module.init-leader.templated
+  }
+}
+
+data "aws_s3_object" "kube_config" {
+  bucket = module.statestore.bucket
+  key    = "rke2.yaml"
+
+  depends_on = [
+    module.leader
+  ]
+}
+
+module "init-server" {
+  source = "./modules/userdata"
+
+  # server_url     = aws_route53_record.public.fqdn
+  server_url    = var.fqdn
+  token_bucket  = module.statestore.bucket
+  token_object  = module.statestore.token_object
+  config        = var.rke2_config
+  pre_userdata  = var.pre_userdata
+  post_userdata = var.post_userdata
+  ccm           = var.enable_ccm
+  agent         = false
+  is_leader     = false
+}
+
+data "template_cloudinit_config" "server" {
+  gzip          = true
+  base64_encode = true
+
+  # Main cloud-init config file
+  part {
+    filename     = "cloud-config.yaml"
+    content_type = "text/cloud-config"
+    content = templatefile("${path.module}/modules/nodepool/files/cloud-config.yaml", {
+      ssh_authorized_keys = var.ssh_authorized_keys
+    })
+  }
+
+  dynamic "part" {
+    for_each = var.download ? [1] : []
+    content {
+      filename     = "00_download.sh"
+      content_type = "text/x-shellscript"
+      content = templatefile("${path.module}/modules/common/download.sh", {
+        # Must not use `version` here since that is reserved
+        set_rke2_version = length(var.rke2_version) > 0 ? true : false
+        rke2_channel     = var.rke2_channel
+        rke2_version     = var.rke2_version
+        type             = "server"
+      })
+    }
+  }
+
+  part {
+    filename     = "01_rke2.sh"
+    content_type = "text/x-shellscript"
+    content      = module.init-server.templated
   }
 }
 

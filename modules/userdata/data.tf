@@ -2,7 +2,9 @@ data "template_file" "init" {
   template = file("${path.module}/files/rke2-init.sh")
 
   vars = {
-    type = var.agent ? "agent" : "server"
+    type           = var.agent ? "agent" : "server"
+    is_leader      = var.is_leader
+    expected_nodes = var.expected_nodes
 
     server_url   = var.server_url
     token_bucket = var.token_bucket

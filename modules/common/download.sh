@@ -2,7 +2,10 @@
 set -e
 
 export INSTALL_RKE2_TYPE="${type}"
-export INSTALL_RKE2_VERSION="${rke2_version}"
+export INSTALL_RKE2_CHANNEL="${rke2_channel}"
+if [ "${set_rke2_version}" = "true" ]; then
+  export INSTALL_RKE2_VERSION="${rke2_version}"
+fi
 
 if [ "$${DEBUG}" == 1 ]; then
   set -x
@@ -90,7 +93,7 @@ do_download() {
     info "Identified Ubuntu"
     # TODO: Determine minimum supported version, for now just carry on assuming ignorance
     apt update -y
-    apt install -y unzip less iptables resolvconf linux-headers-$(uname -r) telnet
+    apt install -y unzip less iptables resolvconf linux-headers-$(uname -r) telnet apparmor apparmor-utils
     hostnamectl set-hostname "$(curl http://169.254.169.254/latest/meta-data/hostname)"
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh

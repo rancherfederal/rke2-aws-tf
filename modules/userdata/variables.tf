@@ -4,6 +4,10 @@ variable "agent" {
   default     = true
 }
 
+variable "is_leader" {
+  type = bool
+}
+
 variable "server_url" {
   description = "rke2 server url"
   type        = string

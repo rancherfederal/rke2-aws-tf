@@ -49,8 +49,12 @@ output "iam_role_arn" {
   value       = var.iam_instance_profile == "" ? module.iam[0].role_arn : var.iam_instance_profile
 }
 
-output "kubeconfig_path" {
+output "kubeconfig_s3_path" {
   value = "s3://${module.statestore.bucket}/rke2.yaml"
+}
+
+output "kubeconfig_content" {
+  value = data.aws_s3_object.kube_config.body
 }
 
 output "lb_name" {
@@ -59,4 +63,20 @@ output "lb_name" {
 
 output "lb_dns" {
   value = module.cp_lb.dns
+}
+
+output "lb_id" {
+  value = module.cp_lb.id
+}
+
+output "lb_arn" {
+  value = module.cp_lb.arn
+}
+
+output "leader_asg_name" {
+  value = module.leader.asg_name
+}
+
+output "server_asg_name" {
+  value = module.servers.asg_name
 }

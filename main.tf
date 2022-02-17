@@ -16,6 +16,9 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
+  security_groups  = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
+  target_groups    = concat(module.cp_lb.target_groups, var.extra_target_group_arns)
+  kube_config_path = "${path.module}/${local.uname}-tfkubeconfig.yaml"
 }
 
 resource "random_string" "uid" {
@@ -46,7 +49,7 @@ module "statestore" {
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/elb"
+  source  = "./modules/loadbalancing"
   name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
@@ -173,6 +176,64 @@ resource "aws_iam_role_policy" "put_kubeconfig" {
 }
 
 #
+# Leader Nodepool
+#
+module "leader" {
+  source = "./modules/nodepool"
+  name   = "${local.uname}-leader"
+
+  vpc_id                      = var.vpc_id
+  subnets                     = var.subnets
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  block_device_mappings       = var.block_device_mappings
+  extra_block_device_mappings = var.extra_block_device_mappings
+  vpc_security_group_ids      = local.security_groups
+  spot                        = var.spot
+  target_group_arns           = local.target_groups
+
+  # Overrideable variables
+  userdata             = data.template_cloudinit_config.leader.rendered
+  iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
+
+  # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
+  asg = { min : 1, max : 1, desired : 1 }
+
+  # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
+  min_elb_capacity = 1
+
+  tags = merge({
+    "Role" = "leader",
+  }, local.ccm_tags, var.tags)
+}
+
+#
+# Store Kubeconfig locally
+#
+resource "local_file" "kubeconfig" {
+  content  = data.aws_s3_object.kube_config.body
+  filename = local.kube_config_path
+}
+
+resource "null_resource" "wait_for_leader_to_register" {
+  provisioner "local-exec" {
+    command = <<-EOT
+    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "1" ]; do
+        sleep 5
+        nodes="$(kubectl get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
+        echo "rke2 nodes: $${nodes}"
+    done'
+    EOT
+    environment = {
+      KUBECONFIG = local.kube_config_path
+    }
+  }
+  depends_on = [
+    local_file.kubeconfig
+  ]
+}
+
+#
 # Server Nodepool
 #
 module "servers" {
@@ -185,21 +246,59 @@ module "servers" {
   instance_type               = var.instance_type
   block_device_mappings       = var.block_device_mappings
   extra_block_device_mappings = var.extra_block_device_mappings
-  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
+  vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
-  load_balancers              = [module.cp_lb.name]
+  # target_group_arns           = concat(module.cp_lb.target_groups, [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn], var.extra_target_group_arns)
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this.rendered
+  userdata             = data.template_cloudinit_config.server.rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
   asg = { min : 1, max : 7, desired : var.servers }
 
   # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
-  min_elb_capacity = 1
+  # min_elb_capacity = tonumber("${var.servers}")
 
   tags = merge({
     "Role" = "server",
   }, local.ccm_tags, var.tags)
+
+  depends_on = [
+    module.leader
+  ]
+}
+
+#
+# Wait for cluster nodes to reach expected number
+#
+
+resource "null_resource" "wait_for_servers_to_register" {
+  provisioner "local-exec" {
+    command = <<-EOT
+    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
+        sleep 5
+        nodes="$(kubectl get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
+        echo "rke2 nodes: $${nodes}"
+    done'
+    EOT
+    environment = {
+      KUBECONFIG = local.kube_config_path
+    }
+  }
+
+  depends_on = [
+    module.servers
+  ]
+}
+
+resource "aws_autoscaling_attachment" "asg_attachment_bar" {
+  count                  = length(local.target_groups)
+  autoscaling_group_name = module.servers.asg_name
+  # elb                    = module.cp_lb.name
+  lb_target_group_arn = local.target_groups[count.index]
+
+  depends_on = [
+    null_resource.wait_for_servers_to_register
+  ]
 }

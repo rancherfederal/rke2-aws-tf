@@ -89,6 +89,12 @@ variable "spot" {
   default     = false
 }
 
+variable "extra_target_group_arns" {
+  description = "List of additional target group ARNs"
+  type        = list(string)
+  default     = []
+}
+
 variable "extra_security_group_ids" {
   description = "List of additional security group IDs"
   type        = list(string)
@@ -117,7 +123,7 @@ variable "cluster_data" {
 variable "rke2_version" {
   description = "Version to use for RKE2 server nodepool"
   type        = string
-  default     = "v1.19.7+rke2r1"
+  default     = ""
 }
 
 variable "rke2_config" {

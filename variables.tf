@@ -3,6 +3,10 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "fqdn" {
+  type = string
+}
+
 variable "unique_suffix" {
   description = "Enables/disables generation of a unique suffix to cluster name"
   type        = bool
@@ -85,6 +89,16 @@ variable "ssh_authorized_keys" {
   default     = []
 }
 
+variable "zone_id" {
+  type = string
+}
+
+variable "extra_target_group_arns" {
+  description = "List of additional target group ARNs"
+  type        = list(string)
+  default     = []
+}
+
 variable "extra_security_group_ids" {
   description = "List of additional security group IDs"
   type        = list(string)
@@ -122,9 +136,15 @@ variable "controlplane_access_logs_bucket" {
 # RKE2 Variables
 #
 variable "rke2_version" {
-  description = "Version to use for RKE2 server nodes"
+  description = "Version to use for RKE2 server nodes, defaults to latest on the specified release channel"
   type        = string
-  default     = "v1.19.7+rke2r1"
+  default     = ""
+}
+
+variable "rke2_channel" {
+  description = "Release channel to use for fetching RKE2 download URL, defaults to stable"
+  type        = string
+  default     = "stable"
 }
 
 variable "rke2_config" {

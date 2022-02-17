@@ -106,12 +106,12 @@ module "vpc" {
   # Add in required tags for proper AWS CCM integration
   public_subnet_tags = merge({
     "kubernetes.io/cluster/${module.rke2.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                            = "1"
+    "kubernetes.io/role/lb"                             = "1"
   }, local.tags)
 
   private_subnet_tags = merge({
     "kubernetes.io/cluster/${module.rke2.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"                   = "1"
+    "kubernetes.io/role/internal-lb"                    = "1"
   }, local.tags)
 
   tags = merge({
