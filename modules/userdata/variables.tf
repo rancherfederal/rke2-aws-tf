@@ -5,7 +5,8 @@ variable "agent" {
 }
 
 variable "is_leader" {
-  type = bool
+  type    = bool
+  default = false
 }
 
 variable "server_url" {

@@ -17,7 +17,3 @@ output "asg_name" {
 output "asg_arn" {
   value = aws_autoscaling_group.this.arn
 }
-
-# output "security_group" {
-#   value = aws_security_group.this.id
-# }
