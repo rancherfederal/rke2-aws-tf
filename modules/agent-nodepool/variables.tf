@@ -126,6 +126,12 @@ variable "rke2_version" {
   default     = ""
 }
 
+variable "rke2_channel" {
+  description = "Release channel to use for fetching RKE2 download URL, defaults to stable"
+  type        = string
+  default     = "stable"
+}
+
 variable "rke2_config" {
   description = "Node pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for full list of options"
   default     = ""

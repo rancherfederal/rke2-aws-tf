@@ -90,6 +90,7 @@ data "template_cloudinit_config" "init" {
       content = templatefile("${path.module}/../common/download.sh", {
         # Must not use `version` here since that is reserved
         rke2_version = var.rke2_version
+        rke2_channel = var.rke2_channel
         type         = "agent"
       })
     }
