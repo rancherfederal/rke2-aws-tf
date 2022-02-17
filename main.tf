@@ -188,6 +188,7 @@ module "servers" {
   vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
   spot                        = var.spot
   load_balancers              = [module.cp_lb.name]
+  wait_for_capacity_timeout   = var.wait_for_capacity_timeout
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered
