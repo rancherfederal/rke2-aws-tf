@@ -193,13 +193,12 @@ module "leader" {
   target_group_arns           = local.target_groups
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.leader.rendered
+  userdata             = data.template_cloudinit_config.this[0].rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
   asg = { min : 1, max : 1, desired : 1 }
 
-  # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
   min_elb_capacity = 1
 
   tags = merge({
@@ -215,10 +214,11 @@ resource "local_file" "kubeconfig" {
   filename = local.kube_config_path
 }
 
+# need to wait for leader to exist in cluster OR until # servers == expected # (for when user might re-apply the config)
 resource "null_resource" "wait_for_leader_to_register" {
   provisioner "local-exec" {
     command = <<-EOT
-    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "1" ]; do
+    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "1" ] || [ "$${nodes}" = "${var.servers}" ]; do
         sleep 5
         nodes="$(kubectl get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
         echo "rke2 nodes: $${nodes}"
@@ -237,6 +237,7 @@ resource "null_resource" "wait_for_leader_to_register" {
 # Server Nodepool
 #
 module "servers" {
+  count  = var.servers > 1 ? 1 : 0
   source = "./modules/nodepool"
   name   = "${local.uname}-server"
 
@@ -248,17 +249,13 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
-  # target_group_arns           = concat(module.cp_lb.target_groups, [aws_lb_target_group.server_80.arn, aws_lb_target_group.server_443.arn], var.extra_target_group_arns)
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.server.rendered
+  userdata             = data.template_cloudinit_config.this[1].rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
-  asg = { min : 1, max : 7, desired : var.servers }
-
-  # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
-  # min_elb_capacity = tonumber("${var.servers}")
+  asg = { min : 1, max : 7, desired : tonumber("${var.servers - 1}") }
 
   tags = merge({
     "Role" = "server",
@@ -272,8 +269,8 @@ module "servers" {
 #
 # Wait for cluster nodes to reach expected number
 #
-
 resource "null_resource" "wait_for_servers_to_register" {
+  count = var.servers > 1 ? 1 : 0
   provisioner "local-exec" {
     command = <<-EOT
     timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
@@ -293,10 +290,9 @@ resource "null_resource" "wait_for_servers_to_register" {
 }
 
 resource "aws_autoscaling_attachment" "asg_attachment_bar" {
-  count                  = length(local.target_groups)
-  autoscaling_group_name = module.servers.asg_name
-  # elb                    = module.cp_lb.name
-  lb_target_group_arn = local.target_groups[count.index]
+  count                  = var.servers > 1 ? length(local.target_groups) : 0
+  autoscaling_group_name = module.servers[0].asg_name
+  lb_target_group_arn    = local.target_groups[count.index]
 
   depends_on = [
     null_resource.wait_for_servers_to_register

@@ -3,28 +3,19 @@ resource "aws_s3_bucket" "bucket" {
   # acl           = "private"
   force_destroy = true
 
-  # server_side_encryption_configuration {
-  #   rule {
-  #     apply_server_side_encryption_by_default {
-  #       sse_algorithm = "aws:kms"
-  #     }
-  #   }
-  # }
-
   tags = merge({}, var.tags)
 }
 
-resource "aws_s3_bucket_acl" "example_bucket_acl" {
+resource "aws_s3_bucket_acl" "this" {
   bucket = aws_s3_bucket.bucket.id
   acl    = "private"
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "example" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.bucket.bucket
 
   rule {
     apply_server_side_encryption_by_default {
-      # kms_master_key_id = aws_kms_key.mykey.arn
       sse_algorithm = "aws:kms"
     }
   }

@@ -1,7 +1,9 @@
-module "init-leader" {
+# only need a count of 2 when var.servers > 1
+# the first instance will be for the leader and the 2nd will be for the server(s)
+module "init" {
+  count  = var.servers > 1 ? 2 : 1
   source = "./modules/userdata"
 
-  # server_url     = aws_route53_record.public.fqdn
   server_url    = var.fqdn
   token_bucket  = module.statestore.bucket
   token_object  = module.statestore.token_object
@@ -10,10 +12,11 @@ module "init-leader" {
   post_userdata = var.post_userdata
   ccm           = var.enable_ccm
   agent         = false
-  is_leader     = true
+  is_leader     = count.index == 0 ? true : false
 }
 
-data "template_cloudinit_config" "leader" {
+data "template_cloudinit_config" "this" {
+  count         = var.servers > 1 ? 2 : 1
   gzip          = true
   base64_encode = true
 
@@ -41,10 +44,11 @@ data "template_cloudinit_config" "leader" {
     }
   }
 
+  # Use the appropriate index of module.init (0 = leader, 1 = servers)
   part {
     filename     = "01_rke2.sh"
     content_type = "text/x-shellscript"
-    content      = module.init-leader.templated
+    content      = module.init[count.index].templated
   }
 }
 
@@ -55,56 +59,6 @@ data "aws_s3_object" "kube_config" {
   depends_on = [
     module.leader
   ]
-}
-
-module "init-server" {
-  source = "./modules/userdata"
-
-  # server_url     = aws_route53_record.public.fqdn
-  server_url    = var.fqdn
-  token_bucket  = module.statestore.bucket
-  token_object  = module.statestore.token_object
-  config        = var.rke2_config
-  pre_userdata  = var.pre_userdata
-  post_userdata = var.post_userdata
-  ccm           = var.enable_ccm
-  agent         = false
-  is_leader     = false
-}
-
-data "template_cloudinit_config" "server" {
-  gzip          = true
-  base64_encode = true
-
-  # Main cloud-init config file
-  part {
-    filename     = "cloud-config.yaml"
-    content_type = "text/cloud-config"
-    content = templatefile("${path.module}/modules/nodepool/files/cloud-config.yaml", {
-      ssh_authorized_keys = var.ssh_authorized_keys
-    })
-  }
-
-  dynamic "part" {
-    for_each = var.download ? [1] : []
-    content {
-      filename     = "00_download.sh"
-      content_type = "text/x-shellscript"
-      content = templatefile("${path.module}/modules/common/download.sh", {
-        # Must not use `version` here since that is reserved
-        set_rke2_version = length(var.rke2_version) > 0 ? true : false
-        rke2_channel     = var.rke2_channel
-        rke2_version     = var.rke2_version
-        type             = "server"
-      })
-    }
-  }
-
-  part {
-    filename     = "01_rke2.sh"
-    content_type = "text/x-shellscript"
-    content      = module.init-server.templated
-  }
 }
 
 #

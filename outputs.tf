@@ -23,15 +23,15 @@ output "server_sg" {
 }
 
 output "server_nodepool_id" {
-  value = module.servers.asg_id
+  value = module.servers[0].asg_id
 }
 
 output "server_nodepool_name" {
-  value = module.servers.asg_name
+  value = module.servers[0].asg_name
 }
 
 output "server_nodepool_arn" {
-  value = module.servers.asg_arn
+  value = module.servers[0].asg_arn
 }
 
 output "iam_role" {
@@ -78,5 +78,5 @@ output "leader_asg_name" {
 }
 
 output "server_asg_name" {
-  value = module.servers.asg_name
+  value = module.servers[0].asg_name
 }
