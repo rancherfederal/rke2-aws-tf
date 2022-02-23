@@ -55,6 +55,7 @@ output "kubeconfig_s3_path" {
 
 output "kubeconfig_content" {
   value = data.aws_s3_object.kube_config.body
+  sensitive = true
 }
 
 output "lb_name" {

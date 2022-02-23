@@ -4,7 +4,9 @@ variable "cluster_name" {
 }
 
 variable "fqdn" {
+  description = "FQDN that routes traffic to your server node(s)"
   type = string
+  default = ""
 }
 
 variable "unique_suffix" {
@@ -87,10 +89,6 @@ variable "ssh_authorized_keys" {
   description = "Server pool list of public keys to add as authorized ssh keys"
   type        = list(string)
   default     = []
-}
-
-variable "zone_id" {
-  type = string
 }
 
 variable "extra_target_group_arns" {

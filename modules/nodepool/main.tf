@@ -1,12 +1,5 @@
 locals {}
 
-# resource "aws_security_group" "this" {
-#   name        = "${var.name}-rke2-nodepool"
-#   vpc_id      = var.vpc_id
-#   description = "${var.name} node pool"
-#   tags        = merge({}, var.tags)
-# }
-
 #
 # Launch template
 #

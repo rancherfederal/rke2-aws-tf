@@ -4,7 +4,7 @@ module "init" {
   count  = var.servers > 1 ? 2 : 1
   source = "./modules/userdata"
 
-  server_url    = var.fqdn
+  server_url    = length(var.fqdn) > 0 ? var.fqdn : module.cp_lb.dns
   token_bucket  = module.statestore.bucket
   token_object  = module.statestore.token_object
   config        = var.rke2_config

@@ -18,7 +18,6 @@ locals {
   }
   security_groups  = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
   target_groups    = concat(module.cp_lb.target_groups, var.extra_target_group_arns)
-  kube_config_path = "${path.module}/${local.uname}-tfkubeconfig.yaml"
 }
 
 resource "random_string" "uid" {
@@ -206,30 +205,23 @@ module "leader" {
   }, local.ccm_tags, var.tags)
 }
 
-#
-# Store Kubeconfig locally
-#
-resource "local_file" "kubeconfig" {
-  content  = data.aws_s3_object.kube_config.body
-  filename = local.kube_config_path
-}
-
 # need to wait for leader to exist in cluster OR until # servers == expected # (for when user might re-apply the config)
 resource "null_resource" "wait_for_leader_to_register" {
   provisioner "local-exec" {
     command = <<-EOT
-    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "1" ] || [ "$${nodes}" = "${var.servers}" ]; do
+    timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "1" ] || [ "$${nodes}" = "${var.servers}" ]; do
         sleep 5
-        nodes="$(kubectl get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
+        nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
         echo "rke2 nodes: $${nodes}"
     done'
     EOT
     environment = {
-      KUBECONFIG = local.kube_config_path
+      KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)
     }
   }
+
   depends_on = [
-    local_file.kubeconfig
+    module.leader
   ]
 }
 
@@ -262,7 +254,7 @@ module "servers" {
   }, local.ccm_tags, var.tags)
 
   depends_on = [
-    module.leader
+    null_resource.wait_for_leader_to_register
   ]
 }
 
@@ -273,14 +265,14 @@ resource "null_resource" "wait_for_servers_to_register" {
   count = var.servers > 1 ? 1 : 0
   provisioner "local-exec" {
     command = <<-EOT
-    timeout --preserve-status 7m sh -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
+    timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
         sleep 5
-        nodes="$(kubectl get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
+        nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
         echo "rke2 nodes: $${nodes}"
     done'
     EOT
     environment = {
-      KUBECONFIG = local.kube_config_path
+      KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)
     }
   }
 
@@ -295,6 +287,22 @@ resource "aws_autoscaling_attachment" "asg_attachment_bar" {
   lb_target_group_arn    = local.target_groups[count.index]
 
   depends_on = [
+    null_resource.wait_for_servers_to_register
+  ]
+}
+
+resource "null_resource" "wait_for_ingress" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      timeout --preserve-status 5m bash -c -- 'kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete job/helm-install-rke2-ingress-nginx'
+    EOT
+    environment = {
+      KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)
+    }
+  }
+  
+  depends_on = [
+    null_resource.wait_for_leader_to_register,
     null_resource.wait_for_servers_to_register
   ]
 }
