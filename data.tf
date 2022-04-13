@@ -15,7 +15,7 @@ module "init" {
   is_leader     = count.index == 0 ? true : false
 }
 
-data "template_cloudinit_config" "this" {
+data "cloudinit_config" "this" {
   count         = var.servers > 1 ? 2 : 1
   gzip          = true
   base64_encode = true

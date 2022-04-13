@@ -36,3 +36,4 @@ override.tf.json
 rke2.yaml
 admin.conf
 .terraform.lock.hcl
+*.tfvars

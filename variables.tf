@@ -5,8 +5,8 @@ variable "cluster_name" {
 
 variable "fqdn" {
   description = "FQDN that routes traffic to your server node(s)"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "unique_suffix" {

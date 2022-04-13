@@ -16,8 +16,8 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
-  security_groups  = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
-  target_groups    = concat(module.cp_lb.target_groups, var.extra_target_group_arns)
+  security_groups = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
+  target_groups   = concat(module.cp_lb.target_groups, var.extra_target_group_arns)
 }
 
 resource "random_string" "uid" {
@@ -26,7 +26,7 @@ resource "random_string" "uid" {
   special = false
   lower   = true
   upper   = false
-  number  = true
+  numeric = true
 }
 
 #
@@ -192,7 +192,7 @@ module "leader" {
   target_group_arns           = local.target_groups
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this[0].rendered
+  userdata             = data.cloudinit_config.this[0].rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
@@ -243,7 +243,7 @@ module "servers" {
   spot                        = var.spot
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this[1].rendered
+  userdata             = data.cloudinit_config.this[1].rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
@@ -300,7 +300,7 @@ resource "null_resource" "wait_for_ingress" {
       KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)
     }
   }
-  
+
   depends_on = [
     null_resource.wait_for_leader_to_register,
     null_resource.wait_for_servers_to_register
