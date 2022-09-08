@@ -145,7 +145,7 @@ Optional policies have the option of being created by default, but are specified
 |------|---------|
 | aws | n/a |
 | random | n/a |
-| template | n/a |
+| cloudinit | n/a |
 
 ## Inputs
 
