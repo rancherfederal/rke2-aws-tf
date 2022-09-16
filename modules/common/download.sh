@@ -42,19 +42,6 @@ install_awscli() {
   ./aws/install --bin-dir /usr/bin
 }
 
-cis_profile() {
-  cat > /etc/sysctl.d/90-kubelet.conf << EOF
-vm.overcommit_memory=1
-kernel.panic=10
-kernel.panic_on_oops=1
-EOF
-  sysctl -p /etc/sysctl.d/90-kubelet.conf
-  info "Adding etcd user"
-  adduser etcd
-  info "Adding etcd group"
-  groupadd etcd
-}
-
 do_download() {
   read_os
   get_installer
@@ -86,8 +73,6 @@ do_download() {
     case $VERSION in
     7*)
       info "Identified RHEL 7"
-
-      cis_profile
 
       rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7
       yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
