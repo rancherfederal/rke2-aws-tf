@@ -294,7 +294,7 @@ resource "aws_autoscaling_attachment" "asg_attachment_bar" {
 resource "null_resource" "wait_for_ingress" {
   provisioner "local-exec" {
     command = <<-EOT
-      timeout --preserve-status 5m bash -c -- 'kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete job/helm-install-rke2-ingress-nginx'
+      timeout --preserve-status 5m bash -c -- 'kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete --timeout=5m job/helm-install-rke2-ingress-nginx'
     EOT
     environment = {
       KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)
