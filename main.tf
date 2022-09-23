@@ -190,7 +190,8 @@ module "leader" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
-  target_group_arns           = local.target_group_arns
+  # load_balancers              = [module.cp_lb.name]
+  target_group_arns = local.target_group_arns
 
   # Overrideable variables
   userdata             = data.cloudinit_config.this[0].rendered
@@ -209,7 +210,8 @@ module "leader" {
 # need to wait for leader to exist in cluster OR until # servers == expected # (for when user might re-apply the config)
 resource "null_resource" "wait_for_leader_to_register" {
   provisioner "local-exec" {
-    command = <<-EOT
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
     timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "1" ] || [ "$${nodes}" = "${var.servers}" ]; do
         sleep 5
         nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
@@ -242,7 +244,9 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
-  wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  # load_balancers              = [module.cp_lb.name]
+  # target_group_arns         = local.target_group_arns
+  wait_for_capacity_timeout = var.wait_for_capacity_timeout
 
   # Overrideable variables
   userdata             = data.cloudinit_config.this[1].rendered
@@ -266,7 +270,8 @@ module "servers" {
 resource "null_resource" "wait_for_servers_to_register" {
   count = local.provision_servers ? 1 : 0
   provisioner "local-exec" {
-    command = <<-EOT
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
     timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
         sleep 5
         nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
@@ -287,6 +292,7 @@ resource "aws_autoscaling_attachment" "asg_attachment_bar" {
   count                  = local.provision_servers ? length(local.target_group_arns) : 0
   autoscaling_group_name = module.servers[0].asg_name
   lb_target_group_arn    = local.target_group_arns[count.index]
+  # elb                    = module.cp_lb.id
 
   depends_on = [
     null_resource.wait_for_servers_to_register
@@ -295,7 +301,8 @@ resource "aws_autoscaling_attachment" "asg_attachment_bar" {
 
 resource "null_resource" "wait_for_ingress" {
   provisioner "local-exec" {
-    command = <<-EOT
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<-EOT
       timeout --preserve-status 5m bash -c -- 'kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete --timeout=5m job/helm-install-rke2-ingress-nginx'
     EOT
     environment = {

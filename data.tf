@@ -3,7 +3,8 @@
 module "init" {
   count  = local.provision_servers ? 2 : 1
   source = "./modules/userdata"
-
+  # TODO: Make `server_url` a list of strings and account for this in `rke2-init.sh`.
+  # TODO: Add `node_taint` and `node_label` input variables
   server_url    = length(var.fqdn) > 0 ? var.fqdn : module.cp_lb.dns
   token_bucket  = module.statestore.bucket
   token_object  = module.statestore.token_object
