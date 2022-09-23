@@ -1,7 +1,7 @@
 # only need a count of 2 when var.servers > 1
 # the first instance will be for the leader and the 2nd will be for the server(s)
 module "init" {
-  count  = var.servers > 1 ? 2 : 1
+  count  = local.provision_servers ? 2 : 1
   source = "./modules/userdata"
 
   server_url    = length(var.fqdn) > 0 ? var.fqdn : module.cp_lb.dns
@@ -16,7 +16,7 @@ module "init" {
 }
 
 data "cloudinit_config" "this" {
-  count         = var.servers > 1 ? 2 : 1
+  count         = local.provision_servers ? 2 : 1
   gzip          = true
   base64_encode = true
 

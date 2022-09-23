@@ -1,10 +1,11 @@
 provider "aws" {
-  region = local.aws_region
+  region  = local.aws_region
+  profile = "rancher-eng"
 }
 
 locals {
   cluster_name = "quickstart"
-  aws_region   = "us-gov-west-1"
+  aws_region   = "us-west-1"
 
   tags = {
     "terraform" = "true",
@@ -34,13 +35,23 @@ resource "local_file" "pem" {
   file_permission = "0600"
 }
 
-data "aws_ami" "rhel8" {
+data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["219670896067"] # owner is specific to aws gov cloud
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["RHEL-8*"]
+    values = ["ubuntu/images/*/ubuntu-bionic-18.04-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 
   filter {
@@ -58,9 +69,11 @@ module "rke2" {
   cluster_name          = local.cluster_name
   vpc_id                = data.aws_vpc.default.id
   subnets               = [data.aws_subnet.default.id]
-  ami                   = data.aws_ami.rhel8.image_id
+  ami                   = data.aws_ami.ubuntu.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
+  iam_instance_profile  = "RancherK8SUnrestrictedCloudProviderRoleWithRoute53S3FullUS"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
+  servers               = 1
 
   tags = local.tags
 }
@@ -71,14 +84,19 @@ module "rke2" {
 module "agents" {
   source = "../../modules/agent-nodepool"
 
-  name                = "generic"
-  vpc_id              = data.aws_vpc.default.id
-  subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.rhel8.image_id
-  ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
-  tags                = local.tags
+  name                 = "generic"
+  vpc_id               = data.aws_vpc.default.id
+  subnets              = [data.aws_subnet.default.id]
+  ami                  = data.aws_ami.ubuntu.image_id
+  iam_instance_profile = "RancherK8SUnrestrictedCloudProviderRoleWithRoute53S3FullUS"
+  ssh_authorized_keys  = [tls_private_key.ssh.public_key_openssh]
+  tags                 = local.tags
 
   cluster_data = module.rke2.cluster_data
+
+  depends_on = [
+    module.rke2
+  ]
 }
 
 # For demonstration only, lock down ssh access in production
@@ -93,7 +111,8 @@ resource "aws_security_group_rule" "quickstart_ssh" {
 
 # Generic outputs as examples
 output "rke2" {
-  value = module.rke2
+  value     = module.rke2
+  sensitive = true
 }
 
 # Example method of fetching kubeconfig from state store, requires aws cli and bash locally
@@ -102,6 +121,6 @@ resource "null_resource" "kubeconfig" {
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "aws s3 cp ${module.rke2.kubeconfig_s3_path} rke2.yaml"
+    command     = "aws s3 --profile=rancher-eng cp ${module.rke2.kubeconfig_s3_path} rke2.yaml"
   }
 }

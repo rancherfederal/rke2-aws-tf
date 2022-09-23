@@ -27,15 +27,19 @@ output "server_sg" {
 }
 
 output "server_nodepool_id" {
-  value = module.servers[0].asg_id
+  value = module.servers[*].asg_id
 }
 
 output "server_nodepool_name" {
-  value = module.servers[0].asg_name
+  value = module.servers[*].asg_name
 }
 
 output "server_nodepool_arn" {
-  value = module.servers[0].asg_arn
+  value = module.servers[*].asg_arn
+}
+
+output "server_asg_name" {
+  value = module.servers[*].asg_name
 }
 
 output "iam_role" {
@@ -67,7 +71,8 @@ output "lb_name" {
 }
 
 output "lb_dns" {
-  value = module.cp_lb.dns
+  value     = module.cp_lb.dns
+  sensitive = true
 }
 
 output "lb_id" {
@@ -80,8 +85,4 @@ output "lb_arn" {
 
 output "leader_asg_name" {
   value = module.leader.asg_name
-}
-
-output "server_asg_name" {
-  value = module.servers[0].asg_name
 }

@@ -16,8 +16,9 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
-  security_groups = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
-  target_groups   = concat(module.cp_lb.target_groups, var.extra_target_group_arns)
+  security_groups   = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
+  target_group_arns = concat(module.cp_lb.target_group_arns, var.extra_target_group_arns)
+  provision_servers = var.servers > 1 ? true : false
 }
 
 resource "random_string" "uid" {
@@ -189,7 +190,7 @@ module "leader" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
-  target_group_arns           = local.target_groups
+  target_group_arns           = local.target_group_arns
 
   # Overrideable variables
   userdata             = data.cloudinit_config.this[0].rendered
@@ -229,7 +230,7 @@ resource "null_resource" "wait_for_leader_to_register" {
 # Server Nodepool
 #
 module "servers" {
-  count  = var.servers > 1 ? 1 : 0
+  count  = local.provision_servers ? 1 : 0
   source = "./modules/nodepool"
   name   = "${local.uname}-server"
 
@@ -241,6 +242,7 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
+  wait_for_capacity_timeout   = var.wait_for_capacity_timeout
 
   # Overrideable variables
   userdata             = data.cloudinit_config.this[1].rendered
@@ -262,7 +264,7 @@ module "servers" {
 # Wait for cluster nodes to reach expected number
 #
 resource "null_resource" "wait_for_servers_to_register" {
-  count = var.servers > 1 ? 1 : 0
+  count = local.provision_servers ? 1 : 0
   provisioner "local-exec" {
     command = <<-EOT
     timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
@@ -282,9 +284,9 @@ resource "null_resource" "wait_for_servers_to_register" {
 }
 
 resource "aws_autoscaling_attachment" "asg_attachment_bar" {
-  count                  = var.servers > 1 ? length(local.target_groups) : 0
+  count                  = local.provision_servers ? length(local.target_group_arns) : 0
   autoscaling_group_name = module.servers[0].asg_name
-  lb_target_group_arn    = local.target_groups[count.index]
+  lb_target_group_arn    = local.target_group_arns[count.index]
 
   depends_on = [
     null_resource.wait_for_servers_to_register
