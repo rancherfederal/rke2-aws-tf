@@ -273,7 +273,7 @@ resource "null_resource" "wait_for_servers_to_register" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
     timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
-        sleep 5
+        sleep 15
         nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
         echo "rke2 nodes: $${nodes}"
     done'
@@ -303,7 +303,11 @@ resource "null_resource" "wait_for_ingress" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
-      timeout --preserve-status 5m bash -c -- 'kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete --timeout=5m job/helm-install-rke2-ingress-nginx'
+      timeout --preserve-status 5m bash -c -- 'while ! kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) -n kube-system wait --for=condition=complete --timeout=5m job/helm-install-rke2-ingress-nginx
+      do
+        sleep 5
+        echo "Waiting for Ingress job"
+      done'
     EOT
     environment = {
       KUBECONFIG = base64encode(data.aws_s3_object.kube_config.body)

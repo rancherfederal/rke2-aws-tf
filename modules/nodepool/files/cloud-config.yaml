@@ -1,7 +1,7 @@
 #cloud-config
 ssh_authorized_keys:
-%{ for _ in ssh_authorized_keys }
-  - ${_}
+%{ for key in ssh_authorized_keys }
+  - ${key}
 %{ endfor }
 
 write-kubeconfig-mode: "0644"
