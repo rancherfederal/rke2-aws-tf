@@ -38,7 +38,8 @@ append_config() {
 # The most simple "leader election" you've ever seen in your life
 elect_leader() {
   # Fetch other running instances in ASG
-  instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  instance_id=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
   asg_name=$(aws autoscaling describe-auto-scaling-instances --instance-ids "$instance_id" --query 'AutoScalingInstances[*].AutoScalingGroupName' --output text)
   instances=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$asg_name" --query 'AutoScalingGroups[*].Instances[?HealthStatus==`Healthy`].InstanceId' --output text)
 
@@ -112,7 +113,8 @@ local_cp_api_wait() {
 fetch_token() {
   info "Fetching rke2 join token..."
 
-  aws configure set default.region "$(curl -s http://169.254.169.254/latest/meta-data/placement/region)"
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  aws configure set default.region "$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)"
 
   # Validate aws caller identity, fatal if not valid
   if ! aws sts get-caller-identity 2>/dev/null; then
