@@ -123,7 +123,7 @@ variable "metadata_options" {
   default     = {
     http_endpoint               = "enabled"
     http_tokens                 = "required" # IMDS-v2
-    http_put_response_hop_limit = 2          # allow pods to use IDMS as well
+    http_put_response_hop_limit = 2          # allow pods to use IMDS as well
     instance_metadata_tags      = "disabled"
   }
   description = "Instance Metadata Options"
