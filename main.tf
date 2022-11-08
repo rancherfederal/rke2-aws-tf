@@ -17,7 +17,7 @@ locals {
     token      = module.statestore.token
   }
   security_groups   = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
-  target_group_arns = concat(module.cp_lb.target_group_arns, var.extra_target_group_arns)
+  target_group_arns = module.cp_lb.target_group_arns
   provision_servers = var.servers > 1 ? true : false
 }
 
@@ -228,6 +228,17 @@ resource "null_resource" "wait_for_leader_to_register" {
   ]
 }
 
+resource "aws_autoscaling_attachment" "leader_extras" {
+  count                  = length(var.extra_target_group_arns)
+  autoscaling_group_name = module.leader.asg_name
+  lb_target_group_arn    = var.extra_target_group_arns[count.index]
+
+  depends_on = [
+    module.cp_lb,
+    null_resource.wait_for_leader_to_register
+  ]
+}
+
 #
 # Server Nodepool
 #
@@ -261,6 +272,7 @@ module "servers" {
 
   depends_on = [
     null_resource.wait_for_leader_to_register
+    # aws_autoscaling_attachment.leader
   ]
 }
 
@@ -273,7 +285,7 @@ resource "null_resource" "wait_for_servers_to_register" {
     interpreter = ["/bin/bash", "-c"]
     command     = <<-EOT
     timeout --preserve-status 7m bash -c -- 'until [ "$${nodes}" = "${var.servers}" ]; do
-        sleep 15
+        sleep 5
         nodes="$(kubectl --kubeconfig <(echo $KUBECONFIG | base64 --decode) get nodes --no-headers | wc -l | awk '\''{$1=$1;print}'\'')"
         echo "rke2 nodes: $${nodes}"
     done'
@@ -288,14 +300,23 @@ resource "null_resource" "wait_for_servers_to_register" {
   ]
 }
 
-resource "aws_autoscaling_attachment" "asg_attachment_bar" {
+resource "aws_autoscaling_attachment" "server" {
   count                  = local.provision_servers ? length(local.target_group_arns) : 0
   autoscaling_group_name = module.servers[0].asg_name
   lb_target_group_arn    = local.target_group_arns[count.index]
-  # elb                    = module.cp_lb.id
 
   depends_on = [
     null_resource.wait_for_servers_to_register
+  ]
+}
+
+resource "aws_autoscaling_attachment" "server_extras" {
+  count                  = local.provision_servers ? length(var.extra_target_group_arns) : 0
+  autoscaling_group_name = module.servers[0].asg_name
+  lb_target_group_arn    = var.extra_target_group_arns[count.index]
+
+  depends_on = [
+    aws_autoscaling_attachment.server
   ]
 }
 
@@ -315,7 +336,6 @@ resource "null_resource" "wait_for_ingress" {
   }
 
   depends_on = [
-    null_resource.wait_for_leader_to_register,
-    null_resource.wait_for_servers_to_register
+    aws_autoscaling_attachment.server_extras
   ]
 }
