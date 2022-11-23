@@ -189,6 +189,7 @@ module "servers" {
   spot                        = var.spot
   load_balancers              = [module.cp_lb.name]
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  metadata_options            = var.metadata_options
 
   # Overrideable variables
   userdata             = data.template_cloudinit_config.this.rendered
