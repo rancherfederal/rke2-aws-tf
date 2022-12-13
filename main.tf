@@ -255,9 +255,15 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = local.security_groups
   spot                        = var.spot
+<<<<<<< HEAD
   # load_balancers              = [module.cp_lb.name]
   # target_group_arns         = local.target_group_arns
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
+=======
+  load_balancers              = [module.cp_lb.name]
+  wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  metadata_options            = var.metadata_options
+>>>>>>> 0235fe4e11645c800f230d1a6c35ea2acc0d36d5
 
   # Overrideable variables
   userdata             = data.cloudinit_config.this[1].rendered

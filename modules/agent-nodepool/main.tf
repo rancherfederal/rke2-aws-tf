@@ -123,6 +123,7 @@ module "nodepool" {
   asg                         = var.asg
   spot                        = var.spot
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  metadata_options            = var.metadata_options
 
   tags = merge({
     "Role" = "agent",

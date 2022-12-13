@@ -28,7 +28,7 @@
 | tags | Map of additional tags to add to all resources created | `map(string)` | `{}` | no |
 | vpc\_id | VPC ID to create resources in | `string` | n/a | yes |
 | wait_for_capacity_timeout | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
-## Outputs
+| metadata_options | Instance Metadata Options | `map` | <pre>{<br>  http_endpoint: "enabled",<br>  http_tokens: "required",<br>  http_put_response_hop_limit: 1,<br>  instance_metadata_tags: "disabled"}</pre> | no |
 
 | Name | Description |
 |------|-------------|
