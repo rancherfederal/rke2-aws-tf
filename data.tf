@@ -11,7 +11,7 @@ module "init" {
   agent         = false
 }
 
-data "template_cloudinit_config" "this" {
+data "cloudinit_config" "this" {
   gzip          = true
   base64_encode = true
 
