@@ -96,8 +96,8 @@ variable "extra_security_group_ids" {
 }
 
 variable "metadata_options" {
-  type        = map
-  default     = {
+  type = map(any)
+  default = {
     http_endpoint               = "enabled"
     http_tokens                 = "required" # IMDS-v2
     http_put_response_hop_limit = 2          # allow pods to use IMDS as well

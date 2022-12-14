@@ -99,7 +99,7 @@ variable "min_elb_capacity" {
 }
 
 variable "metadata_options" {
-  type        = map
+  type        = map(any)
   description = "Instance Metadata Options"
 }
 

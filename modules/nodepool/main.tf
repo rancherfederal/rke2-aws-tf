@@ -11,10 +11,10 @@ resource "aws_security_group" "this" {
 # Launch template
 #
 resource "aws_launch_template" "this" {
-  name                   = "${var.name}-rke2-nodepool"
-  image_id               = var.ami
-  instance_type          = var.instance_type
-  user_data              = var.userdata
+  name          = "${var.name}-rke2-nodepool"
+  image_id      = var.ami
+  instance_type = var.instance_type
+  user_data     = var.userdata
 
   metadata_options {
     http_endpoint               = var.metadata_options["http_endpoint"]
@@ -25,8 +25,8 @@ resource "aws_launch_template" "this" {
 
   network_interfaces {
     associate_public_ip_address = var.associate_public_ip_address
-    delete_on_termination = true
-    security_groups       = var.vpc_security_group_ids
+    delete_on_termination       = true
+    security_groups             = var.vpc_security_group_ids
   }
 
   block_device_mappings {
