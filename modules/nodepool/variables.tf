@@ -88,6 +88,11 @@ variable "spot" {
   type    = bool
 }
 
+variable "associate_public_ip_address" {
+  default = false
+  type    = bool
+}
+
 variable "min_elb_capacity" {
   type    = number
   default = null
@@ -97,3 +102,4 @@ variable "metadata_options" {
   type        = map
   description = "Instance Metadata Options"
 }
+

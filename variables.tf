@@ -173,3 +173,8 @@ variable "wait_for_capacity_timeout" {
   type        = string
   default     = "10m"
 }
+
+variable "associate_public_ip_address" {
+  default = false
+  type    = bool
+}

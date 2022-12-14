@@ -47,7 +47,7 @@ do_download() {
   get_installer
 
   case $ID in
-  centos)
+  centos | rocky)
     yum install -y unzip
     install_awscli
 

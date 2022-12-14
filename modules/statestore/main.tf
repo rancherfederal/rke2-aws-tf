@@ -20,7 +20,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "ssec" {
   }
 }
 
-resource "aws_s3_bucket_object" "token" {
+resource "aws_s3_object" "token" {
   bucket                 = aws_s3_bucket.bucket.id
   key                    = "token"
   content_type           = "text/plain"
@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "getter" {
     effect  = "Allow"
     actions = ["s3:GetObject"]
     resources = [
-      "${aws_s3_bucket.bucket.arn}/${aws_s3_bucket_object.token.id}",
+      "${aws_s3_bucket.bucket.arn}/${aws_s3_object.token.id}",
     ]
   }
 }
