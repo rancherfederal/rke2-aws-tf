@@ -16,6 +16,7 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
+  target_group_arns = module.cp_lb.target_group_arns
 }
 
 resource "random_string" "uid" {
@@ -46,7 +47,7 @@ module "statestore" {
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/elb"
+  source  = "./modules/nlb"
   name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
@@ -187,7 +188,8 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
   spot                        = var.spot
-  load_balancers              = [module.cp_lb.name]
+  #load_balancers              = [module.cp_lb.name]
+  target_group_arns = local.target_group_arns
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
   metadata_options            = var.metadata_options
   associate_public_ip_address = var.associate_public_ip_address

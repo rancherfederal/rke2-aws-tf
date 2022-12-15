@@ -77,8 +77,9 @@ data "cloudinit_config" "init" {
   part {
     filename     = "cloud-config.yaml"
     content_type = "text/cloud-config"
-    content = templatefile("${path.module}/../nodepool/files/cloud-config.yaml", {
-      ssh_authorized_keys = var.ssh_authorized_keys
+    content = templatefile("${path.module}/files/cloud-config.yaml", {
+      ssh_authorized_keys = var.ssh_authorized_keys,
+      extra_cloud_config_config = var.extra_cloud_config_config
     })
   }
 

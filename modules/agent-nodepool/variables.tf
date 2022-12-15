@@ -61,6 +61,12 @@ variable "block_device_mappings" {
   }
 }
 
+variable "extra_cloud_config_config" {
+  description = "extra config to append to cloud-config"
+  type        = string
+  default = ""
+}
+
 variable "extra_block_device_mappings" {
   description = "Used to specify additional block device mapping configurations"
   type        = list(map(string))
