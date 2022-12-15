@@ -96,16 +96,6 @@ output "rke2" {
   value = module.rke2
 }
 
-# Example method of fetching kubeconfig from state store, requires aws cli and bash locally
-resource "null_resource" "kubeconfig" {
-  depends_on = [module.rke2]
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    command     = "aws s3 cp ${module.rke2.kubeconfig_path} rke2.yaml"
-  }
-}
-
 # Example method of installing harbor on created cluster
 ## Requires helm to be installed locally
 # alternative kubeconfig path s3://${module.statestore.bucket}/rke2.yaml
@@ -114,13 +104,7 @@ resource "null_resource" "harbor_install" {
 
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "helm repo add harbor https://helm.goharbor.io" 
-    on_failure = continue
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-c"]
-    command     = "helm install harbor harbor/harbor --set expose=clusterIP --kubeconfig ${module.rke2.kubeconfig_path}" 
+    command     = "./sample-script.sh ${module.rke2.kubeconfig_path}" 
     on_failure = fail
   }
 }
