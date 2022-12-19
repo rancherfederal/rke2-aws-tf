@@ -39,7 +39,7 @@ install_awscli() {
   # NOTE: Assumes unzip has already been installed
   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   unzip -q awscliv2.zip
-  ./aws/install --bin-dir /usr/bin
+  ./aws/install --bin-dir /usr/bin --update
 }
 
 do_download() {
