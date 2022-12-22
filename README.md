@@ -143,9 +143,9 @@ Optional policies have the option of being created by default, but are specified
 
 | Name | Version |
 |------|---------|
-| aws | n/a |
-| random | n/a |
-| template | n/a |
+| aws | >= 3.0.0 |
+| cloudinit | >= 2.2.0 |
+| random | >= 3.0.0 |
 
 ## Inputs
 

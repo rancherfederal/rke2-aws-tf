@@ -4,6 +4,13 @@
 |------|---------|
 | terraform | >= 0.13, < 0.14 |
 
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | >= 3.0.0 |
+| cloudinit | >= 2.2.0 |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
