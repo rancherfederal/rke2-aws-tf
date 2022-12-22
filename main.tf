@@ -191,7 +191,7 @@ module "servers" {
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this.rendered
+  userdata             = data.cloudinit_config.this.rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
