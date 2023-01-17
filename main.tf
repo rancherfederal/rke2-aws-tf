@@ -24,7 +24,7 @@ resource "random_string" "uid" {
   special = false
   lower   = true
   upper   = false
-  number  = true
+  numeric = true
 }
 
 #
