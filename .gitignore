@@ -35,3 +35,4 @@ override.tf.json
 *.pem
 rke2.yaml
 admin.conf
+.terraform.lock.hcl
