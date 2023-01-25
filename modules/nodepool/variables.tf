@@ -88,7 +88,24 @@ variable "spot" {
   type    = bool
 }
 
+variable "associate_public_ip_address" {
+  default = false
+  type    = bool
+}
+
 variable "min_elb_capacity" {
   type    = number
   default = null
 }
+
+variable "metadata_options" {
+  type        = map(any)
+  description = "Instance Metadata Options"
+}
+
+variable "extra_cloud_config_config" {
+  description = "extra config to append to cloud-config"
+  type        = string
+  default     = ""
+}
+

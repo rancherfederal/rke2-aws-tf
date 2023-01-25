@@ -47,7 +47,7 @@ do_download() {
   get_installer
 
   case $ID in
-  centos)
+  centos | rocky)
     yum install -y unzip
     install_awscli
 
@@ -74,6 +74,7 @@ do_download() {
     7*)
       info "Identified RHEL 7"
 
+      rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7
       yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.119.2-1.911c772.el7_8.noarch.rpm
       INSTALL_RKE2_METHOD='yum' INSTALL_RKE2_TYPE="${type}" ./install.sh
       ;;

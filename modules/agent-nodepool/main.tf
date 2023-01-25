@@ -69,7 +69,7 @@ module "init" {
   agent         = true
 }
 
-data "template_cloudinit_config" "init" {
+data "cloudinit_config" "init" {
   gzip          = true
   base64_encode = true
 
@@ -77,8 +77,9 @@ data "template_cloudinit_config" "init" {
   part {
     filename     = "cloud-config.yaml"
     content_type = "text/cloud-config"
-    content = templatefile("${path.module}/../nodepool/files/cloud-config.yaml", {
-      ssh_authorized_keys = var.ssh_authorized_keys
+    content = templatefile("${path.module}/files/cloud-config.yaml", {
+      ssh_authorized_keys       = var.ssh_authorized_keys,
+      extra_cloud_config_config = var.extra_cloud_config_config
     })
   }
 
@@ -116,11 +117,12 @@ module "nodepool" {
   block_device_mappings       = var.block_device_mappings
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = concat([var.cluster_data.cluster_sg], var.extra_security_group_ids)
-  userdata                    = data.template_cloudinit_config.init.rendered
+  userdata                    = data.cloudinit_config.init.rendered
   iam_instance_profile        = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
   asg                         = var.asg
   spot                        = var.spot
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  metadata_options            = var.metadata_options
 
   tags = merge({
     "Role" = "agent",

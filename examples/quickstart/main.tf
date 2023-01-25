@@ -4,12 +4,13 @@ provider "aws" {
 
 locals {
   cluster_name = "quickstart"
-  aws_region   = "us-gov-west-1"
+  aws_region   = "us-gov-east-1"
 
   tags = {
     "terraform" = "true",
     "env"       = "quickstart",
   }
+  server_iam_role = "K8sUnrestrictedCloudProviderRole"
 }
 
 # Query for defaults
@@ -53,32 +54,31 @@ data "aws_ami" "rhel8" {
 # Server
 #
 module "rke2" {
-  source = "../.."
-
+  source                = "../.."
   cluster_name          = local.cluster_name
   vpc_id                = data.aws_vpc.default.id
   subnets               = [data.aws_subnet.default.id]
   ami                   = data.aws_ami.rhel8.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
+  iam_instance_profile  = local.server_iam_role
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
+  tags                  = local.tags
 
-  tags = local.tags
 }
 
 #
 # Generic Agent Pool
 #
 module "agents" {
-  source = "../../modules/agent-nodepool"
-
+  source              = "../../modules/agent-nodepool"
   name                = "generic"
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
   ami                 = data.aws_ami.rhel8.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   tags                = local.tags
+  cluster_data        = module.rke2.cluster_data
 
-  cluster_data = module.rke2.cluster_data
 }
 
 # For demonstration only, lock down ssh access in production

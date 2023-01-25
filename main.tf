@@ -16,6 +16,7 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
+  target_group_arns = module.cp_lb.target_group_arns
 }
 
 resource "random_string" "uid" {
@@ -24,7 +25,7 @@ resource "random_string" "uid" {
   special = false
   lower   = true
   upper   = false
-  number  = true
+  numeric = true
 }
 
 #
@@ -46,7 +47,7 @@ module "statestore" {
 # Controlplane Load Balancer
 #
 module "cp_lb" {
-  source  = "./modules/elb"
+  source  = "./modules/nlb"
   name    = local.uname
   vpc_id  = var.vpc_id
   subnets = var.subnets
@@ -185,13 +186,16 @@ module "servers" {
   instance_type               = var.instance_type
   block_device_mappings       = var.block_device_mappings
   extra_block_device_mappings = var.extra_block_device_mappings
-  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id], var.extra_security_group_ids)
+  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
   spot                        = var.spot
-  load_balancers              = [module.cp_lb.name]
+  #load_balancers              = [module.cp_lb.name]
+  target_group_arns           = local.target_group_arns
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
+  metadata_options            = var.metadata_options
+  associate_public_ip_address = var.associate_public_ip_address
 
   # Overrideable variables
-  userdata             = data.template_cloudinit_config.this.rendered
+  userdata             = data.cloudinit_config.this.rendered
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired

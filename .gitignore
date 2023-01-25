@@ -1,5 +1,6 @@
 # Local .terraform directories
-**/.terraform/*
+**/.terraform
+**.lock.hcl
 
 # .tfstate files
 *.tfstate
@@ -7,6 +8,9 @@
 
 # Crash log files
 crash.log
+
+# Ignore test examples directory
+examples/test
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
@@ -35,3 +39,5 @@ override.tf.json
 *.pem
 rke2.yaml
 admin.conf
+
+**.DS_Store

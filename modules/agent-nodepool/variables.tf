@@ -61,6 +61,12 @@ variable "block_device_mappings" {
   }
 }
 
+variable "extra_cloud_config_config" {
+  description = "extra config to append to cloud-config"
+  type        = string
+  default     = ""
+}
+
 variable "extra_block_device_mappings" {
   description = "Used to specify additional block device mapping configurations"
   type        = list(map(string))
@@ -93,6 +99,17 @@ variable "extra_security_group_ids" {
   description = "List of additional security group IDs"
   type        = list(string)
   default     = []
+}
+
+variable "metadata_options" {
+  type = map(any)
+  default = {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required" # IMDS-v2
+    http_put_response_hop_limit = 2          # allow pods to use IMDS as well
+    instance_metadata_tags      = "disabled"
+  }
+  description = "Instance Metadata Options"
 }
 
 #

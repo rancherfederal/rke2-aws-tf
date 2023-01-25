@@ -70,7 +70,7 @@ variable "extra_block_device_mappings" {
 variable "servers" {
   description = "Number of servers to create"
   type        = number
-  default     = 1
+  default     = 3
 }
 
 variable "spot" {
@@ -118,6 +118,17 @@ variable "controlplane_access_logs_bucket" {
   default     = "disabled"
 }
 
+variable "metadata_options" {
+  type = map(any)
+  default = {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required" # IMDS-v2
+    http_put_response_hop_limit = 2          # allow pods to use IMDS as well
+    instance_metadata_tags      = "disabled"
+  }
+  description = "Instance Metadata Options"
+}
+
 #
 # RKE2 Variables
 #
@@ -162,3 +173,15 @@ variable "wait_for_capacity_timeout" {
   type        = string
   default     = "10m"
 }
+
+variable "associate_public_ip_address" {
+  default = false
+  type    = bool
+}
+
+variable "extra_cloud_config_config" {
+  description = "extra config to append to cloud-config"
+  type        = string
+  default     = ""
+}
+
