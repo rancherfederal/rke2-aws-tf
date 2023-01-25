@@ -106,6 +106,6 @@ variable "metadata_options" {
 variable "extra_cloud_config_config" {
   description = "extra config to append to cloud-config"
   type        = string
-  default = ""
+  default     = ""
 }
 

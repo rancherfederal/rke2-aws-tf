@@ -189,7 +189,7 @@ module "servers" {
   vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
   spot                        = var.spot
   #load_balancers              = [module.cp_lb.name]
-  target_group_arns = local.target_group_arns
+  target_group_arns           = local.target_group_arns
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
   metadata_options            = var.metadata_options
   associate_public_ip_address = var.associate_public_ip_address

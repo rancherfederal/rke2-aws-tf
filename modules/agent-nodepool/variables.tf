@@ -64,7 +64,7 @@ variable "block_device_mappings" {
 variable "extra_cloud_config_config" {
   description = "extra config to append to cloud-config"
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "extra_block_device_mappings" {
