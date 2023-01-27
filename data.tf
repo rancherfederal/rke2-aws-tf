@@ -33,11 +33,11 @@ data "cloudinit_config" "this" {
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/modules/common/download.sh", {
         # Must not use `version` here since that is reserved
-        rke2_version = var.rke2_version
-        type         = "server"
+        rke2_version            = var.rke2_version
+        type                    = "server"
         rke2_install_script_url = var.rke2_install_script_url
-        awscli_url = var.awscli_url
-        unzip_rpm_url = var.unzip_rpm_url
+        awscli_url              = var.awscli_url
+        unzip_rpm_url           = var.unzip_rpm_url
       })
     }
   }

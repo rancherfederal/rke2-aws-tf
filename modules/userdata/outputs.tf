@@ -11,6 +11,6 @@ output "templated" {
     pre_userdata  = var.pre_userdata
     post_userdata = var.post_userdata
 
-    rke2_start    = var.rke2_start
+    rke2_start = var.rke2_start
   })
 }
