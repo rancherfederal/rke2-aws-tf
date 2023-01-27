@@ -188,7 +188,9 @@ EOF
 
     systemctl enable rke2-server
     systemctl daemon-reload
-    systemctl start rke2-server
+    if ${rke2_start}; then
+      systemctl start rke2-server
+    fi
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
@@ -207,7 +209,9 @@ EOF
     # Default to agent
     systemctl enable rke2-agent
     systemctl daemon-reload
-    systemctl start rke2-agent
+    if ${rke2_start}; then
+      systemctl start rke2-agent
+    fi
   fi
 
   post_userdata

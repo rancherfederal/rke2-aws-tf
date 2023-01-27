@@ -9,6 +9,7 @@ module "init" {
   post_userdata = var.post_userdata
   ccm           = var.enable_ccm
   agent         = false
+  rke2_start    = var.rke2_start
 }
 
 data "cloudinit_config" "this" {
@@ -34,6 +35,9 @@ data "cloudinit_config" "this" {
         # Must not use `version` here since that is reserved
         rke2_version = var.rke2_version
         type         = "server"
+        rke2_install_script_url = var.rke2_install_script_url
+        awscli_url = var.awscli_url
+        unzip_rpm_url = var.unzip_rpm_url
       })
     }
   }

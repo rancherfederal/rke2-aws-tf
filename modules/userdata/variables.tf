@@ -44,3 +44,8 @@ variable "post_userdata" {
   description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
   default     = ""
 }
+
+variable "rke2_start" {
+  description = "Start/Stop value for the rke2-server/agent service.  True=start, False=stop."
+  type        = bool
+}

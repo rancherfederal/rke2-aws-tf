@@ -185,3 +185,26 @@ variable "extra_cloud_config_config" {
   default     = ""
 }
 
+variable "rke2_install_script_url" {
+  description = "URL for RKE2 install script"
+  type        = string
+  default     = "https://get.rke2.io"
+}
+
+variable "awscli_url" {
+  description = "URL for awscli zip file"
+  type        = string
+  default     = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+}
+
+variable "unzip_rpm_url" {
+  description = "URL path to unzip rpm"
+  type        = string
+  default     = ""
+}
+
+variable "rke2_start" {
+  description = "Start/Stop value for the rke2-server/agent service.  True=start, False=stop."
+  type        = bool
+  default     = true
+}

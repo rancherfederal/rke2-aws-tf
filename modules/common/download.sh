@@ -30,16 +30,17 @@ read_os() {
 }
 
 get_installer() {
-  curl -fsSL https://get.rke2.io -o install.sh
+  curl -fsSL "${rke2_install_script_url}" -o install.sh
   chmod u+x install.sh
 }
 
 install_awscli() {
   # Install awscli (used for secrets fetching)
   # NOTE: Assumes unzip has already been installed
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  curl -fsSL "${awscli_url}" -o "awscliv2.zip"
   unzip -q awscliv2.zip
   ./aws/install --bin-dir /usr/bin --update
+  rm -f awscliv2.zip
 }
 
 do_download() {
@@ -48,7 +49,14 @@ do_download() {
 
   case $ID in
   centos | rocky)
-    yum install -y unzip
+    
+    if [ -z "${unzip_rpm_url}" ]; then
+      yum install -y unzip
+    else
+      curl -fsSL "${unzip_rpm_url}" -o unzip.rpm
+      rpm -ivh unzip.rpm; rm -f unzip.rpm
+    fi
+
     install_awscli
 
     # TODO: Determine minimum supported version, for now just carry on assuming ignorance
@@ -67,7 +75,14 @@ do_download() {
     ;;
 
   rhel)
-    yum install -y unzip
+    
+    if [ -z "${unzip_rpm_url}" ]; then
+      yum install -y unzip
+    else
+      curl -fsSL "${unzip_rpm_url}" -o unzip.rpm
+      rpm -ivh unzip.rpm; rm -f unzip.rpm
+    fi
+    
     install_awscli
 
     case $VERSION in
@@ -84,7 +99,6 @@ do_download() {
       INSTALL_RKE2_METHOD='yum' INSTALL_RKE2_TYPE="${type}" ./install.sh
       ;;
     esac
-
     ;;
 
   ubuntu)
@@ -95,6 +109,7 @@ do_download() {
     hostnamectl set-hostname "$(curl http://169.254.169.254/latest/meta-data/hostname)"
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh
+    rm -f install.sh
 
     install_awscli
     ;;
@@ -117,6 +132,7 @@ do_download() {
     fatal "$${ID} $${VERSION} is not currently supported"
     ;;
   esac
+  rm -f install.sh
 }
 
 {
