@@ -46,6 +46,6 @@ variable "post_userdata" {
 }
 
 variable "rke2_start" {
-  description = "Start/Stop value for the rke2-server/agent service.  True=start, False=stop."
+  description = "Start/Stop value for the rke2-server/agent service.  True=start, False= don't start."
   type        = bool
 }

@@ -109,8 +109,6 @@ do_download() {
     hostnamectl set-hostname "$(curl http://169.254.169.254/latest/meta-data/hostname)"
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh
-    rm -f install.sh
-
     install_awscli
     ;;
   amzn)
