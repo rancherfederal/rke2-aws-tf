@@ -25,11 +25,15 @@ data "cloudinit_config" "this" {
       extra_cloud_config_config = var.extra_cloud_config_config
     })
   }
-
+  part {
+    filename     = "00_pre.sh"
+    content_type = "text/x-shellscript"
+    content      = module.init.pre_templated
+  } 
   dynamic "part" {
     for_each = var.download ? [1] : []
     content {
-      filename     = "00_download.sh"
+      filename     = "10_download.sh"
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/modules/common/download.sh", {
         # Must not use `version` here since that is reserved
@@ -43,9 +47,14 @@ data "cloudinit_config" "this" {
   }
 
   part {
-    filename     = "01_rke2.sh"
+    filename     = "20_rke2.sh"
     content_type = "text/x-shellscript"
-    content      = module.init.templated
+    content      = module.init.rke2_templated
+  } 
+  part {
+    filename     = "99_post.sh"
+    content_type = "text/x-shellscript"
+    content      = module.init.post_templated
   }
 }
 

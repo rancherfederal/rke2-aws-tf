@@ -149,21 +149,7 @@ upload() {
   sed "s/127.0.0.1/${server_url}/g" /etc/rancher/rke2/rke2.yaml | aws s3 cp - "s3://${token_bucket}/rke2.yaml" --content-type "text/yaml"
 }
 
-pre_userdata() {
-  info "Beginning user defined pre userdata"
-  ${pre_userdata}
-  info "Beginning user defined pre userdata"
-}
-
-post_userdata() {
-  info "Beginning user defined post userdata"
-  ${post_userdata}
-  info "Ending user defined post userdata"
-}
-
 {
-  pre_userdata
-
   config
   fetch_token
 
@@ -213,6 +199,4 @@ EOF
       systemctl start rke2-agent
     fi
   fi
-
-  post_userdata
 }
