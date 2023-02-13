@@ -29,7 +29,7 @@ data "cloudinit_config" "this" {
     filename     = "00_pre.sh"
     content_type = "text/x-shellscript"
     content      = module.init.pre_templated
-  } 
+  }
   dynamic "part" {
     for_each = var.download ? [1] : []
     content {
@@ -50,7 +50,7 @@ data "cloudinit_config" "this" {
     filename     = "20_rke2.sh"
     content_type = "text/x-shellscript"
     content      = module.init.rke2_templated
-  } 
+  }
   part {
     filename     = "99_post.sh"
     content_type = "text/x-shellscript"
