@@ -66,6 +66,8 @@ resource "aws_launch_template" "this" {
 #
 # Autoscaling group
 #
+data "aws_default_tags" "this" {}
+
 resource "aws_autoscaling_group" "this" {
   name                = "${var.name}-rke2-nodepool"
   vpc_zone_identifier = var.subnets
@@ -111,9 +113,11 @@ resource "aws_autoscaling_group" "this" {
   }
 
   dynamic "tag" {
-    for_each = merge({
-      "Name" = "${var.name}-rke2-nodepool"
-    }, var.tags)
+    for_each = merge(
+      data.aws_default_tags.this.tags,
+      { "Name" = "${var.name}-rke2-nodepool" },
+      var.tags
+    )
 
     content {
       key                 = tag.key
