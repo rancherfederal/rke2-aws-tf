@@ -150,6 +150,7 @@ upload() {
 }
 
 {
+  info "Beginning rke2-init userdata"
   config
   fetch_token
 
@@ -174,9 +175,7 @@ EOF
 
     systemctl enable rke2-server
     systemctl daemon-reload
-    if ${rke2_start}; then
-      systemctl start rke2-server
-    fi
+    systemctl start rke2-server
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
@@ -199,4 +198,6 @@ EOF
       systemctl start rke2-agent
     fi
   fi
+  info "Ending rke2-init userdata"
+
 }
