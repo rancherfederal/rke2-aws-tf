@@ -204,7 +204,13 @@ variable "unzip_rpm_url" {
 }
 
 variable "rke2_start" {
-  description = "Start/Stop value for the rke2-server/agent service.  True=start, False= don't start."
+  description = "Start/Stop value for the rke2-agent service.  True=start, False=don't start."
   type        = bool
   default     = true
+}
+
+variable "termination_policies" {
+  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
+  type        = list(string)
+  default     = [ "Default" ]
 }

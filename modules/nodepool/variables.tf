@@ -80,6 +80,7 @@ variable "asg" {
     min     = number
     max     = number
     desired = number
+    termination_policies = list(string)
   })
 }
 
@@ -109,3 +110,7 @@ variable "extra_cloud_config_config" {
   default     = ""
 }
 
+#variable "termination_policies" {
+#  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
+#  type        = list(string)
+#}
