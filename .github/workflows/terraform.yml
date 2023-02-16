@@ -24,3 +24,6 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       run: terraform fmt -recursive -check
+
+    - name: Terraform Validate
+      run: terraform validate
