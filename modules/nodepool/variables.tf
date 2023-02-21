@@ -109,8 +109,3 @@ variable "extra_cloud_config_config" {
   type        = string
   default     = ""
 }
-
-#variable "termination_policies" {
-#  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
-#  type        = list(string)
-#}
