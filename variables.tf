@@ -218,5 +218,5 @@ variable "rke2_start" {
 variable "termination_policies" {
   description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
   type        = list(string)
-  default     = [ "Default" ]
+  default     = ["Default"]
 }

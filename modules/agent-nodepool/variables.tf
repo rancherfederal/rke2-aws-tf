@@ -179,7 +179,7 @@ variable "wait_for_capacity_timeout" {
 }
 
 variable "ccm_external" {
-  description = "Set CCM to external.  Requires manual install of CCM.
+  description = "Set CCM to external.  Requires manual install of CCM."
   type        = bool
   default     = false
 }
