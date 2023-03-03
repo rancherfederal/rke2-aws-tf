@@ -168,6 +168,12 @@ variable "enable_ccm" {
   default     = false
 }
 
+variable "ccm_external" {
+  description = "Set CCM to external.  Requires manual install of CCM."
+  type        = bool
+  default     = false
+}
+
 variable "wait_for_capacity_timeout" {
   description = "How long Terraform should wait for ASG instances to be healthy before timing out."
   type        = string

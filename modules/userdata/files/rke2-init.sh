@@ -2,6 +2,7 @@
 
 export TYPE="${type}"
 export CCM="${ccm}"
+export CCM_EXTERNAL="${ccm_external}"
 
 # info logs the given argument at info log level.
 info() {
@@ -155,7 +156,12 @@ upload() {
   fetch_token
 
   if [ $CCM = "true" ]; then
-    append_config 'cloud-provider-name: "aws"'
+    if [ $CCM_EXTERNAL = "true" ]; then
+      append_config 'cloud-provider-name: "external"'
+      append_config 'disable-cloud-controller: "true"'
+    else
+      append_config 'cloud-provider-name: "aws"'
+    fi
   fi
 
   if [ $TYPE = "server" ]; then

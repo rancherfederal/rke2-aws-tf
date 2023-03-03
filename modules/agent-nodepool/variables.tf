@@ -177,3 +177,9 @@ variable "wait_for_capacity_timeout" {
   type        = string
   default     = "10m"
 }
+
+variable "ccm_external" {
+  description = "Set CCM to external.  Requires manual install of CCM.
+  type        = bool
+  default     = false
+}

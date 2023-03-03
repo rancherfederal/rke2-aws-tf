@@ -7,6 +7,7 @@ output "rke2_templated" {
     token_object = var.token_object
     config       = var.config
     ccm          = var.ccm
+    ccm_external = var.ccm_external
 
     pre_userdata  = var.pre_userdata
     post_userdata = var.post_userdata
@@ -23,6 +24,7 @@ output "pre_templated" {
     token_object = var.token_object
     config       = var.config
     ccm          = var.ccm
+    ccm_external = var.ccm_external
 
     pre_userdata  = var.pre_userdata
     post_userdata = var.post_userdata
@@ -39,6 +41,7 @@ output "post_templated" {
     token_object = var.token_object
     config       = var.config
     ccm          = var.ccm
+    ccm_external = var.ccm_external
 
     pre_userdata  = var.pre_userdata
     post_userdata = var.post_userdata

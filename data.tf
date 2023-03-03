@@ -8,6 +8,7 @@ module "init" {
   pre_userdata  = var.pre_userdata
   post_userdata = var.post_userdata
   ccm           = var.enable_ccm
+  ccm_external  = var.ccm_external
   agent         = false
   rke2_start    = var.rke2_start
 }

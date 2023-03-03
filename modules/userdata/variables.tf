@@ -32,6 +32,12 @@ variable "ccm" {
   default     = false
 }
 
+variable "ccm_external" {
+  description = "Set CCM to external.  Requires manual install of CCM."
+  type        = bool
+  default     = false
+}
+
 #
 # Custom Userdata
 #
