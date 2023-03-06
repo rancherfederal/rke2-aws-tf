@@ -20,6 +20,12 @@ variable "enable_cross_zone_load_balancing" {
   type    = bool
 }
 
+variable "security_group_controlplane" {
+  description = "security group for controlplane targets, created if left blank (default behavior)"
+  type        = string
+  default     = ""
+}
+
 variable "cp_port" {
   type    = number
   default = 6443

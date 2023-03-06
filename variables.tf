@@ -85,6 +85,18 @@ variable "ssh_authorized_keys" {
   default     = []
 }
 
+variable "security_group_cluster" {
+  description = "Security group shared by the cluster, created if left blank (default behavior)"
+  type        = string
+  default     = ""
+}
+
+variable "security_group_server" {
+  description = "Security group for server nodes, created if left blank (default behavior)"
+  type        = string
+  default     = ""
+}
+
 variable "extra_security_group_ids" {
   description = "List of additional security group IDs"
   type        = list(string)

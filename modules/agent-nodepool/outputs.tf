@@ -1,7 +1,3 @@
-output "security_group" {
-  value = module.nodepool.security_group
-}
-
 output "nodepool_name" {
   value = module.nodepool.asg_name
 }
