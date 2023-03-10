@@ -40,6 +40,8 @@ module "statestore" {
   name   = local.uname
   token  = random_password.token.result
   tags   = merge(local.default_tags, var.tags)
+
+  attach_deny_insecure_transport_policy = var.statestore_attach_deny_insecure_transport_policy
 }
 
 #

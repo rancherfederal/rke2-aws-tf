@@ -173,3 +173,13 @@ variable "wait_for_capacity_timeout" {
   type        = string
   default     = "10m"
 }
+
+#
+### Statestore Variables
+#
+
+variable "statestore_attach_deny_insecure_transport_policy" {
+  description = "Toggle for enabling s3 policy to reject non-SSL requests"
+  type        = bool
+  default     = true
+}
