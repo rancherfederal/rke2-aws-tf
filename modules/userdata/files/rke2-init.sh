@@ -194,8 +194,7 @@ EOF
 
       # For servers, wait for apiserver to be ready before continuing so that `post_userdata` can operate on the cluster
       local_cp_api_wait
-    fi
-    if ${rke2_start}; then
+    elif ${rke2_start}; then
       systemctl start rke2-server
     fi
 

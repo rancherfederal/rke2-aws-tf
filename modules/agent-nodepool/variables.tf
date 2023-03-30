@@ -189,6 +189,7 @@ variable "ccm_external" {
 variable "rke2_start" {
   description = "Start/Stop value for the rke2-server/agent service.  True=start, False= don't start."
   type        = bool
+  default     = true
 }
 
 variable "rke2_install_script_url" {
