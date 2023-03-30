@@ -80,12 +80,14 @@ variable "asg" {
     min     = number
     max     = number
     desired = number
+    termination_policies = list(string)
   })
 
   default = {
-    min     = 1
-    max     = 10
-    desired = 1
+    min                  = 1
+    max                  = 10
+    desired              = 1
+    termination_policies = ["Default"]
   }
 }
 
@@ -179,7 +181,30 @@ variable "wait_for_capacity_timeout" {
 }
 
 variable "ccm_external" {
-  description = "Set CCM to external.  Requires manual install of CCM."
+  description = "Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM."
   type        = bool
   default     = false
+}
+
+variable "rke2_start" {
+  description = "Start/Stop value for the rke2-server/agent service.  True=start, False= don't start."
+  type        = bool
+}
+
+variable "rke2_install_script_url" {
+  description = "URL for RKE2 install script"
+  type        = string
+  default     = "https://get.rke2.io"
+}
+
+variable "awscli_url" {
+  description = "URL for awscli zip file"
+  type        = string
+  default     = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+}
+
+variable "unzip_rpm_url" {
+  description = "URL path to unzip rpm"
+  type        = string
+  default     = ""
 }

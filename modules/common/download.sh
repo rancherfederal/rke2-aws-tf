@@ -32,7 +32,7 @@ read_os() {
 
 get_installer() {
   info 'Curl-ing RKE2 install script from "${rke2_install_script_url}"'
-  curl -fsSL "${rke2_install_script_url}" -o install.sh
+  curl -fsSL ${rke2_install_script_url} -o install.sh
   chmod u+x install.sh
   info 'RKE2 install script downloaded'
 }
@@ -41,7 +41,7 @@ install_awscli() {
   # Install awscli (used for secrets fetching)
   # NOTE: Assumes unzip has already been installed
   info 'Installing AWSCLI from "${awscli_url}"'
-  curl -fsSL "${awscli_url}" -o "awscliv2.zip"
+  curl -fsSL ${awscli_url} -o awscliv2.zip
   unzip -q awscliv2.zip
   ./aws/install --bin-dir /usr/bin --update
   rm -f awscliv2.zip
@@ -54,7 +54,7 @@ install_unzip_el() {
     yum install -y unzip
   else
     info "Installing unzip via ${unzip_rpm_url}"
-    curl -fsSL "${unzip_rpm_url}" -o unzip.rpm
+    curl -fsSL ${unzip_rpm_url} -o unzip.rpm
     rpm -ivh unzip.rpm; rm -f unzip.rpm
   fi
 }

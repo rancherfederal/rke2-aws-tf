@@ -169,7 +169,7 @@ variable "enable_ccm" {
 }
 
 variable "ccm_external" {
-  description = "Set CCM to external.  Requires manual install of CCM."
+  description = "Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM."
   type        = bool
   default     = false
 }
@@ -210,7 +210,7 @@ variable "unzip_rpm_url" {
 }
 
 variable "rke2_start" {
-  description = "Start/Stop value for the rke2-agent service.  True=start, False=don't start."
+  description = "Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start."
   type        = bool
   default     = true
 }

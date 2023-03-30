@@ -181,17 +181,22 @@ EOF
 
     systemctl enable rke2-server
     systemctl daemon-reload
-    systemctl start rke2-server
+
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
 
     if [ $SERVER_TYPE = "leader" ]; then
+      systemctl start rke2-server
+
       # Upload kubeconfig to s3 bucket
       upload
 
       # For servers, wait for apiserver to be ready before continuing so that `post_userdata` can operate on the cluster
       local_cp_api_wait
+    fi
+    if ${rke2_start}; then
+      systemctl start rke2-server
     fi
 
   else

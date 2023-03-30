@@ -11,6 +11,7 @@ crash.log
 
 # Ignore test examples directory
 examples/test
+examples/separate
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
