@@ -77,9 +77,9 @@ variable "extra_block_device_mappings" {
 variable "asg" {
   description = "Node pool AutoScalingGroup scaling definition"
   type = object({
-    min     = number
-    max     = number
-    desired = number
+    min                  = number
+    max                  = number
+    desired              = number
     termination_policies = list(string)
   })
 

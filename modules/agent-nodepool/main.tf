@@ -101,8 +101,8 @@ data "cloudinit_config" "init" {
         type         = "agent"
 
         rke2_install_script_url = var.rke2_install_script_url
-        awscli_url = var.awscli_url
-        unzip_rpm_url = var.unzip_rpm_url
+        awscli_url              = var.awscli_url
+        unzip_rpm_url           = var.unzip_rpm_url
 
       })
     }
