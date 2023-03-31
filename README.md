@@ -6,6 +6,20 @@ This repository is inteded to clearly demonstrate one method of deploying `rke2`
 
 We highly recommend you use the modules in this repository as stepping stones in solutions that meet the needs of your workflow and organization.  If you have suggestions or areas of improvements, we would [love to hear them](https://slack.rancher.io/)!
 
+## Non-Backwards compatible changes
+
+Changes have been introduced as of March 2023 that are not compatible with user-defined environments.  Please make note of and test the following changes before deploying into your environments:
+
+-rke2 user is no longer being installed by default for both servers and agents.
+-cloud-init runcmd scripts have been re-numbered as follows:
+  - 00_pre.sh
+  - 10_download.sh
+  - 20_rke2.sh
+  - 99_post.sh
+
+  If you are using additional cloud-init scripts, ensure that their numbering will run in the order you expect.
+-When setting the 'asg' variable, you now must also set the 'termination_policy' value.  
+
 ## Usage
 
 This repository contains 2 terraform modules intended for user consumption:
@@ -178,6 +192,12 @@ Optional policies have the option of being created by default, but are specified
 | vpc\_id | VPC ID to create resources in | `string` | n/a | yes |
 | wait_for_capacity_timeout | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
 | metadata_options | Instance Metadata Options | `map` | <pre>{<br>  http_endpoint: "enabled",<br>  http_tokens: "required",<br>  http_put_response_hop_limit: 1,<br>  instance_metadata_tags: "disabled"}</pre> | no |
+| ccm_external | Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM. | `bool` | `false` | no
+| rke2_start | Start/Stop value for the rke2-server/agent service.  True=start, False= don't start. | `bool` | `true` | no
+| rke2_install_script_url | URL for RKE2 install script | `string` | `"https://get.rke2.io"` | no
+| awscli_url | URL for awscli zip file | `string` | `"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"` | no
+| unzip_rpm_url | URL path to unzip rpm | `string` | `""` | no
+| termination_policies | List of policies to decide how the instances in the Auto Scaling Group should be terminated | `list(string)` | `["Default"]` | no
 | statestore_attach_deny_insecure_transport_policy | Toggle for enabling s3 policy to reject non-SSL requests | `bool` | `true` | yes |
 
 ## Outputs

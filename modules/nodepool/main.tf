@@ -70,9 +70,10 @@ resource "aws_autoscaling_group" "this" {
   name                = "${var.name}-rke2-nodepool"
   vpc_zone_identifier = var.subnets
 
-  min_size         = var.asg.min
-  max_size         = var.asg.max
-  desired_capacity = var.asg.desired
+  min_size             = var.asg.min
+  max_size             = var.asg.max
+  desired_capacity     = var.asg.desired
+  termination_policies = var.asg.termination_policies
 
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
   health_check_type         = var.health_check_type

@@ -32,6 +32,12 @@ variable "ccm" {
   default     = false
 }
 
+variable "ccm_external" {
+  description = "Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM."
+  type        = bool
+  default     = false
+}
+
 #
 # Custom Userdata
 #
@@ -43,4 +49,10 @@ variable "pre_userdata" {
 variable "post_userdata" {
   description = "Custom userdata to run immediately after rke2 node attempts to join cluster"
   default     = ""
+}
+
+variable "rke2_start" {
+  description = "Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start."
+  type        = bool
+  default     = true
 }

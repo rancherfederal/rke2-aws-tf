@@ -77,9 +77,10 @@ variable "extra_block_device_mappings" {
 
 variable "asg" {
   type = object({
-    min     = number
-    max     = number
-    desired = number
+    min                  = number
+    max                  = number
+    desired              = number
+    termination_policies = list(string)
   })
 }
 
@@ -108,4 +109,3 @@ variable "extra_cloud_config_config" {
   type        = string
   default     = ""
 }
-

@@ -201,7 +201,7 @@ module "servers" {
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
-  asg = { min : 1, max : 7, desired : var.servers }
+  asg = { min : 1, max : 7, desired : var.servers, termination_policies : var.termination_policies }
 
   # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
   min_elb_capacity = 1

@@ -2,6 +2,7 @@
 
 export TYPE="${type}"
 export CCM="${ccm}"
+export CCM_EXTERNAL="${ccm_external}"
 
 # info logs the given argument at info log level.
 info() {
@@ -149,26 +150,18 @@ upload() {
   sed "s/127.0.0.1/${server_url}/g" /etc/rancher/rke2/rke2.yaml | aws s3 cp - "s3://${token_bucket}/rke2.yaml" --content-type "text/yaml"
 }
 
-pre_userdata() {
-  info "Beginning user defined pre userdata"
-  ${pre_userdata}
-  info "Beginning user defined pre userdata"
-}
-
-post_userdata() {
-  info "Beginning user defined post userdata"
-  ${post_userdata}
-  info "Ending user defined post userdata"
-}
-
 {
-  pre_userdata
-
+  info "Beginning rke2-init userdata"
   config
   fetch_token
 
   if [ $CCM = "true" ]; then
-    append_config 'cloud-provider-name: "aws"'
+    if [ $CCM_EXTERNAL = "true" ]; then
+      append_config 'cloud-provider-name: "external"'
+      append_config 'disable-cloud-controller: "true"'
+    else
+      append_config 'cloud-provider-name: "aws"'
+    fi
   fi
 
   if [ $TYPE = "server" ]; then
@@ -188,17 +181,21 @@ EOF
 
     systemctl enable rke2-server
     systemctl daemon-reload
-    systemctl start rke2-server
+
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
 
     if [ $SERVER_TYPE = "leader" ]; then
+      systemctl start rke2-server
+
       # Upload kubeconfig to s3 bucket
       upload
 
       # For servers, wait for apiserver to be ready before continuing so that `post_userdata` can operate on the cluster
       local_cp_api_wait
+    elif ${rke2_start}; then
+      systemctl start rke2-server
     fi
 
   else
@@ -207,8 +204,10 @@ EOF
     # Default to agent
     systemctl enable rke2-agent
     systemctl daemon-reload
-    systemctl start rke2-agent
+    if ${rke2_start}; then
+      systemctl start rke2-agent
+    fi
   fi
+  info "Ending rke2-init userdata"
 
-  post_userdata
 }

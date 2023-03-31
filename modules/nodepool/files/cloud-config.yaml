@@ -6,8 +6,5 @@ ssh_authorized_keys:
 
 users:
   - default
-  - name: rke2
-    homedir: /var/lib/rancher/rke2
-    system: true
-
+  
 ${extra_cloud_config_config}

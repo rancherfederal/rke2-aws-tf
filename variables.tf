@@ -168,6 +168,12 @@ variable "enable_ccm" {
   default     = false
 }
 
+variable "ccm_external" {
+  description = "Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM."
+  type        = bool
+  default     = false
+}
+
 variable "wait_for_capacity_timeout" {
   description = "How long Terraform should wait for ASG instances to be healthy before timing out."
   type        = string
@@ -183,6 +189,36 @@ variable "extra_cloud_config_config" {
   description = "extra config to append to cloud-config"
   type        = string
   default     = ""
+}
+
+variable "rke2_install_script_url" {
+  description = "URL for RKE2 install script"
+  type        = string
+  default     = "https://get.rke2.io"
+}
+
+variable "awscli_url" {
+  description = "URL for awscli zip file"
+  type        = string
+  default     = "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+}
+
+variable "unzip_rpm_url" {
+  description = "URL path to unzip rpm"
+  type        = string
+  default     = ""
+}
+
+variable "rke2_start" {
+  description = "Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start."
+  type        = bool
+  default     = true
+}
+
+variable "termination_policies" {
+  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
+  type        = list(string)
+  default     = ["Default"]
 }
 
 #
