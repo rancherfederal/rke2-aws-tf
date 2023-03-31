@@ -220,3 +220,13 @@ variable "termination_policies" {
   type        = list(string)
   default     = ["Default"]
 }
+
+#
+### Statestore Variables
+#
+
+variable "statestore_attach_deny_insecure_transport_policy" {
+  description = "Toggle for enabling s3 policy to reject non-SSL requests"
+  type        = bool
+  default     = true
+}

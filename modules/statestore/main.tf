@@ -47,3 +47,41 @@ data "aws_iam_policy_document" "setter" {
     ]
   }
 }
+
+data "aws_iam_policy_document" "deny_insecure_transport" {
+  count = var.attach_deny_insecure_transport_policy ? 1 : 0
+
+  statement {
+    sid    = "denyInsecureTransport"
+    effect = "Deny"
+
+    actions = [
+      "s3:*",
+    ]
+
+    resources = [
+      aws_s3_bucket.bucket.arn,
+      "${aws_s3_bucket.bucket.arn}/*",
+    ]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values = [
+        "false"
+      ]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "this" {
+  count = var.attach_deny_insecure_transport_policy ? 1 : 0
+
+  bucket = aws_s3_bucket.bucket.id
+  policy = data.aws_iam_policy_document.deny_insecure_transport[0].json
+}

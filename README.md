@@ -198,8 +198,7 @@ Optional policies have the option of being created by default, but are specified
 | awscli_url | URL for awscli zip file | `string` | `"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"` | no
 | unzip_rpm_url | URL path to unzip rpm | `string` | `""` | no
 | termination_policies | List of policies to decide how the instances in the Auto Scaling Group should be terminated | `list(string)` | `["Default"]` | no
-
-
+| statestore_attach_deny_insecure_transport_policy | Toggle for enabling s3 policy to reject non-SSL requests | `bool` | `true` | yes |
 
 ## Outputs
 
