@@ -5,6 +5,19 @@ resource "aws_s3_bucket" "bucket" {
   tags = merge({}, var.tags)
 }
 
+resource "aws_s3_bucket_ownership_controls" "bucket_ownership" {
+  bucket = aws_s3_bucket.bucket
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+
+  # This `depends_on` is to prevent "A conflicting conditional operation is currently in progress against this resource."
+  depends_on = [
+    aws_s3_bucket.bucket
+  ]
+}
+
 resource "aws_s3_bucket_acl" "acl" {
   bucket = aws_s3_bucket.bucket.id
   acl    = "private"
