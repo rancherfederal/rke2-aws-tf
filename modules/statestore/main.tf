@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "bucket" {
   tags = merge({}, var.tags)
 }
 
-resource "aws_s3_bucket_ownership_controls" "bucket_ownership" {
+resource "aws_s3_bucket_ownership_controls" "bucket_ownership_controls" {
   bucket = aws_s3_bucket.bucket.id
 
   rule {
@@ -22,7 +22,7 @@ resource "aws_s3_bucket_acl" "acl" {
   acl    = "private"
 
   depends_on = [
-    aws_s3_bucket_ownership_controls.bucket_ownership
+    aws_s3_bucket_ownership_controls.bucket_ownership_controls
   ]
 }
 
