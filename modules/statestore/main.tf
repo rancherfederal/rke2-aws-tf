@@ -18,7 +18,7 @@ resource "aws_s3_bucket_ownership_controls" "bucket_ownership_controls" {
 }
 
 resource "aws_s3_bucket_acl" "acl" {
-  count = var.create_acl ? 1 : 0
+  count  = var.create_acl ? 1 : 0
   bucket = aws_s3_bucket.bucket.id
   acl    = "private"
 
