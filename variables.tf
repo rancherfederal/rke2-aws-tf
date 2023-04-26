@@ -230,3 +230,9 @@ variable "statestore_attach_deny_insecure_transport_policy" {
   type        = bool
   default     = true
 }
+
+variable "create_acl" {
+  description = "Toggle creation of ACL for statestore bucket"
+  type        = bool
+  default     = true
+}

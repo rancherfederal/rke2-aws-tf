@@ -37,10 +37,11 @@ resource "random_password" "token" {
 }
 
 module "statestore" {
-  source = "./modules/statestore"
-  name   = local.uname
-  token  = random_password.token.result
-  tags   = merge(local.default_tags, var.tags)
+  source     = "./modules/statestore"
+  name       = local.uname
+  create_acl = var.create_acl
+  token      = random_password.token.result
+  tags       = merge(local.default_tags, var.tags)
 
   attach_deny_insecure_transport_policy = var.statestore_attach_deny_insecure_transport_policy
 }
