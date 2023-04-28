@@ -42,3 +42,4 @@ rke2.yaml
 admin.conf
 
 **.DS_Store
+examples/test-*
