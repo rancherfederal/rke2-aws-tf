@@ -93,7 +93,10 @@ do_download() {
     # TODO: Determine minimum supported version, for now just carry on assuming ignorance
     apt update -y
     apt install -y unzip less iptables resolvconf linux-headers-$(uname -r) telnet
-    hostnamectl set-hostname "$(curl http://169.254.169.254/latest/meta-data/hostname)"
+
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    HOSTNAME=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/hostname)
+    hostnamectl set-hostname $HOSTNAME
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh
     
