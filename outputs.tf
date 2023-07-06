@@ -19,7 +19,7 @@ output "server_url" {
 }
 
 output "server_sg" {
-  value = aws_security_group.server.id
+  value = local.cluster_data.server_sg
 }
 
 output "server_nodepool_id" {

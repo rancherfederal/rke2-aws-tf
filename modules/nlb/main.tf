@@ -6,6 +6,7 @@ locals {
 }
 
 resource "aws_security_group" "controlplane" {
+  count = var.security_group_controlplane == "" ? 1 : 0
   name        = local.controlplane_name
   description = "${local.controlplane_name} sg"
   vpc_id      = var.vpc_id
@@ -14,30 +15,33 @@ resource "aws_security_group" "controlplane" {
 }
 
 resource "aws_security_group_rule" "apiserver" {
+  count = var.security_group_controlplane == "" ? 1 : 0
   from_port         = var.cp_port
   to_port           = var.cp_port
   protocol          = "tcp"
-  security_group_id = aws_security_group.controlplane.id
+  security_group_id = aws_security_group.controlplane[0].id
   type              = "ingress"
 
   cidr_blocks = var.cp_ingress_cidr_blocks
 }
 
 resource "aws_security_group_rule" "supervisor" {
+  count = var.security_group_controlplane == "" ? 1 : 0
   from_port         = var.cp_supervisor_port
   to_port           = var.cp_supervisor_port
   protocol          = "tcp"
-  security_group_id = aws_security_group.controlplane.id
+  security_group_id = aws_security_group.controlplane[0].id
   type              = "ingress"
 
   cidr_blocks = var.cp_supervisor_ingress_cidr_blocks
 }
 
 resource "aws_security_group_rule" "egress" {
+  count = var.security_group_controlplane == "" ? 1 : 0
   from_port         = "0"
   to_port           = "0"
   protocol          = "-1"
-  security_group_id = aws_security_group.controlplane.id
+  security_group_id = aws_security_group.controlplane[0].id
   type              = "egress"
 
   cidr_blocks = ["0.0.0.0/0"]

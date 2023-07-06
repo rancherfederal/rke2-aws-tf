@@ -15,7 +15,7 @@ output "name" {
 }
 
 output "security_group" {
-  value = aws_security_group.controlplane.id
+  value = var.security_group_controlplane == "" ? aws_security_group.controlplane[0].id : var.security_group_controlplane
 }
 
 output "target_group_arns" {

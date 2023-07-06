@@ -13,7 +13,8 @@ locals {
   cluster_data = {
     name       = local.uname
     server_url = module.cp_lb.dns
-    cluster_sg = aws_security_group.cluster.id
+    cluster_sg = var.security_group_cluster == "" ? aws_security_group.cluster[0].id : var.security_group_cluster
+    server_sg = var.security_group_server == "" ? aws_security_group.server[0].id : var.security_group_server
     token      = module.statestore.token
   }
   target_group_arns = module.cp_lb.target_group_arns
@@ -59,6 +60,7 @@ module "cp_lb" {
   internal                         = var.controlplane_internal
   access_logs_bucket               = var.controlplane_access_logs_bucket
 
+  security_group_controlplane       = var.security_group_server
   cp_ingress_cidr_blocks            = var.controlplane_allowed_cidrs
   cp_supervisor_ingress_cidr_blocks = var.controlplane_allowed_cidrs
 
@@ -71,6 +73,7 @@ module "cp_lb" {
 
 # Shared Cluster Security Group
 resource "aws_security_group" "cluster" {
+  count = var.security_group_cluster == "" ? 1 : 0
   name        = "${local.uname}-rke2-cluster"
   description = "Shared ${local.uname} cluster security group"
   vpc_id      = var.vpc_id
@@ -81,28 +84,31 @@ resource "aws_security_group" "cluster" {
 }
 
 resource "aws_security_group_rule" "cluster_shared" {
+  count = var.security_group_cluster == "" ? 1 : 0
   description       = "Allow all inbound traffic between ${local.uname} cluster nodes"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
-  security_group_id = aws_security_group.cluster.id
+  security_group_id = aws_security_group.cluster[0].id
   type              = "ingress"
 
   self = true
 }
 
 resource "aws_security_group_rule" "cluster_egress" {
+  count = var.security_group_cluster == "" ? 1 : 0
   description       = "Allow all outbound traffic"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
-  security_group_id = aws_security_group.cluster.id
+  security_group_id = aws_security_group.cluster[0].id
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
 # Server Security Group
 resource "aws_security_group" "server" {
+  count = var.security_group_server == "" ? 1 : 0
   name        = "${local.uname}-rke2-server"
   vpc_id      = var.vpc_id
   description = "${local.uname} rke2 server node pool"
@@ -110,19 +116,21 @@ resource "aws_security_group" "server" {
 }
 
 resource "aws_security_group_rule" "server_cp" {
+  count = var.security_group_server == "" ? 1 : 0
   from_port                = 6443
   to_port                  = 6443
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.server.id
+  security_group_id        = aws_security_group.server[0].id
   type                     = "ingress"
   source_security_group_id = module.cp_lb.security_group
 }
 
 resource "aws_security_group_rule" "server_cp_supervisor" {
+  count = var.security_group_server == "" ? 1 : 0
   from_port                = 9345
   to_port                  = 9345
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.server.id
+  security_group_id        = aws_security_group.server[0].id
   type                     = "ingress"
   source_security_group_id = module.cp_lb.security_group
 }
@@ -189,7 +197,7 @@ module "servers" {
   instance_type               = var.instance_type
   block_device_mappings       = var.block_device_mappings
   extra_block_device_mappings = var.extra_block_device_mappings
-  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
+  vpc_security_group_ids      = distinct(concat([local.cluster_data.server_sg, local.cluster_data.cluster_sg, module.cp_lb.security_group], var.extra_security_group_ids))
   spot                        = var.spot
   #load_balancers              = [module.cp_lb.name]
   target_group_arns           = local.target_group_arns
