@@ -67,6 +67,12 @@ variable "extra_block_device_mappings" {
   ]
 }
 
+variable "extra_security_group_ids" {
+  description = "List of additional security group IDs"
+  type        = list(string)
+  default     = []
+}
+
 variable "servers" {
   description = "Number of servers to create"
   type        = number
@@ -85,10 +91,16 @@ variable "ssh_authorized_keys" {
   default     = []
 }
 
-variable "extra_security_group_ids" {
-  description = "List of additional security group IDs"
+variable "suspended_processes" {
+  description = "List of processes to suspend in the autoscaling service"
   type        = list(string)
   default     = []
+}
+
+variable "termination_policies" {
+  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
+  type        = list(string)
+  default     = ["Default"]
 }
 
 #
@@ -213,12 +225,6 @@ variable "rke2_start" {
   description = "Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start."
   type        = bool
   default     = true
-}
-
-variable "termination_policies" {
-  description = "List of policies to decide how the instances in the Auto Scaling Group should be terminated"
-  type        = list(string)
-  default     = ["Default"]
 }
 
 #

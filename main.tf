@@ -191,7 +191,6 @@ module "servers" {
   extra_block_device_mappings = var.extra_block_device_mappings
   vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
   spot                        = var.spot
-  #load_balancers              = [module.cp_lb.name]
   target_group_arns           = local.target_group_arns
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
   metadata_options            = var.metadata_options
@@ -202,7 +201,13 @@ module "servers" {
   iam_instance_profile = var.iam_instance_profile == "" ? module.iam[0].iam_instance_profile : var.iam_instance_profile
 
   # Don't allow something not recommended within etcd scaling, set max deliberately and only control desired
-  asg = { min : 1, max : 7, desired : var.servers, termination_policies : var.termination_policies }
+  asg = {
+    min                  = 1
+    max                  = 7
+    desired              = var.servers
+    suspended_processes  = var.suspended_processes
+    termination_policies = var.termination_policies
+  }
 
   # TODO: Ideally set this to `length(var.servers)`, but currently blocked by: https://github.com/rancher/rke2/issues/349
   min_elb_capacity = 1
