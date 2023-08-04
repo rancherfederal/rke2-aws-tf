@@ -4,15 +4,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.4"
+      version = ">= 4.6"
     }
     cloudinit = {
       source  = "hashicorp/cloudinit"
-      version = "~> 2.3"
+      version = ">= 2"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.5"
+      version = ">= 3"
     }
   }
 }
