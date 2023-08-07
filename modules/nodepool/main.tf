@@ -73,6 +73,7 @@ resource "aws_autoscaling_group" "this" {
   min_size             = var.asg.min
   max_size             = var.asg.max
   desired_capacity     = var.asg.desired
+  suspended_processes  = var.asg.suspended_processes
   termination_policies = var.asg.termination_policies
 
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)

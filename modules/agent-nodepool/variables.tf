@@ -80,13 +80,15 @@ variable "asg" {
     min                  = number
     max                  = number
     desired              = number
-    termination_policies = list(string)
+    suspended_processes  = optional(list(string))
+    termination_policies = optional(list(string))
   })
 
   default = {
     min                  = 1
     max                  = 10
     desired              = 1
+    suspended_processes  = []
     termination_policies = ["Default"]
   }
 }
