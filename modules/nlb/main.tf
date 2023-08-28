@@ -1,6 +1,6 @@
 locals {
   # Handle case where target group/load balancer name exceeds 32 character limit without creating illegal names
-  controlplane_name = "${substr(var.name, 0, 23)}-rke2-cp"
+  controlplane_name = "${substr(var.name, 0, 18)}-rke2-cp"
   server_name       = "${substr(var.name, 0, 18)}-rke2-server"
   supervisor_name   = "${substr(var.name, 0, 15)}-rke2-supervisor"
 }
