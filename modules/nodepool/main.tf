@@ -16,11 +16,14 @@ resource "aws_launch_template" "this" {
   instance_type = var.instance_type
   user_data     = var.userdata
 
-  metadata_options {
-    http_endpoint               = var.metadata_options["http_endpoint"]
-    http_tokens                 = var.metadata_options["http_tokens"]
-    http_put_response_hop_limit = var.metadata_options["http_put_response_hop_limit"]
-    instance_metadata_tags      = var.metadata_options["instance_metadata_tags"]
+  dynamic "metadata_options" {
+    for_each = (var.metadata_options == null) ? [] : [1]
+    content {
+      http_endpoint               = var.metadata_options["http_endpoint"]
+      http_tokens                 = var.metadata_options["http_tokens"]
+      http_put_response_hop_limit = var.metadata_options["http_put_response_hop_limit"]
+      instance_metadata_tags      = var.metadata_options["instance_metadata_tags"]
+    }
   }
 
   network_interfaces {
