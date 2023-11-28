@@ -36,6 +36,16 @@ append_config() {
   echo "$1" >> "/etc/rancher/rke2/config.yaml"
 }
 
+append_config_san() {
+  grep "^tls-san:$" /etc/rancher/rke2/config.yaml > /dev/null
+  if [ $? -eq 0 ]; then
+    sed -i "/^tls-san:$/a \ \ - ${server_url}" /etc/rancher/rke2/config.yaml
+    return
+  fi
+  echo "tls-san:" >> /etc/rancher/rke2/config.yaml
+  echo "  - ${server_url}" >> /etc/rancher/rke2/config.yaml
+}
+
 # The most simple "leader election" you've ever seen in your life
 elect_leader() {
   # Fetch other running instances in ASG
@@ -168,10 +178,7 @@ upload() {
     # Initialize server
     identify
 
-    cat <<EOF >> "/etc/rancher/rke2/config.yaml"
-tls-san:
-  - ${server_url}
-EOF
+    append_config_san
 
     if [ $SERVER_TYPE = "server" ]; then     # additional server joining an existing cluster
       append_config 'server: https://${server_url}:9345'
