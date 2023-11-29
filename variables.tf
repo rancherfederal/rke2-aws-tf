@@ -193,7 +193,7 @@ variable "wait_for_capacity_timeout" {
 }
 
 variable "associate_public_ip_address" {
-  default = false
+  default = null
   type    = bool
 }
 
