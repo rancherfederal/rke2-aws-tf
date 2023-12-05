@@ -27,7 +27,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami"></a> [ami](#input\_ami) | n/a | `string` | `""` | no |
 | <a name="input_asg"></a> [asg](#input\_asg) | n/a | <pre>object({<br>    min                  = number<br>    max                  = number<br>    desired              = number<br>    suspended_processes  = list(string)<br>    termination_policies = list(string)<br>  })</pre> | <pre>{<br>  "desired": 3,<br>  "max": 7,<br>  "min": 1,<br>  "suspended_processes": [],<br>  "termination_policies": []<br>}</pre> | no |
-| <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | n/a | `bool` | `false` | no |
+| <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | n/a | `bool` | `null` | no |
 | <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | n/a | `map(string)` | <pre>{<br>  "size": 30,<br>  "type": "gp2"<br>}</pre> | no |
 | <a name="input_extra_block_device_mappings"></a> [extra\_block\_device\_mappings](#input\_extra\_block\_device\_mappings) | n/a | `list(map(string))` | `[]` | no |
 | <a name="input_extra_cloud_config_config"></a> [extra\_cloud\_config\_config](#input\_extra\_cloud\_config\_config) | extra config to append to cloud-config | `string` | `""` | no |
