@@ -144,10 +144,16 @@ variable "metadata_options" {
 #
 # RKE2 Variables
 #
-variable "rke2_version" {
-  description = "Version to use for RKE2 server nodes"
+variable "rke2_channel" {
+  description = "Channel to use for RKE2 server nodepool"
   type        = string
-  default     = "v1.19.7+rke2r1"
+  default     = null
+}
+
+variable "rke2_version" {
+  description = "Version to use for RKE2 server nodepool"
+  type        = string
+  default     = null
 }
 
 variable "rke2_config" {

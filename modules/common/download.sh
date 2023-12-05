@@ -2,7 +2,12 @@
 set -e
 
 export INSTALL_RKE2_TYPE="${type}"
+%{ if rke2_channel != null ~}
+export INSTALL_RKE2_CHANNEL="${rke2_channel}"
+%{ endif ~}
+%{ if rke2_version != null ~}
 export INSTALL_RKE2_VERSION="${rke2_version}"
+%{ endif ~}
 
 if [ "$${DEBUG}" == 1 ]; then
   set -x
@@ -66,7 +71,7 @@ do_download() {
   case $ID in
   centos | rocky | rhel)
     info "Installing RKE2 for EL-based distro"
-    
+
     install_unzip_el
 
     install_awscli
@@ -99,7 +104,7 @@ do_download() {
     hostnamectl set-hostname $HOSTNAME
 
     INSTALL_RKE2_METHOD='tar' INSTALL_RKE2_TYPE="${type}" ./install.sh
-    
+
     install_awscli
     ;;
   amzn)

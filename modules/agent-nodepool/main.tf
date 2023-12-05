@@ -84,6 +84,7 @@ data "cloudinit_config" "init" {
       extra_cloud_config_config = var.extra_cloud_config_config
     })
   }
+
   part {
     filename     = "00_pre.sh"
     content_type = "text/x-shellscript"
@@ -97,9 +98,9 @@ data "cloudinit_config" "init" {
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/../common/download.sh", {
         # Must not use `version` here since that is reserved
-        rke2_version = var.rke2_version
-        type         = "agent"
-
+        rke2_channel            = var.rke2_channel
+        rke2_version            = var.rke2_version
+        type                    = "agent"
         rke2_install_script_url = var.rke2_install_script_url
         awscli_url              = var.awscli_url
         unzip_rpm_url           = var.unzip_rpm_url
@@ -113,6 +114,7 @@ data "cloudinit_config" "init" {
     content_type = "text/x-shellscript"
     content      = module.init.rke2_templated
   }
+
   part {
     filename     = "99_post.sh"
     content_type = "text/x-shellscript"

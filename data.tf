@@ -26,11 +26,13 @@ data "cloudinit_config" "this" {
       extra_cloud_config_config = var.extra_cloud_config_config
     })
   }
+
   part {
     filename     = "00_pre.sh"
     content_type = "text/x-shellscript"
     content      = module.init.pre_templated
   }
+
   dynamic "part" {
     for_each = var.download ? [1] : []
     content {
@@ -38,6 +40,7 @@ data "cloudinit_config" "this" {
       content_type = "text/x-shellscript"
       content = templatefile("${path.module}/modules/common/download.sh", {
         # Must not use `version` here since that is reserved
+        rke2_channel            = var.rke2_channel
         rke2_version            = var.rke2_version
         type                    = "server"
         rke2_install_script_url = var.rke2_install_script_url
@@ -52,6 +55,7 @@ data "cloudinit_config" "this" {
     content_type = "text/x-shellscript"
     content      = module.init.rke2_templated
   }
+
   part {
     filename     = "99_post.sh"
     content_type = "text/x-shellscript"
@@ -142,4 +146,11 @@ data "aws_iam_policy_document" "aws_ccm" {
       "kms:DescribeKey"
     ]
   }
+}
+
+# Need to add getter/setter for statestore if provided with role
+data "aws_iam_role" "provided" {
+  count = var.iam_instance_profile == "" ? 0 : 1
+
+  name = var.iam_instance_profile
 }
