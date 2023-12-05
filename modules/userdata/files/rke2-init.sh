@@ -174,6 +174,9 @@ upload() {
     fi
   fi
 
+  systemctl is-enabled --quiet nm-cloud-setup && \
+    systemctl disable nm-cloud-setup; systemctl disable nm-cloud-setup.timer
+
   if [ $TYPE = "server" ]; then
     # Initialize server
     identify
@@ -188,7 +191,6 @@ upload() {
 
     systemctl enable rke2-server
     systemctl daemon-reload
-
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin
