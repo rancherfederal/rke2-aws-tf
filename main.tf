@@ -160,6 +160,14 @@ resource "aws_iam_role_policy" "aws_ccm" {
   policy = data.aws_iam_policy_document.aws_ccm[count.index].json
 }
 
+resource "aws_iam_role_policy" "aws_autoscaler" {
+  count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-aws-autoscaler"
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_autoscaler[count.index].json
+}
+
 resource "aws_iam_role_policy" "get_token" {
   #count = var.iam_instance_profile == "" ? 1 : 0
 

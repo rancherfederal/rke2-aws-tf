@@ -180,6 +180,12 @@ variable "post_userdata" {
   default     = ""
 }
 
+variable "enable_autoscaler" {
+  description = "Toggle enabling policies required for cluster autoscaler to work"
+  type        = bool
+  default     = false
+}
+
 variable "enable_ccm" {
   description = "Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present"
   type        = bool

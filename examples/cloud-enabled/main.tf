@@ -96,16 +96,19 @@ module "rke2" {
   vpc_id       = module.vpc.vpc_id
   subnets      = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                   = data.aws_ami.rhel8.image_id # Note: Multi OS is primarily for example purposes
+  ami                   = data.aws_ami.rhel8.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   instance_type         = "t3.medium"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
   servers               = 1
 
   # Enable AWS Cloud Controller Manager
-  enable_ccm = true
+  enable_ccm        = true
+  enable_autoscaler = true
 
   rke2_config = yamlencode({ "node-label" : ["name=server", "os=rhel8"] })
+
+  rke2_channel = "v1.27"
 }
 
 #
@@ -131,6 +134,8 @@ module "agents" {
   rke2_config = yamlencode({ "node-label" : ["name=generic", "os=rhel8"] })
 
   cluster_data = module.rke2.cluster_data
+
+  rke2_channel = "v1.27"
 }
 
 # For demonstration only, lock down ssh access in production

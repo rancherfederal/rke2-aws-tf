@@ -148,6 +148,36 @@ data "aws_iam_policy_document" "aws_ccm" {
   }
 }
 
+data "aws_iam_policy_document" "aws_autoscaler" {
+  count = var.enable_autoscaler ? 1 : 0
+
+  statement {
+    actions = [
+      "autoscaling:DescribeAutoScalingGroups",
+      "autoscaling:DescribeAutoScalingInstances",
+      "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeScalingActivities",
+      "autoscaling:DescribeTags",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeLaunchTemplateVersions"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "autoscaling:SetDesiredCapacity",
+      "autoscaling:TerminateInstanceInAutoScalingGroup",
+      "ec2:DescribeImages",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+}
+
 # Need to add getter/setter for statestore if provided with role
 data "aws_iam_role" "provided" {
   count = var.iam_instance_profile == "" ? 0 : 1
