@@ -14,8 +14,14 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "lb_subnets" {
+  description = "List of subnet IDs to create load balancer in"
+  default     = null
+  type        = list(string)
+}
+
 variable "subnets" {
-  description = "List of subnet IDs to create resources in"
+  description = "List of subnet IDs to create nodes in"
   type        = list(string)
 }
 

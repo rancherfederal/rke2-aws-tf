@@ -85,6 +85,7 @@ resource "aws_lb" "controlplane" {
   internal           = var.internal
   load_balancer_type = "network"
   subnets            = var.subnets
+  security_groups    = [aws_security_group.controlplane.id]
 
   enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
 
