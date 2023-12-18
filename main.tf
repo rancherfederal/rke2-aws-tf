@@ -17,7 +17,7 @@ locals {
     token      = module.statestore.token
   }
 
-  lb_subnets = var.lb_subnets == null ? var.subnets : var.lb_subnets
+  lb_subnets        = var.lb_subnets == null ? var.subnets : var.lb_subnets
   target_group_arns = module.cp_lb.target_group_arns
 }
 
