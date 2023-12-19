@@ -166,13 +166,12 @@ upload() {
   fetch_token
 
   if [ $CCM = "true" ]; then
-    if [ $CCM_EXTERNAL = "true" ]; then
-      append_config 'cloud-provider-name: "external"'
-      append_config 'disable-cloud-controller: "true"'
-    else
-      append_config 'cloud-provider-name: "aws"'
-    fi
+    append_config 'cloud-provider-name: "external"'
+    append_config 'disable-cloud-controller: "true"'
   fi
+
+  systemctl is-enabled --quiet nm-cloud-setup && \
+    systemctl disable nm-cloud-setup; systemctl disable nm-cloud-setup.timer
 
   if [ $TYPE = "server" ]; then
     # Initialize server
@@ -188,7 +187,6 @@ upload() {
 
     systemctl enable rke2-server
     systemctl daemon-reload
-
 
     export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
     export PATH=$PATH:/var/lib/rancher/rke2/bin

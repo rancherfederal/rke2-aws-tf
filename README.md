@@ -152,18 +152,18 @@ Optional policies have the option of being created by default, but are specified
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.4 |
-| <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | ~> 2.3 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.5 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.6, <= 5.22 |
+| <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | >= 2 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.11.0 |
-| <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | 2.3.2 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.6, <= 5.22 |
+| <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | >= 2 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3 |
 
 ## Modules
 
@@ -179,6 +179,7 @@ Optional policies have the option of being created by default, but are specified
 
 | Name | Type |
 |------|------|
+| [aws_iam_role_policy.aws_autoscaler](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.aws_ccm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.aws_required](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.get_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
@@ -191,8 +192,10 @@ Optional policies have the option of being created by default, but are specified
 | [aws_security_group_rule.server_cp_supervisor](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [random_password.token](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_string.uid](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
+| [aws_iam_policy_document.aws_autoscaler](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.aws_ccm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.aws_required](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_role.provided](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_role) | data source |
 | [cloudinit_config.this](https://registry.terraform.io/providers/hashicorp/cloudinit/latest/docs/data-sources/config) | data source |
 
 ## Inputs
@@ -200,7 +203,7 @@ Optional policies have the option of being created by default, but are specified
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami"></a> [ami](#input\_ami) | Server pool ami | `string` | n/a | yes |
-| <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | n/a | `bool` | `false` | no |
+| <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | n/a | `bool` | `null` | no |
 | <a name="input_awscli_url"></a> [awscli\_url](#input\_awscli\_url) | URL for awscli zip file | `string` | `"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"` | no |
 | <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | Server pool block device mapping configuration | `map(string)` | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no |
 | <a name="input_ccm_external"></a> [ccm\_external](#input\_ccm\_external) | Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM. | `bool` | `false` | no |
@@ -211,6 +214,7 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_controlplane_internal"></a> [controlplane\_internal](#input\_controlplane\_internal) | Toggle between public or private control plane load balancer | `bool` | `true` | no |
 | <a name="input_create_acl"></a> [create\_acl](#input\_create\_acl) | Toggle creation of ACL for statestore bucket | `bool` | `true` | no |
 | <a name="input_download"></a> [download](#input\_download) | Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH | `bool` | `true` | no |
+| <a name="input_enable_autoscaler"></a> [enable\_autoscaler](#input\_enable\_autoscaler) | Toggle enabling policies required for cluster autoscaler to work | `bool` | `false` | no |
 | <a name="input_enable_ccm"></a> [enable\_ccm](#input\_enable\_ccm) | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
 | <a name="input_extra_block_device_mappings"></a> [extra\_block\_device\_mappings](#input\_extra\_block\_device\_mappings) | Used to specify additional block device mapping configurations | `list(map(string))` | `[]` | no |
 | <a name="input_extra_cloud_config_config"></a> [extra\_cloud\_config\_config](#input\_extra\_cloud\_config\_config) | extra config to append to cloud-config | `string` | `""` | no |
@@ -218,18 +222,20 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | Server pool IAM Instance Profile, created if left blank (default behavior) | `string` | `""` | no |
 | <a name="input_iam_permissions_boundary"></a> [iam\_permissions\_boundary](#input\_iam\_permissions\_boundary) | If provided, the IAM role created for the servers will be created with this permissions boundary attached. | `string` | `null` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Server pool instance type | `string` | `"t3a.medium"` | no |
+| <a name="input_lb_subnets"></a> [lb\_subnets](#input\_lb\_subnets) | List of subnet IDs to create load balancer in | `list(string)` | `null` | no |
 | <a name="input_metadata_options"></a> [metadata\_options](#input\_metadata\_options) | Instance Metadata Options | `map(any)` | <pre>{<br>  "http_endpoint": "enabled",<br>  "http_put_response_hop_limit": 2,<br>  "http_tokens": "required",<br>  "instance_metadata_tags": "disabled"<br>}</pre> | no |
 | <a name="input_post_userdata"></a> [post\_userdata](#input\_post\_userdata) | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | <a name="input_pre_userdata"></a> [pre\_userdata](#input\_pre\_userdata) | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
+| <a name="input_rke2_channel"></a> [rke2\_channel](#input\_rke2\_channel) | Channel to use for RKE2 server nodepool | `string` | `null` | no |
 | <a name="input_rke2_config"></a> [rke2\_config](#input\_rke2\_config) | Server pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/server_config for full list of options | `string` | `""` | no |
 | <a name="input_rke2_install_script_url"></a> [rke2\_install\_script\_url](#input\_rke2\_install\_script\_url) | URL for RKE2 install script | `string` | `"https://get.rke2.io"` | no |
 | <a name="input_rke2_start"></a> [rke2\_start](#input\_rke2\_start) | Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start. | `bool` | `true` | no |
-| <a name="input_rke2_version"></a> [rke2\_version](#input\_rke2\_version) | Version to use for RKE2 server nodes | `string` | `"v1.19.7+rke2r1"` | no |
+| <a name="input_rke2_version"></a> [rke2\_version](#input\_rke2\_version) | Version to use for RKE2 server nodepool | `string` | `null` | no |
 | <a name="input_servers"></a> [servers](#input\_servers) | Number of servers to create | `number` | `3` | no |
 | <a name="input_spot"></a> [spot](#input\_spot) | Toggle spot requests for server pool | `bool` | `false` | no |
 | <a name="input_ssh_authorized_keys"></a> [ssh\_authorized\_keys](#input\_ssh\_authorized\_keys) | Server pool list of public keys to add as authorized ssh keys | `list(string)` | `[]` | no |
 | <a name="input_statestore_attach_deny_insecure_transport_policy"></a> [statestore\_attach\_deny\_insecure\_transport\_policy](#input\_statestore\_attach\_deny\_insecure\_transport\_policy) | Toggle for enabling s3 policy to reject non-SSL requests | `bool` | `true` | no |
-| <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet IDs to create resources in | `list(string)` | n/a | yes |
+| <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet IDs to create nodes in | `list(string)` | n/a | yes |
 | <a name="input_suspended_processes"></a> [suspended\_processes](#input\_suspended\_processes) | List of processes to suspend in the autoscaling service | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Map of tags to add to all resources created | `map(string)` | `{}` | no |
 | <a name="input_termination_policies"></a> [termination\_policies](#input\_termination\_policies) | List of policies to decide how the instances in the Auto Scaling Group should be terminated | `list(string)` | <pre>[<br>  "Default"<br>]</pre> | no |

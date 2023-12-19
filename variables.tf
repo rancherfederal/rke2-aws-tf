@@ -14,8 +14,14 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "lb_subnets" {
+  description = "List of subnet IDs to create load balancer in"
+  default     = null
+  type        = list(string)
+}
+
 variable "subnets" {
-  description = "List of subnet IDs to create resources in"
+  description = "List of subnet IDs to create nodes in"
   type        = list(string)
 }
 
@@ -144,10 +150,16 @@ variable "metadata_options" {
 #
 # RKE2 Variables
 #
-variable "rke2_version" {
-  description = "Version to use for RKE2 server nodes"
+variable "rke2_channel" {
+  description = "Channel to use for RKE2 server nodepool"
   type        = string
-  default     = "v1.19.7+rke2r1"
+  default     = null
+}
+
+variable "rke2_version" {
+  description = "Version to use for RKE2 server nodepool"
+  type        = string
+  default     = null
 }
 
 variable "rke2_config" {
@@ -174,6 +186,12 @@ variable "post_userdata" {
   default     = ""
 }
 
+variable "enable_autoscaler" {
+  description = "Toggle enabling policies required for cluster autoscaler to work"
+  type        = bool
+  default     = false
+}
+
 variable "enable_ccm" {
   description = "Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present"
   type        = bool
@@ -193,7 +211,7 @@ variable "wait_for_capacity_timeout" {
 }
 
 variable "associate_public_ip_address" {
-  default = false
+  default = null
   type    = bool
 }
 

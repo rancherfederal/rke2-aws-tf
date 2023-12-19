@@ -34,11 +34,22 @@ data "aws_iam_policy_document" "aws_autoscaler" {
       "autoscaling:DescribeAutoScalingGroups",
       "autoscaling:DescribeAutoScalingInstances",
       "autoscaling:DescribeLaunchConfigurations",
+      "autoscaling:DescribeScalingActivities",
       "autoscaling:DescribeTags",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeLaunchTemplateVersions"
+    ]
+  }
+
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+    actions = [
       "autoscaling:SetDesiredCapacity",
       "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeLaunchTemplateVersions",
-      "ec2:DescribeInstanceTypes"
+      "ec2:DescribeImages",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
     ]
   }
 }

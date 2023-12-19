@@ -98,7 +98,7 @@ variable "spot" {
 }
 
 variable "associate_public_ip_address" {
-  default = false
+  default = null
   type    = bool
 }
 

@@ -63,7 +63,6 @@ module "rke2" {
   iam_instance_profile  = local.server_iam_role
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
   tags                  = local.tags
-
 }
 
 #
@@ -78,7 +77,6 @@ module "agents" {
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   tags                = local.tags
   cluster_data        = module.rke2.cluster_data
-
 }
 
 # For demonstration only, lock down ssh access in production

@@ -36,7 +36,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami"></a> [ami](#input\_ami) | Node pool ami | `string` | `""` | no |
-| <a name="input_asg"></a> [asg](#input\_asg) | Node pool AutoScalingGroup scaling definition | <pre>object({<br>    min                  = number<br>    max                  = number<br>    desired              = number<br>    suspended_processes  = list(string)<br>    termination_policies = list(string)<br>  })</pre> | <pre>{<br>  "desired": 1,<br>  "max": 10,<br>  "min": 1,<br>  "suspended_processes": [],<br>  "termination_policies": [<br>    "Default"<br>  ]<br>}</pre> | no |
+| <a name="input_asg"></a> [asg](#input\_asg) | Node pool AutoScalingGroup scaling definition | <pre>object({<br>    min                  = number<br>    max                  = number<br>    desired              = number<br>    suspended_processes  = optional(list(string))<br>    termination_policies = optional(list(string))<br>  })</pre> | <pre>{<br>  "desired": 1,<br>  "max": 10,<br>  "min": 1,<br>  "suspended_processes": [],<br>  "termination_policies": [<br>    "Default"<br>  ]<br>}</pre> | no |
 | <a name="input_awscli_url"></a> [awscli\_url](#input\_awscli\_url) | URL for awscli zip file | `string` | `"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"` | no |
 | <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | Node pool block device mapping configuration | `map(string)` | <pre>{<br>  "size": 30,<br>  "type": "gp2"<br>}</pre> | no |
 | <a name="input_ccm_external"></a> [ccm\_external](#input\_ccm\_external) | Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM. | `bool` | `false` | no |
@@ -54,10 +54,11 @@
 | <a name="input_name"></a> [name](#input\_name) | Nodepool name | `string` | n/a | yes |
 | <a name="input_post_userdata"></a> [post\_userdata](#input\_post\_userdata) | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | <a name="input_pre_userdata"></a> [pre\_userdata](#input\_pre\_userdata) | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
+| <a name="input_rke2_channel"></a> [rke2\_channel](#input\_rke2\_channel) | Channel to use for RKE2 agent nodepool | `string` | `null` | no |
 | <a name="input_rke2_config"></a> [rke2\_config](#input\_rke2\_config) | Node pool additional configuration passed as rke2 config file, see https://docs.rke2.io/install/install_options/agent_config for full list of options | `string` | `""` | no |
 | <a name="input_rke2_install_script_url"></a> [rke2\_install\_script\_url](#input\_rke2\_install\_script\_url) | URL for RKE2 install script | `string` | `"https://get.rke2.io"` | no |
 | <a name="input_rke2_start"></a> [rke2\_start](#input\_rke2\_start) | Start/Stop value for the rke2-server/agent service.  True=start, False= don't start. | `bool` | `true` | no |
-| <a name="input_rke2_version"></a> [rke2\_version](#input\_rke2\_version) | Version to use for RKE2 server nodepool | `string` | `"v1.19.7+rke2r1"` | no |
+| <a name="input_rke2_version"></a> [rke2\_version](#input\_rke2\_version) | Version to use for RKE2 agent nodepool | `string` | `null` | no |
 | <a name="input_spot"></a> [spot](#input\_spot) | Toggle spot requests for node pool | `bool` | `false` | no |
 | <a name="input_ssh_authorized_keys"></a> [ssh\_authorized\_keys](#input\_ssh\_authorized\_keys) | Node pool list of public keys to add as authorized ssh keys, not required | `list(string)` | `[]` | no |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet IDs to create resources in | `list(string)` | n/a | yes |

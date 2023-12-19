@@ -16,6 +16,8 @@ locals {
     cluster_sg = aws_security_group.cluster.id
     token      = module.statestore.token
   }
+
+  lb_subnets        = var.lb_subnets == null ? var.subnets : var.lb_subnets
   target_group_arns = module.cp_lb.target_group_arns
 }
 
@@ -53,7 +55,7 @@ module "cp_lb" {
   source  = "./modules/nlb"
   name    = local.uname
   vpc_id  = var.vpc_id
-  subnets = var.subnets
+  subnets = local.lb_subnets
 
   enable_cross_zone_load_balancing = var.controlplane_enable_cross_zone_load_balancing
   internal                         = var.controlplane_internal
@@ -160,19 +162,27 @@ resource "aws_iam_role_policy" "aws_ccm" {
   policy = data.aws_iam_policy_document.aws_ccm[count.index].json
 }
 
+resource "aws_iam_role_policy" "aws_autoscaler" {
+  count = var.iam_instance_profile == "" && var.enable_autoscaler ? 1 : 0
+
+  name   = "${local.uname}-rke2-server-aws-autoscaler"
+  role   = module.iam[count.index].role
+  policy = data.aws_iam_policy_document.aws_autoscaler[count.index].json
+}
+
 resource "aws_iam_role_policy" "get_token" {
-  count = var.iam_instance_profile == "" ? 1 : 0
+  #count = var.iam_instance_profile == "" ? 1 : 0
 
   name   = "${local.uname}-rke2-server-get-token"
-  role   = module.iam[count.index].role
+  role   = var.iam_instance_profile == "" ? module.iam[0].role : data.aws_iam_role.provided[0].name
   policy = module.statestore.token.policy_document
 }
 
 resource "aws_iam_role_policy" "put_kubeconfig" {
-  count = var.iam_instance_profile == "" ? 1 : 0
+  #count = var.iam_instance_profile == "" ? 1 : 0
 
   name   = "${local.uname}-rke2-server-put-kubeconfig"
-  role   = module.iam[count.index].role
+  role   = var.iam_instance_profile == "" ? module.iam[0].role : data.aws_iam_role.provided[0].name
   policy = module.statestore.kubeconfig_put_policy
 }
 
@@ -189,7 +199,9 @@ module "servers" {
   instance_type               = var.instance_type
   block_device_mappings       = var.block_device_mappings
   extra_block_device_mappings = var.extra_block_device_mappings
-  vpc_security_group_ids      = concat([aws_security_group.server.id, aws_security_group.cluster.id, module.cp_lb.security_group], var.extra_security_group_ids)
+  vpc_security_group_ids = concat(
+    [aws_security_group.cluster.id, aws_security_group.server.id],
+  var.extra_security_group_ids)
   spot                        = var.spot
   target_group_arns           = local.target_group_arns
   wait_for_capacity_timeout   = var.wait_for_capacity_timeout
