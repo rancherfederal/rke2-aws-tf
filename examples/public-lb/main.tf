@@ -42,7 +42,7 @@ data "cloudinit_config" "bastion" {
     filename     = "00_init.sh"
     content_type = "text/x-shellscript"
     # required to use sshuttle for ssh tunneling
-    content      = <<EOF
+    content = <<EOF
 #!/bin/sh
 dnf install -y python3
 EOF
@@ -77,10 +77,10 @@ resource "aws_security_group" "bastion" {
 resource "aws_security_group_rule" "ssh" {
   description = "Allow ssh from Internet"
 
-  from_port   = 22
-  to_port     = 22
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
   ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.bastion.id
   type              = "ingress"
