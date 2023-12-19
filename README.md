@@ -153,7 +153,7 @@ Optional policies have the option of being created by default, but are specified
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.6, <= 5.22 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.31 |
 | <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | >= 2 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3 |
 
@@ -161,7 +161,7 @@ Optional policies have the option of being created by default, but are specified
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.6, <= 5.22 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.31 |
 | <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | >= 2 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3 |
 
