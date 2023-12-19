@@ -1,13 +1,12 @@
 provider "aws" {
-  region = local.aws_region
   default_tags {
     tags = local.tags
   }
 }
 
 locals {
+  aws_region   = data.aws_region.current.name
   cluster_name = "cloud-enabled"
-  aws_region   = "us-gov-west-1"
   cidr         = "10.88.0.0/16"
   ssh_allowed_cidrs = [
     "0.0.0.0/0"
@@ -19,13 +18,18 @@ locals {
   }
 }
 
-data "aws_ami" "rhel8" {
+data "aws_region" "current" {}
+
+data "aws_ami" "rhel9" {
   most_recent = true
-  owners      = ["219670896067"] # owner is specific to aws gov cloud
+  # uncomment for GovCloud owner ID
+  # owners      = ["219670896067"]
+  # uncomment for commercial owner ID
+  owners = ["309956199498"]
 
   filter {
     name   = "name"
-    values = ["RHEL-8*"]
+    values = ["RHEL-9.3*"]
   }
 
   filter {
@@ -36,13 +40,12 @@ data "aws_ami" "rhel8" {
 
 # Key Pair
 resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+  algorithm = "ED25519"
 }
 
 resource "local_sensitive_file" "ssh_pem" {
   filename        = "${local.cluster_name}.pem"
-  content         = tls_private_key.ssh.private_key_pem
+  content         = tls_private_key.ssh.private_key_openssh
   file_permission = "0600"
 }
 
@@ -96,7 +99,7 @@ module "rke2" {
   vpc_id       = module.vpc.vpc_id
   subnets      = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                   = data.aws_ami.rhel8.image_id
+  ami                   = data.aws_ami.rhel9.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
   instance_type         = "t3.medium"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
@@ -121,7 +124,7 @@ module "agents" {
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                 = data.aws_ami.rhel8.image_id
+  ami                 = data.aws_ami.rhel9.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   spot                = true
   asg                 = { min : 1, max : 10, desired : 2 }

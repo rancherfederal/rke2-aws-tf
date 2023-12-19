@@ -32,8 +32,7 @@ Is equivalent to the AWS CLI call:
 ```sh
 aws ec2 describe-images \
   --owners 219670896067 \
-  --filter "Name=name,Values=RHEL-9*" \
-  --filter "Name=architecture,Values=x86_64" \
+  --filters "Name=name,Values=RHEL-9*" "Name=architecture,Values=x86_64" \
   --query "reverse(sort_by(Images, &CreationDate))[0]"
 ```
 

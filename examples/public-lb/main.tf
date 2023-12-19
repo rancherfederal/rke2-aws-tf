@@ -19,11 +19,14 @@ provider "aws" {
 
 data "aws_ami" "rhel9" {
   most_recent = true
-  owners      = ["219670896067"] # owner is specific to aws gov cloud
+  # uncomment for GovCloud owner ID
+  # owners      = ["219670896067"]
+  # uncomment for commercial owner ID
+  owners = ["309956199498"]
 
   filter {
     name   = "name"
-    values = ["RHEL-9*"]
+    values = ["RHEL-9.3*"]
   }
 
   filter {
@@ -141,10 +144,11 @@ module "rke2" {
   tags                                          = local.tags
   vpc_id                                        = module.vpc.vpc_id
 
-  # kube prereqs not present in RHEL 9
+  # kube enhancers not present in RHEL 9
+  # containerd will automatically use pigz for image extraction if present
   pre_userdata = <<EOF
 #!/bin/sh
-dnf install -y conntrack container-selinux iptables-nft socat
+dnf install -y conntrack socat pigz
 EOF
 }
 

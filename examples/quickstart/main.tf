@@ -1,47 +1,45 @@
-provider "aws" {
-  region = local.aws_region
-}
-
 locals {
   cluster_name = "quickstart"
-  aws_region   = "us-gov-east-1"
 
   tags = {
     "terraform" = "true",
     "env"       = "quickstart",
   }
-  server_iam_role = "K8sUnrestrictedCloudProviderRole"
 }
 
 # Query for defaults
+data "aws_region" "current" {}
+
 data "aws_vpc" "default" {
   default = true
 }
 
 data "aws_subnet" "default" {
-  availability_zone = "${local.aws_region}a"
+  availability_zone = "${data.aws_region.current.name}a"
   default_for_az    = true
 }
 
 # Private Key
 resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+  algorithm = "ED25519"
 }
 
 resource "local_file" "pem" {
   filename        = "${local.cluster_name}.pem"
-  content         = tls_private_key.ssh.private_key_pem
+  content         = tls_private_key.ssh.private_key_openssh
   file_permission = "0600"
 }
 
-data "aws_ami" "rhel8" {
+data "aws_ami" "rhel9" {
   most_recent = true
-  owners      = ["219670896067"] # owner is specific to aws gov cloud
+  # uncomment for GovCloud owner ID
+  # owners      = ["219670896067"]
+  # uncomment for commercial owner ID
+  owners = ["309956199498"]
 
   filter {
     name   = "name"
-    values = ["RHEL-8*"]
+    values = ["RHEL-9.3*"]
   }
 
   filter {
@@ -58,9 +56,8 @@ module "rke2" {
   cluster_name          = local.cluster_name
   vpc_id                = data.aws_vpc.default.id
   subnets               = [data.aws_subnet.default.id]
-  ami                   = data.aws_ami.rhel8.image_id
+  ami                   = data.aws_ami.rhel9.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
-  iam_instance_profile  = local.server_iam_role
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
   tags                  = local.tags
 }
@@ -73,7 +70,7 @@ module "agents" {
   name                = "generic"
   vpc_id              = data.aws_vpc.default.id
   subnets             = [data.aws_subnet.default.id]
-  ami                 = data.aws_ami.rhel8.image_id
+  ami                 = data.aws_ami.rhel9.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   tags                = local.tags
   cluster_data        = module.rke2.cluster_data
