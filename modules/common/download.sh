@@ -86,7 +86,7 @@ do_download() {
       INSTALL_RKE2_METHOD='yum' INSTALL_RKE2_TYPE="${type}" ./install.sh
 
       ;;
-    8*)
+    [8-9]*)
       INSTALL_RKE2_METHOD='yum' INSTALL_RKE2_TYPE="${type}" ./install.sh
 
       ;;
