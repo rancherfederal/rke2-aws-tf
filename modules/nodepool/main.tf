@@ -78,11 +78,13 @@ resource "aws_autoscaling_group" "this" {
 
   # Health check and target groups dependent on whether we're a server or not (identified via rke2_url)
   health_check_type         = var.health_check_type
+  health_check_grace_period = var.health_check_grace_period
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   target_group_arns         = var.target_group_arns
   load_balancers            = var.load_balancers
 
   min_elb_capacity = var.min_elb_capacity
+  wait_for_elb_capacity = var.wait_for_elb_capacity_on_updates ? var.min_elb_capacity : null
 
   dynamic "launch_template" {
     for_each = var.spot ? [] : ["spot"]
