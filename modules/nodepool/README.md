@@ -31,6 +31,7 @@ No modules.
 | <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | n/a | `map(string)` | <pre>{<br>  "size": 30,<br>  "type": "gp2"<br>}</pre> | no |
 | <a name="input_extra_block_device_mappings"></a> [extra\_block\_device\_mappings](#input\_extra\_block\_device\_mappings) | n/a | `list(map(string))` | `[]` | no |
 | <a name="input_extra_cloud_config_config"></a> [extra\_cloud\_config\_config](#input\_extra\_cloud\_config\_config) | extra config to append to cloud-config | `string` | `""` | no |
+| <a name="input_health_check_grace_period"></a> [health\_check\_grace\_period](#input\_health\_check\_grace\_period) | n/a | `number` | `300` | no |
 | <a name="input_health_check_type"></a> [health\_check\_type](#input\_health\_check\_type) | n/a | `string` | `"EC2"` | no |
 | <a name="input_iam_instance_profile"></a> [iam\_instance\_profile](#input\_iam\_instance\_profile) | n/a | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | n/a | `string` | `"t3.medium"` | no |
@@ -46,6 +47,7 @@ No modules.
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | n/a | `string` | n/a | yes |
 | <a name="input_vpc_security_group_ids"></a> [vpc\_security\_group\_ids](#input\_vpc\_security\_group\_ids) | n/a | `list(string)` | `[]` | no |
 | <a name="input_wait_for_capacity_timeout"></a> [wait\_for\_capacity\_timeout](#input\_wait\_for\_capacity\_timeout) | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
+| <a name="input_wait_for_elb_capacity_on_updates"></a> [wait\_for\_elb\_capacity\_on\_updates](#input\_wait\_for\_elb\_capacity\_on\_updates) | n/a | `bool` | `false` | no |
 
 ## Outputs
 

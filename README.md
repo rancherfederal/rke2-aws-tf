@@ -216,6 +216,7 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_download"></a> [download](#input\_download) | Toggle best effort download of rke2 dependencies (rke2 and aws cli), if disabled, dependencies are assumed to exist in $PATH | `bool` | `true` | no |
 | <a name="input_enable_autoscaler"></a> [enable\_autoscaler](#input\_enable\_autoscaler) | Toggle enabling policies required for cluster autoscaler to work | `bool` | `false` | no |
 | <a name="input_enable_ccm"></a> [enable\_ccm](#input\_enable\_ccm) | Toggle enabling the cluster as aws aware, this will ensure the appropriate IAM policies are present | `bool` | `false` | no |
+| <a name="input_enforce_min_elb_capacity"></a> [enforce\_min\_elb\_capacity](#input\_enforce\_min\_elb\_capacity) | If this is set to true, it requires all server nodes to be healthy, before the ASG will be considered healthy. This only applies for creation of the ASG.  If you want this check for updates, set wait\_for\_elb\_capacity\_on\_updates to true. | `bool` | `false` | no |
 | <a name="input_extra_block_device_mappings"></a> [extra\_block\_device\_mappings](#input\_extra\_block\_device\_mappings) | Used to specify additional block device mapping configurations | `list(map(string))` | `[]` | no |
 | <a name="input_extra_cloud_config_config"></a> [extra\_cloud\_config\_config](#input\_extra\_cloud\_config\_config) | extra config to append to cloud-config | `string` | `""` | no |
 | <a name="input_extra_security_group_ids"></a> [extra\_security\_group\_ids](#input\_extra\_security\_group\_ids) | List of additional security group IDs | `list(string)` | `[]` | no |
@@ -231,6 +232,8 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_rke2_install_script_url"></a> [rke2\_install\_script\_url](#input\_rke2\_install\_script\_url) | URL for RKE2 install script | `string` | `"https://get.rke2.io"` | no |
 | <a name="input_rke2_start"></a> [rke2\_start](#input\_rke2\_start) | Start/Stop value for the rke2-server/agent service.  This will prevent the service from starting until the next reboot. True=start, False= don't start. | `bool` | `true` | no |
 | <a name="input_rke2_version"></a> [rke2\_version](#input\_rke2\_version) | Version to use for RKE2 server nodepool | `string` | `null` | no |
+| <a name="input_server_node_health_check_grace_period"></a> [server\_node\_health\_check\_grace\_period](#input\_server\_node\_health\_check\_grace\_period) | Time (in seconds) after instance comes into service before checking health of the server node. | `number` | `"300"` | no |
+| <a name="input_server_node_health_check_type"></a> [server\_node\_health\_check\_type](#input\_server\_node\_health\_check\_type) | Type of health check to use for server nodes (EC2 or ELB). Setting to ELB will wait until the target groups health checks pass before declaring an EC2 instance healthy.  (i.e. It will check to make sure the kubeapi server is up.) | `string` | `"EC2"` | no |
 | <a name="input_servers"></a> [servers](#input\_servers) | Number of servers to create | `number` | `3` | no |
 | <a name="input_spot"></a> [spot](#input\_spot) | Toggle spot requests for server pool | `bool` | `false` | no |
 | <a name="input_ssh_authorized_keys"></a> [ssh\_authorized\_keys](#input\_ssh\_authorized\_keys) | Server pool list of public keys to add as authorized ssh keys | `list(string)` | `[]` | no |
@@ -243,6 +246,7 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_unzip_rpm_url"></a> [unzip\_rpm\_url](#input\_unzip\_rpm\_url) | URL path to unzip rpm | `string` | `""` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID to create resources in | `string` | n/a | yes |
 | <a name="input_wait_for_capacity_timeout"></a> [wait\_for\_capacity\_timeout](#input\_wait\_for\_capacity\_timeout) | How long Terraform should wait for ASG instances to be healthy before timing out. | `string` | `"10m"` | no |
+| <a name="input_wait_for_elb_capacity_on_updates"></a> [wait\_for\_elb\_capacity\_on\_updates](#input\_wait\_for\_elb\_capacity\_on\_updates) | Setting this will cause Terraform to wait for min\_elb\_capacity healthy instances from this Auto Scaling Group in all attached load balancers on update operations as well. | `bool` | `false` | no |
 
 ## Outputs
 
