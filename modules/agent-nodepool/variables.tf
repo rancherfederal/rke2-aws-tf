@@ -74,6 +74,12 @@ variable "extra_block_device_mappings" {
   ]
 }
 
+variable "target_group_arns" {
+  description = "Target group ARNs to link ASG to for NLB/ALB load balancers"
+  type    = list(string)
+  default = []
+}
+
 variable "asg" {
   description = "Node pool AutoScalingGroup scaling definition"
   type = object({
