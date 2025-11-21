@@ -6,11 +6,13 @@ provider "aws" {
 }
 
 locals {
+  ami_prefix   = "RHEL-9"
+  aws_region   = "us-east-2"
+  cidr         = "10.80.0.0/16"
   cluster_name = "cloud-enabled"
-  aws_region   = "us-gov-west-1"
-  cidr         = "10.88.0.0/16"
+
   ssh_allowed_cidrs = [
-    "0.0.0.0/0"
+    "76.185.97.220/32"
   ]
 
   tags = {
@@ -19,13 +21,13 @@ locals {
   }
 }
 
-data "aws_ami" "rhel8" {
+data "aws_ami" "server" {
   most_recent = true
-  owners      = ["219670896067"] # owner is specific to aws gov cloud
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
-    values = ["RHEL-8*"]
+    values = ["${local.ami_prefix}*"]
   }
 
   filter {
@@ -56,8 +58,8 @@ module "vpc" {
   cidr = local.cidr
 
   azs             = ["${local.aws_region}a", "${local.aws_region}b", "${local.aws_region}c"]
-  public_subnets  = [cidrsubnet(local.cidr, 8, 1), cidrsubnet(local.cidr, 8, 2), cidrsubnet(local.cidr, 8, 3)]
-  private_subnets = [cidrsubnet(local.cidr, 8, 101), cidrsubnet(local.cidr, 8, 102), cidrsubnet(local.cidr, 8, 103)]
+  public_subnets  = [cidrsubnet(local.cidr, 8, 0), cidrsubnet(local.cidr, 8, 1), cidrsubnet(local.cidr, 8, 2)]
+  private_subnets = [cidrsubnet(local.cidr, 8, 10), cidrsubnet(local.cidr, 8, 11), cidrsubnet(local.cidr, 8, 12)]
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
@@ -96,9 +98,9 @@ module "rke2" {
   vpc_id       = module.vpc.vpc_id
   subnets      = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                   = data.aws_ami.rhel8.image_id
+  ami                   = data.aws_ami.server.image_id
   ssh_authorized_keys   = [tls_private_key.ssh.public_key_openssh]
-  instance_type         = "t3.medium"
+  instance_type         = "m5a.large"
   controlplane_internal = false # Note this defaults to best practice of true, but is explicitly set to public for demo purposes
   servers               = 1
 
@@ -106,9 +108,9 @@ module "rke2" {
   enable_ccm        = true
   enable_autoscaler = true
 
-  rke2_config = yamlencode({ "node-label" : ["name=server", "os=rhel8"] })
+  rke2_config = yamlencode({ "node-label" : ["name=server", "os=rhel"] })
 
-  rke2_channel = "v1.27"
+  rke2_channel = "v1.33"
 }
 
 #
@@ -121,21 +123,21 @@ module "agents" {
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets # Note: Public subnets used for demo purposes, this is not recommended in production
 
-  ami                 = data.aws_ami.rhel8.image_id
+  ami                 = data.aws_ami.server.image_id
   ssh_authorized_keys = [tls_private_key.ssh.public_key_openssh]
   spot                = true
-  asg                 = { min : 1, max : 10, desired : 2 }
-  instance_type       = "t3.large"
+  asg                 = { min : 2, max : 2, desired : 2 }
+  instance_type       = "m5a.xlarge"
 
   # Enable AWS Cloud Controller Manager and Cluster Autoscaler
   enable_ccm        = true
   enable_autoscaler = true
 
-  rke2_config = yamlencode({ "node-label" : ["name=generic", "os=rhel8"] })
+  rke2_config = yamlencode({ "node-label" : ["name=generic", "os=rhel"] })
 
   cluster_data = module.rke2.cluster_data
 
-  rke2_channel = "v1.27"
+  rke2_channel = "v1.33"
 }
 
 # For demonstration only, lock down ssh access in production

@@ -1,5 +1,5 @@
 variable "cluster_name" {
-  description = "Name of the rkegov cluster to create"
+  description = "Name of the rke2 cluster to create"
   type        = string
 }
 
@@ -61,16 +61,14 @@ variable "block_device_mappings" {
   description = "Server pool block device mapping configuration"
   type        = map(string)
   default = {
-    "size"      = 30
-    "encrypted" = false
+    size = "30"
   }
 }
 
 variable "extra_block_device_mappings" {
   description = "Used to specify additional block device mapping configurations"
   type        = list(map(string))
-  default = [
-  ]
+  default     = []
 }
 
 variable "extra_security_group_ids" {
@@ -141,7 +139,7 @@ variable "metadata_options" {
   default = {
     http_endpoint               = "enabled"
     http_tokens                 = "required" # IMDS-v2
-    http_put_response_hop_limit = 2          # allow pods to use IMDS as well
+    http_put_response_hop_limit = 3          # ACME DNS via cert-manager challenge seems to require 3
     instance_metadata_tags      = "disabled"
   }
   description = "Instance Metadata Options"

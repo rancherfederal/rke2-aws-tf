@@ -80,7 +80,7 @@ data "aws_iam_policy_document" "aws_required" {
   }
 }
 
-# Required IAM Policy for AWS CCM
+# Required IAM policy for AWS CCM (https://cloud-provider-aws.sigs.k8s.io/prerequisites/#iam-policies)
 data "aws_iam_policy_document" "aws_ccm" {
   count = var.iam_instance_profile == "" && var.enable_ccm ? 1 : 0
 
@@ -91,13 +91,13 @@ data "aws_iam_policy_document" "aws_ccm" {
       "autoscaling:DescribeAutoScalingGroups",
       "autoscaling:DescribeLaunchConfigurations",
       "autoscaling:DescribeTags",
-      "autoscaling:DescribeAutoScalingInstances",
       "ec2:DescribeInstances",
       "ec2:DescribeRegions",
       "ec2:DescribeRouteTables",
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeSubnets",
       "ec2:DescribeVolumes",
+      "ec2:DescribeAvailabilityZones",
       "ec2:CreateSecurityGroup",
       "ec2:CreateTags",
       "ec2:CreateVolume",
@@ -112,6 +112,7 @@ data "aws_iam_policy_document" "aws_ccm" {
       "ec2:DetachVolume",
       "ec2:RevokeSecurityGroupIngress",
       "ec2:DescribeVpcs",
+      "ec2:DescribeInstanceTopology",
       "elasticloadbalancing:AddTags",
       "elasticloadbalancing:AttachLoadBalancerToSubnets",
       "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
@@ -148,6 +149,8 @@ data "aws_iam_policy_document" "aws_ccm" {
   }
 }
 
+# Required IAM policy for AWS Cluster Autoscaler
+# (https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended)
 data "aws_iam_policy_document" "aws_autoscaler" {
   count = var.enable_autoscaler ? 1 : 0
 
@@ -157,9 +160,11 @@ data "aws_iam_policy_document" "aws_autoscaler" {
       "autoscaling:DescribeAutoScalingInstances",
       "autoscaling:DescribeLaunchConfigurations",
       "autoscaling:DescribeScalingActivities",
-      "autoscaling:DescribeTags",
+      "ec2:DescribeImages",
       "ec2:DescribeInstanceTypes",
-      "ec2:DescribeLaunchTemplateVersions"
+      "ec2:DescribeLaunchTemplateVersions",
+      "ec2:GetInstanceTypesFromInstanceRequirements",
+      "eks:DescribeNodegroup"
     ]
     effect    = "Allow"
     resources = ["*"]
@@ -168,10 +173,7 @@ data "aws_iam_policy_document" "aws_autoscaler" {
   statement {
     actions = [
       "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeImages",
-      "ec2:GetInstanceTypesFromInstanceRequirements",
-      "eks:DescribeNodegroup"
+      "autoscaling:TerminateInstanceInAutoScalingGroup"
     ]
     effect    = "Allow"
     resources = ["*"]

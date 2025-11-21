@@ -32,9 +32,9 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_access_logs_bucket"></a> [access\_logs\_bucket](#input\_access\_logs\_bucket) | n/a | `string` | `"disabled"` | no |
-| <a name="input_cp_ingress_cidr_blocks"></a> [cp\_ingress\_cidr\_blocks](#input\_cp\_ingress\_cidr\_blocks) | n/a | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_cp_ingress_cidr_blocks"></a> [cp\_ingress\_cidr\_blocks](#input\_cp\_ingress\_cidr\_blocks) | n/a | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_cp_port"></a> [cp\_port](#input\_cp\_port) | n/a | `number` | `6443` | no |
-| <a name="input_cp_supervisor_ingress_cidr_blocks"></a> [cp\_supervisor\_ingress\_cidr\_blocks](#input\_cp\_supervisor\_ingress\_cidr\_blocks) | n/a | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_cp_supervisor_ingress_cidr_blocks"></a> [cp\_supervisor\_ingress\_cidr\_blocks](#input\_cp\_supervisor\_ingress\_cidr\_blocks) | n/a | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_cp_supervisor_port"></a> [cp\_supervisor\_port](#input\_cp\_supervisor\_port) | n/a | `number` | `9345` | no |
 | <a name="input_enable_cross_zone_load_balancing"></a> [enable\_cross\_zone\_load\_balancing](#input\_enable\_cross\_zone\_load\_balancing) | n/a | `bool` | `true` | no |
 | <a name="input_internal"></a> [internal](#input\_internal) | n/a | `bool` | `true` | no |

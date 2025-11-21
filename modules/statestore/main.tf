@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "getter" {
     effect  = "Allow"
     actions = ["s3:GetObject"]
     resources = [
-      "${aws_s3_bucket.bucket.arn}/${aws_s3_object.token.id}",
+      "${aws_s3_bucket.bucket.arn}/${aws_s3_object.token.key}",
     ]
   }
 }

@@ -61,18 +61,13 @@ variable "vpc_security_group_ids" {
 }
 
 variable "block_device_mappings" {
-  type = map(string)
-
-  default = {
-    "size" = 30
-    type   = "gp2"
-  }
+  type    = map(string)
+  default = {}
 }
 
 variable "extra_block_device_mappings" {
-  type = list(map(string))
-  default = [
-  ]
+  type    = list(map(string))
+  default = []
 }
 
 variable "asg" {

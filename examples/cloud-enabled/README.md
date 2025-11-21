@@ -25,13 +25,14 @@ helm install aws-cloud-controller-manager aws-cloud-controller-manager/aws-cloud
 
 ## `cluster-autoscaler`
 
-Match region to your actual region, but it is `us-gov-west-1` in this example.
+Match region to your actual region, but it is `us-east-2` in this example. The cluster name also includes a UID suffix that will be created by Terraform at apply time, so change that to yours as well. The version here is coupled to the Kubernetes version. You can run `helm search repo -l autoscaler/cluster-autoscaler` to see all charts and the corresponding app version. Here, we grab the chart version that matches app version 1.33.0 because we are using `rke2` 1.33.
 
 ```sh
 helm repo add autoscaler https://kubernetes.github.io/autoscaler
 helm repo update
 helm install autoscaler autoscaler/cluster-autoscaler \
   --namespace kube-system \
-  --set autoDiscovery.clusterName=cloud-enabled-zjl \
-  --set awsRegion=us-gov-west-1
+  --version 9.51.0 \
+  --set autoDiscovery.clusterName=cloud-enabled-dyh \
+  --set awsRegion=us-east-2
 ```

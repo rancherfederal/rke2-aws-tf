@@ -54,10 +54,8 @@ variable "ssh_authorized_keys" {
 variable "block_device_mappings" {
   description = "Node pool block device mapping configuration"
   type        = map(string)
-
   default = {
-    "size" = 30
-    type   = "gp2"
+    size = "30"
   }
 }
 
@@ -70,8 +68,7 @@ variable "extra_cloud_config_config" {
 variable "extra_block_device_mappings" {
   description = "Used to specify additional block device mapping configurations"
   type        = list(map(string))
-  default = [
-  ]
+  default     = []
 }
 
 variable "asg" {

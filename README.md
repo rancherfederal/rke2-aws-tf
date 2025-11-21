@@ -153,7 +153,7 @@ Optional policies have the option of being created by default, but are specified
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.6, <= 5.22 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.32 |
 | <a name="requirement_cloudinit"></a> [cloudinit](#requirement\_cloudinit) | >= 2 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3 |
 
@@ -161,7 +161,7 @@ Optional policies have the option of being created by default, but are specified
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.6, <= 5.22 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.32 |
 | <a name="provider_cloudinit"></a> [cloudinit](#provider\_cloudinit) | >= 2 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3 |
 
@@ -205,11 +205,11 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_ami"></a> [ami](#input\_ami) | Server pool ami | `string` | n/a | yes |
 | <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | n/a | `bool` | `null` | no |
 | <a name="input_awscli_url"></a> [awscli\_url](#input\_awscli\_url) | URL for awscli zip file | `string` | `"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"` | no |
-| <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | Server pool block device mapping configuration | `map(string)` | <pre>{<br>  "encrypted": false,<br>  "size": 30<br>}</pre> | no |
+| <a name="input_block_device_mappings"></a> [block\_device\_mappings](#input\_block\_device\_mappings) | Server pool block device mapping configuration | `map(string)` | <pre>{<br/>  "size": "30"<br/>}</pre> | no |
 | <a name="input_ccm_external"></a> [ccm\_external](#input\_ccm\_external) | Set kubelet arg 'cloud-provider-name' value to 'external'.  Requires manual install of CCM. | `bool` | `false` | no |
-| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the rkegov cluster to create | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the rke2 cluster to create | `string` | n/a | yes |
 | <a name="input_controlplane_access_logs_bucket"></a> [controlplane\_access\_logs\_bucket](#input\_controlplane\_access\_logs\_bucket) | Bucket name for logging requests to control plane load balancer | `string` | `"disabled"` | no |
-| <a name="input_controlplane_allowed_cidrs"></a> [controlplane\_allowed\_cidrs](#input\_controlplane\_allowed\_cidrs) | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_controlplane_allowed_cidrs"></a> [controlplane\_allowed\_cidrs](#input\_controlplane\_allowed\_cidrs) | Server pool security group allowed cidr ranges | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_controlplane_enable_cross_zone_load_balancing"></a> [controlplane\_enable\_cross\_zone\_load\_balancing](#input\_controlplane\_enable\_cross\_zone\_load\_balancing) | Toggle between controlplane cross zone load balancing | `bool` | `true` | no |
 | <a name="input_controlplane_internal"></a> [controlplane\_internal](#input\_controlplane\_internal) | Toggle between public or private control plane load balancer | `bool` | `true` | no |
 | <a name="input_create_acl"></a> [create\_acl](#input\_create\_acl) | Toggle creation of ACL for statestore bucket | `bool` | `true` | no |
@@ -223,7 +223,7 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_iam_permissions_boundary"></a> [iam\_permissions\_boundary](#input\_iam\_permissions\_boundary) | If provided, the IAM role created for the servers will be created with this permissions boundary attached. | `string` | `null` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Server pool instance type | `string` | `"t3a.medium"` | no |
 | <a name="input_lb_subnets"></a> [lb\_subnets](#input\_lb\_subnets) | List of subnet IDs to create load balancer in | `list(string)` | `null` | no |
-| <a name="input_metadata_options"></a> [metadata\_options](#input\_metadata\_options) | Instance Metadata Options | `map(any)` | <pre>{<br>  "http_endpoint": "enabled",<br>  "http_put_response_hop_limit": 2,<br>  "http_tokens": "required",<br>  "instance_metadata_tags": "disabled"<br>}</pre> | no |
+| <a name="input_metadata_options"></a> [metadata\_options](#input\_metadata\_options) | Instance Metadata Options | `map(any)` | <pre>{<br/>  "http_endpoint": "enabled",<br/>  "http_put_response_hop_limit": 3,<br/>  "http_tokens": "required",<br/>  "instance_metadata_tags": "disabled"<br/>}</pre> | no |
 | <a name="input_post_userdata"></a> [post\_userdata](#input\_post\_userdata) | Custom userdata to run immediately after rke2 node attempts to join cluster | `string` | `""` | no |
 | <a name="input_pre_userdata"></a> [pre\_userdata](#input\_pre\_userdata) | Custom userdata to run immediately before rke2 node attempts to join cluster, after required rke2, dependencies are installed | `string` | `""` | no |
 | <a name="input_rke2_channel"></a> [rke2\_channel](#input\_rke2\_channel) | Channel to use for RKE2 server nodepool | `string` | `null` | no |
@@ -238,7 +238,7 @@ Optional policies have the option of being created by default, but are specified
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet IDs to create nodes in | `list(string)` | n/a | yes |
 | <a name="input_suspended_processes"></a> [suspended\_processes](#input\_suspended\_processes) | List of processes to suspend in the autoscaling service | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Map of tags to add to all resources created | `map(string)` | `{}` | no |
-| <a name="input_termination_policies"></a> [termination\_policies](#input\_termination\_policies) | List of policies to decide how the instances in the Auto Scaling Group should be terminated | `list(string)` | <pre>[<br>  "Default"<br>]</pre> | no |
+| <a name="input_termination_policies"></a> [termination\_policies](#input\_termination\_policies) | List of policies to decide how the instances in the Auto Scaling Group should be terminated | `list(string)` | <pre>[<br/>  "Default"<br/>]</pre> | no |
 | <a name="input_unique_suffix"></a> [unique\_suffix](#input\_unique\_suffix) | Enables/disables generation of a unique suffix to cluster name | `bool` | `true` | no |
 | <a name="input_unzip_rpm_url"></a> [unzip\_rpm\_url](#input\_unzip\_rpm\_url) | URL path to unzip rpm | `string` | `""` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID to create resources in | `string` | n/a | yes |

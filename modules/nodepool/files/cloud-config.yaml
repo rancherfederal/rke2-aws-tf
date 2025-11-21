@@ -1,10 +1,10 @@
 #cloud-config
 ssh_authorized_keys:
-%{ for _ in ssh_authorized_keys }
+%{ for _ in ssh_authorized_keys ~}
   - ${_}
-%{ endfor }
+%{ endfor ~}
 
 users:
   - default
-  
+
 ${extra_cloud_config_config}

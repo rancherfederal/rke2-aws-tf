@@ -3,7 +3,7 @@ output "bucket" {
 }
 
 output "token_object" {
-  value = aws_s3_object.token.id
+  value = aws_s3_object.token.key
 }
 
 output "kubeconfig_put_policy" {
@@ -13,7 +13,7 @@ output "kubeconfig_put_policy" {
 output "token" {
   value = {
     bucket          = aws_s3_object.token.bucket
-    object          = aws_s3_object.token.id
+    object          = aws_s3_object.token.key
     policy_document = data.aws_iam_policy_document.getter.json
     bucket_arn      = aws_s3_bucket.bucket.arn
   }
