@@ -60,7 +60,7 @@ variable "iam_permissions_boundary" {
 variable "block_device_mappings" {
   description = "Server pool block device mapping configuration"
   type        = map(string)
-  default     = {
+  default = {
     size = "30"
   }
 }

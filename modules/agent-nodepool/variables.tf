@@ -54,7 +54,7 @@ variable "ssh_authorized_keys" {
 variable "block_device_mappings" {
   description = "Node pool block device mapping configuration"
   type        = map(string)
-  default     = {
+  default = {
     size = "30"
   }
 }
