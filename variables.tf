@@ -83,6 +83,30 @@ variable "servers" {
   default     = 3
 }
 
+variable "server_node_health_check_type" {
+  description = "Type of health check to use for server nodes (EC2 or ELB). Setting to ELB will wait until the target groups health checks pass before declaring an EC2 instance healthy.  (i.e. It will check to make sure the kubeapi server is up.)"
+  type        = string
+  default     = "EC2"
+}
+
+variable "server_node_health_check_grace_period" {
+  description = "Time (in seconds) after instance comes into service before checking health of the server node."
+  type        = number
+  default     = "300"
+}
+
+variable "enforce_min_elb_capacity" {
+  description = "If this is set to true, it requires all server nodes to be healthy, before the ASG will be considered healthy. This only applies for creation of the ASG.  If you want this check for updates, set wait_for_elb_capacity_on_updates to true."
+  type        = bool
+  default     = false
+}
+
+variable "wait_for_elb_capacity_on_updates" {
+  description = "Setting this will cause Terraform to wait for min_elb_capacity healthy instances from this Auto Scaling Group in all attached load balancers on update operations as well."
+  type        = bool
+  default     = false
+}
+
 variable "spot" {
   description = "Toggle spot requests for server pool"
   type        = bool

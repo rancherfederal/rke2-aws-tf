@@ -39,6 +39,16 @@ variable "health_check_type" {
   default = "EC2"
 }
 
+variable "health_check_grace_period" {
+  type    = number
+  default = 300
+}
+
+variable "wait_for_elb_capacity_on_updates" {
+  type    = bool
+  default = false
+}
+
 variable "wait_for_capacity_timeout" {
   description = "How long Terraform should wait for ASG instances to be healthy before timing out."
   type        = string
